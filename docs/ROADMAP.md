@@ -5,18 +5,28 @@ runs against real data and has tests.
 
 ## Phase 1 — Explore and measure (`v0.1.0`)
 
-- [ ] 3D globe with satellite basemap, search, camera bookmarks
-- [ ] Layer system with a common interface, legend and provenance
-- [ ] Timeline that changes the imagery on the globe
-- [ ] Landsat 5/7/8/9 and Sentinel-2 annual composites
-- [ ] NDVI, NDWI, MNDWI, NDBI as map layers and as AOI statistics
-- [ ] AOI drawing (rectangle, polygon) and preset regions
-- [ ] Before/after comparison (swipe, blink, opacity)
-- [ ] Index change detection with real job states
-- [ ] Analysis panel, evidence panel, statistics and charts
-- [ ] GeoJSON and CSV export, Earth Engine script generation
-- [ ] Analysis IDs and shareable URLs
-- [ ] Lahore 1993 → 2026 demonstration
+- [x] 3D globe with satellite basemap and place search
+- [x] Layer panel with legend, value kind and provenance for each layer
+- [x] Timeline that changes the imagery on the globe, with playback
+- [x] Landsat 5/7/8/9 and Sentinel-2 annual layers, true and false colour
+- [x] NDVI, NDWI, MNDWI, NDBI as map layers and as AOI statistics
+- [x] AOI drawing (rectangle, polygon) and a Lahore District preset
+- [x] Before/after comparison: swipe, blink, opacity
+- [x] Index change detection with real job stages
+- [x] Multi-year index series with gaps kept as gaps
+- [x] Analysis panel, evidence panel, statistics and charts
+- [x] GeoJSON, CSV, JSON and GeoTIFF export; Earth Engine script generation
+- [x] Analysis IDs and shareable URLs
+- [x] Lahore 1993 to today guided tour
+
+Carried over to later releases:
+
+- [ ] Camera bookmarks, measurement tools, circle and line drawing
+- [ ] 2D map mode and a side-by-side dual view
+- [ ] Day and month resolution on the timeline, event markers
+- [ ] Terrain without a Cesium ion token
+- [ ] Component-level frontend tests (current tests cover state and logic)
+- [ ] Run the generated Earth Engine script in Earth Engine and record the difference
 
 ## Phase 2 — Thematic modes (`v0.2.0`)
 
