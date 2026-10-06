@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 
 import { HOSTED } from "../app/api";
 import { useStore } from "../app/store";
-import { STORED_ANALYSIS } from "../demo/stored";
+import { STORED_ANALYSIS, STORED_FLOOD } from "../demo/stored";
 import { exploreEvidence, startLahoreTour, stopTour } from "../demo/lahore";
 
 const NOTICE_SECONDS = 6;
@@ -29,6 +29,17 @@ export function Intro() {
         <button onClick={() => set({ introOpen: false, mode: "explore" })}>
           <strong>Explore Earth</strong>
           <span>Move through 40 years of imagery with the timeline. Zoom to a region to load it.</span>
+        </button>
+        <button onClick={() => {
+          set({ introOpen: false, mode: "floods" });
+          if (HOSTED) void loadAnalysis(STORED_FLOOD.id);
+        }}>
+          <strong>Map a flood</strong>
+          <span>
+            {HOSTED
+              ? `${STORED_FLOOD.title}: flood extent from Sentinel-1 radar, which sees through cloud.`
+              : "Flood extent from Sentinel-1 radar, which sees through cloud, with the land it covered."}
+          </span>
         </button>
         {HOSTED ? (
           <button onClick={() => { set({ introOpen: false, mode: "change" }); void loadAnalysis(STORED_ANALYSIS.id); }}>

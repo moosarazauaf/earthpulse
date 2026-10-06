@@ -32,10 +32,12 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm test
-      # No VITE_API_BASE: the build runs in hosted mode (no analysis service).
+      # With the repository variable EARTHPULSE_API_BASE unset, the build runs
+      # in hosted mode (no analysis service). See docs/DEPLOY.md.
       - run: npm run build
         env:
           VITE_BASE: /earthpulse/
+          VITE_API_BASE: ${{ vars.EARTHPULSE_API_BASE }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist

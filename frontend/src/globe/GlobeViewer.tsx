@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { ApiError, api } from "../app/api";
 import { datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
-import type { ChangeResult, Detection, ImageryLayerInfo } from "../app/types";
+import { type Detection, type ImageryLayerInfo, type MappedResult, type Overlay, isMapped } from "../app/types";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -44,7 +44,7 @@ export function GlobeViewer() {
       (geometry) => useStore.getState().setAoi({ geometry, label: "Drawn area" }),
       (id) => {
         const { result } = useStore.getState();
-        const features = result?.type === "change" ? result.detections.features : [];
+        const features = isMapped(result) ? result.detections.features : [];
         const found = id === null ? null : features.find((f) => String(f.id) === id) ?? null;
         useStore.getState().set({ selectedDetection: found as Detection | null });
       },
@@ -130,14 +130,15 @@ export function GlobeViewer() {
   useEffect(() => drawing.current?.setTool(s.drawTool), [s.drawTool]);
 
   // Analysis outputs.
-  const change: ChangeResult | null = s.result?.type === "change" ? s.result : null;
+  const mapped: MappedResult | null = isMapped(s.result) ? s.result : null;
   useEffect(() => {
-    const overlay = change && s.overlay.key ? change.overlays[s.overlay.key] : null;
+    const overlays: Record<string, Overlay> | null = mapped?.overlays ?? null;
+    const overlay = overlays && s.overlay.key ? overlays[s.overlay.key] ?? null : null;
     void instance?.setOverlay(overlay, s.overlay.opacity);
-  }, [change, s.overlay.key, s.overlay.opacity]);
+  }, [mapped, s.overlay.key, s.overlay.opacity]);
   useEffect(() => {
-    void instance?.setDetections(change, s.overlay.detections);
-  }, [change, s.overlay.detections]);
+    void instance?.setDetections(mapped, s.overlay.detections);
+  }, [mapped, s.overlay.detections]);
   useEffect(() => {
     instance?.highlightDetection(s.selectedDetection);
     if (s.selectedDetection) {

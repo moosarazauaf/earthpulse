@@ -306,7 +306,9 @@ def run(request: FloodRequest, analysis_id: str, settings: Settings, stage: Stag
                 "Known error sources: wind-roughened water is missed; smooth dry surfaces and "
                 "radar shadow can be mistaken for water; water under vegetation or between "
                 "buildings is not detected, so flooding in dense crops and built-up areas is "
-                "underestimated. thresholdSensitivity shows the effect of a 1 dB threshold error."
+                "underestimated. Fields flooded on purpose, such as rice paddies, are open water "
+                "too and are counted as flooded. thresholdSensitivity shows the effect of a 1 dB "
+                "threshold error."
             ),
         },
         "summary": summary,

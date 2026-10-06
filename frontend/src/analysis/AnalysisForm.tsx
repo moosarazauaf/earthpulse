@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { HOSTED } from "../app/api";
-import { FIRST_YEAR, SENTINEL2_FIRST_YEAR, currentYear, seasonNotStarted, seasonPeriod } from "../app/logic";
+import { FIRST_YEAR, SENTINEL2_FIRST_YEAR, currentYear, rectangleAoi, seasonNotStarted, seasonPeriod } from "../app/logic";
 import { useStore } from "../app/store";
 import type { AoiGeometry, IndexId } from "../app/types";
 import { STORED_ANALYSIS } from "../demo/stored";
@@ -35,6 +35,41 @@ function seriesYears(first: number, last: number): number[] {
   const count = Math.min(SERIES_POINTS, last - first + 1);
   const years = Array.from({ length: count }, (_, i) => Math.round(first + ((last - first) * i) / (count - 1)));
   return [...new Set(years)];
+}
+
+/** Indus floodplain between Taunsa and Layyah, used as the flood example. */
+const INDUS_AT_LAYYAH = { geometry: rectangleAoi(70.7, 30.75, 71.1, 31.25), label: "Indus at Layyah" };
+
+/** Step 1 of every analysis: draw an area or take a preset. */
+export function AreaPicker() {
+  const s = useStore();
+  return (
+    <section>
+      <h3>1. Area</h3>
+      <div className="seg">
+        <button className={s.drawTool === "rectangle" ? "on" : ""} aria-pressed={s.drawTool === "rectangle"}
+          onClick={() => s.set({ drawTool: s.drawTool === "rectangle" ? "none" : "rectangle" })}>Rectangle</button>
+        <button className={s.drawTool === "polygon" ? "on" : ""} aria-pressed={s.drawTool === "polygon"}
+          onClick={() => s.set({ drawTool: s.drawTool === "polygon" ? "none" : "polygon" })}>Polygon</button>
+      </div>
+      <div className="seg" aria-label="Preset areas">
+        <button onClick={() => void loadLahore().then(s.setAoi)}>Lahore District</button>
+        <button onClick={() => s.setAoi(INDUS_AT_LAYYAH)}>Indus at Layyah</button>
+      </div>
+      {s.drawTool === "rectangle" && <p className="note">Click two opposite corners on the globe. Esc cancels.</p>}
+      {s.drawTool === "polygon" && (
+        <p className="note">Click each corner, then double-click or press Enter to close. Esc cancels.</p>
+      )}
+      {s.aoi ? (
+        <p className="aoi-line">
+          <span>{s.aoi.label}</span>
+          <button className="link" onClick={() => s.setAoi(null)}>Clear</button>
+        </p>
+      ) : (
+        s.drawTool === "none" && <p className="muted">Draw an area on the globe or pick a preset.</p>
+      )}
+    </section>
+  );
 }
 
 export function AnalysisForm() {
@@ -81,28 +116,7 @@ export function AnalysisForm() {
 
   return (
     <div className="form">
-      <section>
-        <h3>1. Area</h3>
-        <div className="seg">
-          <button className={s.drawTool === "rectangle" ? "on" : ""} aria-pressed={s.drawTool === "rectangle"}
-            onClick={() => s.set({ drawTool: s.drawTool === "rectangle" ? "none" : "rectangle" })}>Rectangle</button>
-          <button className={s.drawTool === "polygon" ? "on" : ""} aria-pressed={s.drawTool === "polygon"}
-            onClick={() => s.set({ drawTool: s.drawTool === "polygon" ? "none" : "polygon" })}>Polygon</button>
-          <button onClick={() => void loadLahore().then(s.setAoi)}>Lahore District</button>
-        </div>
-        {s.drawTool === "rectangle" && <p className="note">Click two opposite corners on the globe. Esc cancels.</p>}
-        {s.drawTool === "polygon" && (
-          <p className="note">Click each corner, then double-click or press Enter to close. Esc cancels.</p>
-        )}
-        {s.aoi ? (
-          <p className="aoi-line">
-            <span>{s.aoi.label}</span>
-            <button className="link" onClick={() => s.setAoi(null)}>Clear</button>
-          </p>
-        ) : (
-          s.drawTool === "none" && <p className="muted">Draw an area on the globe or pick a preset.</p>
-        )}
-      </section>
+      <AreaPicker />
 
       <section>
         <h3>2. Question</h3>

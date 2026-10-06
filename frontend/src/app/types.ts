@@ -12,6 +12,12 @@ export interface Legend {
   min: number;
   max: number;
   colors: string[];
+  unit?: string;
+}
+
+/** Legend of a categorical layer. */
+export interface ClassLegend {
+  classes: { label: string; color: string }[];
 }
 
 export interface DatasetInfo {
@@ -86,6 +92,16 @@ export interface ChangeRequest {
   minAreaHa: number;
 }
 
+export interface FloodRequest {
+  aoi: AoiGeometry;
+  label?: string;
+  before: Period;
+  flood: Period;
+  after?: Period;
+  thresholdDb?: number;
+  minAreaHa: number;
+}
+
 export interface TimeSeriesRequest {
   aoi: AoiGeometry;
   label?: string;
@@ -101,7 +117,7 @@ export interface Overlay {
   url: string;
   geotiff: string;
   bounds: [number, number, number, number];
-  legend: Legend;
+  legend: Legend | ClassLegend;
 }
 
 export interface DetectionProps {
@@ -126,9 +142,17 @@ export interface Provenance {
   nativeResolutionM: number;
   workingResolutionM: number;
   gridSize?: [number, number];
-  maxCloudPercent: number;
-  scenes?: { before: SceneInfo[]; after: SceneInfo[] };
+  maxCloudPercent?: number;
+  scenes?: Record<string, SceneInfo[]>;
   uncertainty?: string;
+  // Radar analyses
+  polarisation?: string;
+  relativeOrbit?: number;
+  orbitState?: string | null;
+  orbitCoverage?: Record<string, number>;
+  threshold?: { valueDb: number; source: "otsu" | "user" | "fallback"; separability: number | null };
+  speckleFilter?: string;
+  landCover?: { name: string; provider: string; license: string; attribution: string } | null;
 }
 
 interface ResultBase {
@@ -186,12 +210,46 @@ export interface TimeSeriesResult extends ResultBase {
   series: SeriesEntry[];
 }
 
-export type AnalysisResult = ChangeResult | TimeSeriesResult;
+export interface FloodResult extends ResultBase {
+  type: "flood";
+  request: FloodRequest;
+  summary: {
+    aoiAreaHa: number;
+    analysedAreaHa: number;
+    validFraction: number;
+    floodedAreaHa: number;
+    floodedPercent: number;
+    preExistingWaterHa: number;
+    waterExtentDuringFloodHa: number;
+    thresholdDb: number;
+    minDropDb: number;
+    thresholdSensitivity: { thresholdDb: number; floodedAreaHa: number }[];
+    passes: Record<string, number>;
+    recession?: { stillWaterHa: number; recededHa: number; notObservedHa: number };
+  };
+  landCover: {
+    croplandFloodedHa: number;
+    builtUpFloodedHa: number;
+    otherFloodedHa: number;
+    permanentWaterMappedHa: number;
+    preExistingWaterAlsoMappedHa: number;
+    note: string;
+  } | null;
+  histogram: { binEdges: number[]; counts: number[] };
+  detections: ChangeResult["detections"];
+  overlays: Record<string, Overlay>;
+}
+
+export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult;
+/** Results that put rasters and regions on the globe. */
+export type MappedResult = ChangeResult | FloodResult;
+export const isMapped = (r: AnalysisResult | null): r is MappedResult =>
+  r !== null && (r.type === "change" || r.type === "flood");
 export type JobStatus = "QUEUED" | "RUNNING" | "COMPLETE" | "FAILED";
 
 export interface AnalysisRecord {
   id: string;
-  type: "change" | "timeseries";
+  type: "change" | "timeseries" | "flood";
   status: JobStatus;
   stage: string;
   stages: string[];

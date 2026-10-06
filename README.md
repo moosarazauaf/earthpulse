@@ -11,8 +11,8 @@ that comes with its evidence.
 
 Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
 
-> Status: `v0.1.1`. Exploration, comparison and index change analysis work on
-> real data. Floods, forests, water, fire, carbon, classification, the
+> Status: Phase 2 in progress. Exploration, comparison, index change analysis
+> and flood mapping work on real data. Forests, water, fire, carbon, classification, the
 > assistant and story mode are not built yet. [CHANGELOG.md](CHANGELOG.md)
 > lists what works; [docs/ROADMAP.md](docs/ROADMAP.md) lists what does not.
 
@@ -26,6 +26,9 @@ Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
 - **Measure.** Draw an area, pick two years and a season, and run a change
   analysis. The backend selects the clearest scenes, masks cloud, builds
   median composites, and reports where the index moved past a threshold.
+- **Map floods.** FloodLens maps flood extent from Sentinel-1 radar for a
+  before and a flood window, separates water that was already there, and
+  reports the cropland and built-up land under water.
 - **Prove.** Each result has an Analysis ID, the list of scenes used, the
   method, its limits, exports, and an Earth Engine script that names the same
   scenes.
@@ -97,6 +100,7 @@ Computer STAC archive. See [.env.example](.env.example) for optional settings.
 | GET | `/api/imagery/tiles/{dataset}/{year}/{render}/{z}/{x}/{y}.png` | Map tiles |
 | POST | `/api/analysis/change` | Start a change analysis; returns an Analysis ID |
 | POST | `/api/analysis/timeseries` | Start a multi-year index series |
+| POST | `/api/analysis/flood` | Start a Sentinel-1 flood analysis |
 | GET | `/api/analysis/{id}` | Status, current stage, and the result when complete |
 | GET | `/api/analysis/{id}/export?format=geojson\|csv\|json\|gee` | Exports |
 | GET | `/api/analysis/{id}/files/{change\|before\|after}.{png\|tif}` | Result rasters |
@@ -127,6 +131,7 @@ cd frontend && npm test
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - [docs/ROADMAP.md](docs/ROADMAP.md)
+- [docs/DEPLOY.md](docs/DEPLOY.md): hosting the frontend and the backend
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [SECURITY.md](SECURITY.md)
 

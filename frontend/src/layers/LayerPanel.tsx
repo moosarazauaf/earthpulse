@@ -3,8 +3,8 @@ import { useState } from "react";
 
 import { LegendBar } from "../analysis/charts";
 import { SENTINEL2_FIRST_YEAR, datasetForYear } from "../app/logic";
-import { type OverlayKey, useStore } from "../app/store";
-import type { RenderId } from "../app/types";
+import { useStore } from "../app/store";
+import { type Overlay, type RenderId, isMapped } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
@@ -15,18 +15,24 @@ const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
   { id: "mndwi", label: "MNDWI", hint: "Open water, built-up suppressed" },
   { id: "ndbi", label: "NDBI", hint: "Built-up and bare surfaces" },
 ];
-const OVERLAYS: { key: OverlayKey; label: string }[] = [
-  { key: "change", label: "Change" },
-  { key: "before", label: "Before" },
-  { key: "after", label: "After" },
-];
+const OVERLAY_LABELS: Record<string, string> = {
+  change: "Change",
+  before: "Before",
+  after: "After",
+  flood: "Flood extent",
+  vv_before: "Radar before",
+  vv_flood: "Radar flood",
+  vv_after: "Radar after",
+};
 
 export function LayerPanel() {
   const s = useStore();
   const [open, setOpen] = useState(true);
   const dataset = datasetForYear(s.preferredDataset, s.year);
   const sentinelBlocked = s.preferredDataset === "sentinel2" && dataset === "landsat";
-  const change = s.result?.type === "change" ? s.result : null;
+  const mapped = isMapped(s.result) ? s.result : null;
+  const overlays: Record<string, Overlay> = mapped?.overlays ?? {};
+  const shown = s.overlay.key ? overlays[s.overlay.key] : undefined;
 
   return (
     <aside className={`panel left${open ? "" : " collapsed"}`} aria-label="Layers">
@@ -86,21 +92,29 @@ export function LayerPanel() {
             )}
           </section>
 
-          {change && (
+          {mapped && (
             <section>
-              <header className="row"><h3>Analysis result</h3><KindBadge kind={change.valueKind} /></header>
-              <div className="seg" role="radiogroup" aria-label="Result layer">
-                {OVERLAYS.map((o) => (
-                  <button key={o.key} role="radio" aria-checked={s.overlay.key === o.key}
-                    className={s.overlay.key === o.key ? "on" : ""}
-                    onClick={() => s.setOverlay({ key: s.overlay.key === o.key ? null : o.key })}>
-                    {o.label}
+              <header className="row"><h3>Analysis result</h3><KindBadge kind={mapped.valueKind} /></header>
+              <div className="options" role="radiogroup" aria-label="Result layer">
+                {Object.entries(overlays).map(([key, overlay]) => (
+                  <button key={key} role="radio" aria-checked={s.overlay.key === key} title={overlay.title}
+                    className={s.overlay.key === key ? "on" : ""}
+                    onClick={() => s.setOverlay({ key: s.overlay.key === key ? null : key })}>
+                    {OVERLAY_LABELS[key] ?? key}
                   </button>
                 ))}
               </div>
-              {s.overlay.key && (
+              {shown && (
                 <>
-                  <LegendBar {...change.overlays[s.overlay.key].legend} label={change.overlays[s.overlay.key].title} />
+                  {"classes" in shown.legend ? (
+                    <ul className="class-legend">
+                      {shown.legend.classes.map((c) => (
+                        <li key={c.label}><i className="swatch" style={{ background: c.color }} aria-hidden="true" />{c.label}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <LegendBar {...shown.legend} label={shown.legend.unit ? `${shown.title} (${shown.legend.unit})` : shown.title} />
+                  )}
                   <label className="slider">
                     <span>Opacity</span>
                     <input type="range" min={0} max={1} step={0.05} value={s.overlay.opacity}
@@ -111,8 +125,12 @@ export function LayerPanel() {
               <label className="check">
                 <input type="checkbox" checked={s.overlay.detections}
                   onChange={(e) => s.setOverlay({ detections: e.target.checked })} />
-                <span>Detected regions <i className="swatch loss" aria-hidden="true" /> decrease{" "}
-                  <i className="swatch gain" aria-hidden="true" /> increase</span>
+                {mapped.type === "flood" ? (
+                  <span>Outlines of flooded areas</span>
+                ) : (
+                  <span>Detected regions <i className="swatch loss" aria-hidden="true" /> decrease{" "}
+                    <i className="swatch gain" aria-hidden="true" /> increase</span>
+                )}
               </label>
             </section>
           )}

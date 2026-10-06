@@ -6,6 +6,7 @@ import type {
   Catalog,
   ChangeRequest,
   DatasetId,
+  FloodRequest,
   ImageryLayerInfo,
   Place,
   RenderId,
@@ -79,6 +80,7 @@ const live = {
     request<{ results: Place[]; attribution: string }>(`/api/geocode?q=${encodeURIComponent(q)}`),
   submitChange: (body: ChangeRequest) => post<{ id: string }>("/api/analysis/change", body),
   submitTimeSeries: (body: TimeSeriesRequest) => post<{ id: string }>("/api/analysis/timeseries", body),
+  submitFlood: (body: FloodRequest) => post<{ id: string }>("/api/analysis/flood", body),
   analysis: (id: string) => request<AnalysisRecord>(`/api/analysis/${encodeURIComponent(id)}`),
   geeScript: (analysisId: string) =>
     post<{ script: string; codeEditorUrl: string }>("/api/gee/generate", { analysisId }),
@@ -91,6 +93,7 @@ const offline: typeof live = {
   geocode: (q) => local(hosted.geocode(q)),
   submitChange: () => local(hosted.submit()),
   submitTimeSeries: () => local(hosted.submit()),
+  submitFlood: () => local(hosted.submit()),
   analysis: (id) => local(hosted.analysis(id)),
   geeScript: (id) => local(hosted.geeScript(id)),
   exportUrl: (id, format) => hosted.exportUrl(id, format),

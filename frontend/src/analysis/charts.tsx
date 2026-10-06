@@ -55,6 +55,43 @@ export function ChangeHistogram({ edges, counts, threshold, indexName }: {
   );
 }
 
+/** Distribution of flood-period VV backscatter, with the water threshold marked. */
+export function BackscatterHistogram({ edges, counts, threshold }: {
+  edges: number[];
+  counts: number[];
+  threshold: number;
+}) {
+  const lo = edges[0] ?? -30;
+  const hi = edges[edges.length - 1] ?? 0;
+  const peak = Math.max(...counts, 1);
+  const x = (value: number) => PAD.left + ((value - lo) / (hi - lo)) * PLOT_W;
+  const barWidth = PLOT_W / counts.length;
+  return (
+    <figure className="chart">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img"
+        aria-label={`Histogram of radar backscatter during the flood. Water threshold at ${threshold.toFixed(1)} decibels.`}>
+        <line x1={PAD.left} x2={W - PAD.right} y1={H - PAD.bottom} y2={H - PAD.bottom} className="axis" />
+        {counts.map((count, i) => {
+          const centre = ((edges[i] ?? 0) + (edges[i + 1] ?? 0)) / 2;
+          const height = (count / peak) * PLOT_H;
+          return (
+            <rect key={i} x={PAD.left + i * barWidth + 0.5} y={H - PAD.bottom - height}
+              width={Math.max(1, barWidth - 1)} height={height} className={`bar ${centre < threshold ? "water" : "neutral"}`} />
+          );
+        })}
+        <line x1={x(threshold)} x2={x(threshold)} y1={PAD.top} y2={H - PAD.bottom} className="threshold" />
+        {[-30, -20, -10, 0].filter((t) => t >= lo && t <= hi).map((tick) => (
+          <text key={tick} x={x(tick)} y={H - 6} textAnchor="middle" className="tick">{tick}</text>
+        ))}
+      </svg>
+      <figcaption>
+        VV backscatter during the flood, in dB. Pixels left of the dashed line are dark enough to be
+        water; whether they count as flood also depends on the image before.
+      </figcaption>
+    </figure>
+  );
+}
+
 const SERIES: { id: IndexId; label: string; className: string }[] = [
   { id: "ndvi", label: "NDVI", className: "s-ndvi" },
   { id: "ndbi", label: "NDBI", className: "s-ndbi" },

@@ -12,6 +12,7 @@ import type {
   ChangeRequest,
   DatasetId,
   Detection,
+  FloodRequest,
   ImageryLayerInfo,
   RenderId,
   TimeSeriesRequest,
@@ -19,7 +20,8 @@ import type {
 
 export type CompareMode = "swipe" | "blink" | "opacity";
 export type DrawTool = "none" | "rectangle" | "polygon";
-export type OverlayKey = "change" | "before" | "after";
+/** Name of a result raster, as keyed in the result's `overlays`. */
+export type OverlayKey = string;
 
 export interface Aoi {
   geometry: AoiGeometry;
@@ -54,7 +56,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "explore" | "change" | "research";
+  mode: "explore" | "change" | "floods" | "research";
   sourcesOpen: boolean;
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
@@ -68,6 +70,7 @@ interface State {
   loadCatalog: () => Promise<void>;
   runChange: (request: ChangeRequest) => Promise<void>;
   runTimeSeries: (request: TimeSeriesRequest) => Promise<void>;
+  runFlood: (request: FloodRequest) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
 }
@@ -106,8 +109,9 @@ export const useStore = create<State>((set, get) => {
       set({
         job: { status: "complete", record, error: null },
         result,
-        overlay: { ...get().overlay, key: result.type === "change" ? "change" : null },
-        mode: get().mode === "explore" ? "change" : get().mode,
+        // Show the headline raster of the result: "change" or "flood".
+        overlay: { ...get().overlay, key: result.type === "timeseries" ? null : result.type },
+        mode: result.type === "flood" ? "floods" : get().mode === "research" ? "research" : "change",
         aoi: get().aoi ?? { geometry: result.aoi, label: result.label ?? "Analysed area" },
       });
     } else {
@@ -153,6 +157,7 @@ export const useStore = create<State>((set, get) => {
     },
     runChange: (request) => follow(() => api.submitChange(request)),
     runTimeSeries: (request) => follow(() => api.submitTimeSeries(request)),
+    runFlood: (request) => follow(() => api.submitFlood(request)),
     loadAnalysis: async (id) => {
       try {
         const record = await api.analysis(id);

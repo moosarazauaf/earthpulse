@@ -10,10 +10,11 @@ import { getGlobe } from "../globe/GlobeViewer";
 const MODES = [
   { id: "explore", label: "Explore" },
   { id: "change", label: "Change" },
+  { id: "floods", label: "Floods" },
   { id: "research", label: "Research" },
 ] as const;
 /** Modules on the roadmap. Listed so the plan is visible, disabled so nothing is faked. */
-const PLANNED = ["Floods", "Cities", "Forests", "Water", "Carbon"];
+const PLANNED = ["Cities", "Forests", "Water", "Carbon"];
 
 export function shareUrl(): string {
   const s = useStore.getState();

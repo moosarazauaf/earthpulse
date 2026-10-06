@@ -30,7 +30,10 @@ Carried over to later releases:
 
 ## Phase 2 — Thematic modes (`v0.2.0`)
 
-- [ ] FloodLens: Sentinel-1 before/flood/after, Otsu threshold, permanent-water mask
+- [x] FloodLens: Sentinel-1 before/flood/after, Otsu threshold with fallback, pre-existing
+      water excluded, recession, flooded cropland and built-up area (ESA WorldCover)
+- [ ] FloodLens: elevation context (the Copernicus DEM is not readable without credentials),
+      VH polarisation, flood duration, affected roads, Earth Engine script
 - [ ] WaterWatch: surface-water area, persistence and trend
 - [ ] UrbanEye: built-up growth profile, surface temperature where thermal data exists
 - [ ] ForestEye: loss, gain and disturbance with explicit terminology

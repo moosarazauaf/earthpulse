@@ -70,6 +70,9 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .slider.inline { grid-template-columns: auto 140px auto; font-family: var(--mono); }
 .field { display: grid; gap: 4px; }
 .field > span, .eyebrow { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.window { border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; margin: 0; display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; }
+.window legend { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 4px; }
+.window input { background: rgba(0, 0, 0, 0.35); border: 1px solid var(--line-strong); border-radius: 4px; padding: 5px 6px; width: 100%; min-width: 0; }
 .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -137,6 +140,9 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: -1px; }
 .swatch.loss { background: var(--orange); }
 .swatch.gain { background: var(--green); }
+.swatch.flood { background: #ff503c; }
+.class-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.class-legend .swatch { margin-right: 6px; }
 
 /* ---- results --------------------------------------------------------------- */
 .result-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding-top: 10px; }
@@ -145,6 +151,8 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .stat { border: 1px solid var(--line); border-radius: 4px; padding: 8px; display: grid; gap: 2px; border-top-width: 2px; }
 .stat.loss { border-top-color: var(--orange); }
 .stat.gain { border-top-color: var(--green); }
+.stat.flood { border-top-color: #ff503c; }
+.stat.water { border-top-color: var(--blue); }
 .stat span, .stat em { font-size: 11px; color: var(--muted); font-style: normal; }
 .stat strong { font: 600 20px var(--mono); }
 .table { width: 100%; border-collapse: collapse; font-size: 12px; }
@@ -185,6 +193,7 @@ details > summary { cursor: pointer; }
 .chart .bar.neutral { fill: #55666c; }
 .chart .bar.loss { fill: var(--orange); }
 .chart .bar.gain { fill: var(--green); }
+.chart .bar.water { fill: var(--blue); }
 .chart .bar.hot { fill: #fff; }
 .chart .threshold { stroke: var(--text); stroke-dasharray: 3 3; opacity: 0.7; }
 .chart .line { fill: none; stroke: currentColor; stroke-width: 2; }
@@ -236,7 +245,7 @@ details > summary { cursor: pointer; }
 }
 .intro h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 600; letter-spacing: -0.01em; }
 .intro .lede { color: var(--muted); font-size: 15px; max-width: 60ch; }
-.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .cards button { text-align: left; padding: 14px; display: grid; gap: 6px; align-content: start; }
 .cards strong { font-size: 14px; color: var(--cyan); }
 .cards span { color: var(--muted); font-size: 12px; }

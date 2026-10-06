@@ -5,6 +5,25 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+Phase 2 in progress.
+
+### Added
+- **FloodLens.** Flood extent from Sentinel-1 radar (RTC, VV) with before,
+  flood and optional after windows. One relative orbit is used throughout,
+  chosen by its worst-period coverage of the area. Water is separated with
+  Otsu's threshold when the histogram is bimodal, otherwise a fixed -17 dB,
+  and a flooded pixel must also have dropped by 3 dB. Reports flooded area,
+  pre-existing water, recession, threshold sensitivity, and flooded cropland
+  and built-up area from ESA WorldCover 2021.
+- Floods mode in the interface, with the flood-extent and radar layers on the
+  globe and a stored example (Indus at Layyah, 2022) in the hosted demo.
+- `backend/Dockerfile` and `docs/DEPLOY.md` for hosting the backend; the
+  Pages build reads the backend address from a repository variable.
+
+### Known limits
+- No accuracy assessment of the flood maps. Elevation context is missing.
+- The Dockerfile has not been built on a host yet.
+
 ## [0.1.1] - 2026-10-06
 
 ### Added

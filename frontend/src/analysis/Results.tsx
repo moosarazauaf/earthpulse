@@ -2,7 +2,7 @@
 import { HOSTED, absolute, api } from "../app/api";
 import { formatArea, formatIndex, formatSigned } from "../app/logic";
 import { useStore } from "../app/store";
-import type { ChangeResult, IndexId, TimeSeriesResult } from "../app/types";
+import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesResult, isMapped } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 import { shareUrl } from "../ui/TopBar";
 import { ChangeHistogram, SeriesChart } from "./charts";
@@ -14,7 +14,7 @@ const INDEX_ROWS: { id: IndexId; label: string }[] = [
   { id: "ndbi", label: "NDBI · built-up / bare" },
 ];
 
-function Header({ result }: { result: ChangeResult | TimeSeriesResult }) {
+export function ResultHeader({ result }: { result: AnalysisResult }) {
   const set = useStore((s) => s.set);
   const created = useStore((s) => s.job.record?.createdAt);
   return (
@@ -51,16 +51,19 @@ function Header({ result }: { result: ChangeResult | TimeSeriesResult }) {
   );
 }
 
-function Exports({ result }: { result: ChangeResult | TimeSeriesResult }) {
+export function Exports({ result }: { result: AnalysisResult }) {
   const observed = result.provenance.provider.observed;
   return (
     <section>
       <h3>Export</h3>
       <div className="exports">
-        {result.type === "change" && <a href={api.exportUrl(result.id, "geojson")}>GeoJSON</a>}
+        {isMapped(result) && <a href={api.exportUrl(result.id, "geojson")}>GeoJSON</a>}
         <a href={api.exportUrl(result.id, "csv")}>CSV</a>
         <a href={api.exportUrl(result.id, "json")}>Full record (JSON)</a>
         {result.type === "change" && <a href={absolute(result.overlays.change.geotiff)}>GeoTIFF</a>}
+        {result.type === "flood" && result.overlays.flood && (
+          <a href={absolute(result.overlays.flood.geotiff)}>GeoTIFF</a>
+        )}
         {result.type === "change" && observed && <a href={api.exportUrl(result.id, "gee")}>Earth Engine script</a>}
       </div>
     </section>
@@ -77,7 +80,7 @@ export function ChangeResults({ result }: { result: ChangeResult }) {
 
   return (
     <div className="results">
-      <Header result={result} />
+      <ResultHeader result={result} />
       <section>
         <h3>What changed here</h3>
         <p className="muted">{period(result.request.before)} compared with {period(result.request.after)}</p>
@@ -155,7 +158,7 @@ export function SeriesResults({ result }: { result: TimeSeriesResult }) {
   const gaps = result.series.filter((e) => !e.values);
   return (
     <div className="results">
-      <Header result={result} />
+      <ResultHeader result={result} />
       <section>
         <h3>Index series</h3>
         <SeriesChart series={result.series} />

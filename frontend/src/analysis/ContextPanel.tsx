@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useStore } from "../app/store";
 import { AnalysisForm } from "./AnalysisForm";
 import { Evidence } from "./Evidence";
+import { FloodForm, FloodResults } from "./FloodPanel";
 import { ChangeResults, SeriesResults } from "./Results";
 
 const STAGE_LABELS: Record<string, string> = {
@@ -12,6 +13,7 @@ const STAGE_LABELS: Record<string, string> = {
   PROCESSING_IMAGERY: "Processing imagery",
   CALCULATING_INDICES: "Calculating indices",
   DETECTING_CHANGE: "Detecting change",
+  // FloodLens reports the same stages; for radar "indices" is the water threshold.
   GENERATING_RESULTS: "Generating results",
 };
 
@@ -49,7 +51,7 @@ export function ContextPanel() {
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";
-  const title = mode === "research" ? "Evidence" : "What changed here?";
+  const title = mode === "research" ? "Evidence" : mode === "floods" ? "FloodLens" : "What changed here?";
 
   return (
     <aside className={`panel right${open ? "" : " collapsed"}`} aria-label={title}>
@@ -76,10 +78,11 @@ export function ContextPanel() {
               )}
               {!running && result?.type === "change" && <ChangeResults result={result} />}
               {!running && result?.type === "timeseries" && <SeriesResults result={result} />}
+              {!running && result?.type === "flood" && <FloodResults result={result} />}
               {!running && (
                 <details className="form-wrap" open={!result}>
                   <summary>{result ? "New analysis" : "Set up an analysis"}</summary>
-                  <AnalysisForm />
+                  {mode === "floods" ? <FloodForm /> : <AnalysisForm />}
                 </details>
               )}
             </>

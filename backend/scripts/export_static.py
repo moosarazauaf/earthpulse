@@ -6,7 +6,8 @@ analyses that were computed here and exported. Usage, from backend/:
     python scripts/export_static.py EP-2026-LAHOREDISTRICT-2EBD2
 
 Writes frontend/public/data/analyses/<id>/ and refreshes
-frontend/public/data/catalog.json.
+frontend/public/data/catalog.json. Every display raster is copied, plus the
+headline GeoTIFF; the other GeoTIFFs would triple the download.
 """
 import json
 import shutil
@@ -22,9 +23,6 @@ from app.gee.generator import NotReproducible, generate_change_script  # noqa: E
 from app.services import jobs  # noqa: E402
 
 PUBLIC_DATA = BACKEND_DIR.parent / "frontend" / "public" / "data"
-# Display rasters plus the change GeoTIFF; the other GeoTIFFs can be
-# regenerated from the Earth Engine script and would triple the download.
-FILES = ("change.png", "before.png", "after.png", "change.tif")
 
 
 def export(analysis_id: str) -> Path:
@@ -39,19 +37,21 @@ def export(analysis_id: str) -> Path:
     (out / "record.json").write_text(json.dumps(record), encoding="utf-8")
     (out / "export.json").write_text(json.dumps(result), encoding="utf-8")
     (out / "export.csv").write_text(_csv(result), encoding="utf-8")
-    if result["type"] == "change":
+    if "detections" in result:
         collection = dict(result["detections"])
         collection["earthpulse"] = {
             k: result[k] for k in ("id", "softwareVersion", "valueKind", "provenance", "summary",
                                    "warnings")
         }
         (out / "export.geojson").write_text(json.dumps(collection), encoding="utf-8")
-        try:
-            (out / "export.js").write_text(generate_change_script(result), encoding="utf-8")
-        except NotReproducible as exc:
-            print(f"no Earth Engine script: {exc.message}")
+        if result["type"] == "change":
+            try:
+                (out / "export.js").write_text(generate_change_script(result), encoding="utf-8")
+            except NotReproducible as exc:
+                print(f"no Earth Engine script: {exc.message}")
         source = get_settings().data_dir / "analyses" / analysis_id
-        for name in FILES:
+        headline = f"{result['type']}.tif"  # change.tif or flood.tif
+        for name in (*(f"{key}.png" for key in result["overlays"]), headline):
             shutil.copyfile(source / name, out / name)
     (PUBLIC_DATA / "catalog.json").write_text(json.dumps(datasets()), encoding="utf-8")
     return out

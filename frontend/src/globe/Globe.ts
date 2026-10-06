@@ -24,7 +24,7 @@ import {
 } from "cesium";
 
 import { absolute } from "../app/api";
-import type { AoiGeometry, ChangeResult, Detection, ImageryLayerInfo, Overlay } from "../app/types";
+import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
 
 const ESRI_IMAGERY =
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
@@ -321,7 +321,7 @@ export class Globe {
     this.render();
   }
 
-  async setDetections(result: ChangeResult | null, visible: boolean) {
+  async setDetections(result: MappedResult | null, visible: boolean) {
     const key = result && visible ? result.id : null;
     if (key === this.detectionsFor) return;
     this.detectionsFor = key;
