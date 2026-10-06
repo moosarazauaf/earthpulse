@@ -7,7 +7,11 @@ open satellite archives and a reproducible analysis engine in one browser
 application, so that a question like *"what changed here?"* gets an answer
 that comes with its evidence.
 
-> Status: `v0.1.0`. Exploration, comparison and index change analysis work on
+**Live demo: https://moosarazauaf.github.io/earthpulse/**
+
+Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
+
+> Status: `v0.1.1`. Exploration, comparison and index change analysis work on
 > real data. Floods, forests, water, fire, carbon, classification, the
 > assistant and story mode are not built yet. [CHANGELOG.md](CHANGELOG.md)
 > lists what works; [docs/ROADMAP.md](docs/ROADMAP.md) lists what does not.
@@ -31,6 +35,17 @@ Example: Lahore District, October to December 1993 against the same months of
 working resolution, threshold 0.15): NDVI decreased on 179 km² and increased
 on 220 km² of 1,674 km² analysed. That is an index result. It mixes urban
 growth with changes in cropping, and no accuracy assessment has been made.
+
+## The live demo and the full application
+
+The live demo is the frontend alone, served by GitHub Pages. It can do
+everything that needs only imagery: the globe, the annual layers, the
+timeline, comparison and the Lahore tour, with tiles requested from Planetary
+Computer by the browser. It cannot run a new analysis, because that needs the
+Python service in `backend/`. Instead it ships one real analysis that the
+backend computed (Lahore District, NDVI, 1993 and 2025) and labels it as a
+stored result. To analyse your own area, run both parts locally as described
+under Quick start.
 
 ## Design rule
 
@@ -114,6 +129,13 @@ cd frontend && npm test
 - [docs/ROADMAP.md](docs/ROADMAP.md)
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [SECURITY.md](SECURITY.md)
+
+## Author
+
+EarthPulse is developed by Muhammad Moosa Raza
+([portfolio](https://moosarazauaf.github.io/),
+[GitHub](https://github.com/moosarazauaf)). The project is under active
+development; see the roadmap for what comes next.
 
 ## Responsible use
 

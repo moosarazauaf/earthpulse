@@ -258,6 +258,11 @@ details > summary { cursor: pointer; }
 .sheet section { display: grid; gap: 8px; padding: 14px 0; border-top: 1px solid var(--line); }
 .sheet h3 { font-size: 14px; }
 
+/* Sits at the right end of the timeline bar, where no panel can cover it. */
+.credit-corner { margin: 0 0 0 auto; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.credit-corner a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+.credit-corner a:hover { color: var(--cyan); border-color: var(--cyan); }
+
 /* ---- responsive ------------------------------------------------------------ */
 @media (max-width: 1100px) {
   .topbar nav button:disabled { display: none; }

@@ -2,6 +2,8 @@
 .env
 .env.*
 !.env.example
+# Not a secret: points the dev server at the local API.
+!frontend/.env.development
 *.pem
 *service-account*.json
 *credentials*.json

@@ -121,6 +121,25 @@ Comparison uses Cesium's imagery split: the earlier year is clipped to the
 left of the divider and the later year to the right. Both are layers on the
 same globe, so pan and zoom cannot drift apart.
 
+## Hosted mode
+
+When `VITE_API_BASE` is not set at build time, the client runs without the
+backend (`frontend/src/app/hosted.ts`). This is how the GitHub Pages demo is
+built.
+
+| Capability | With backend | Hosted mode |
+|---|---|---|
+| Annual imagery layers | Tiles proxied and cached by the API | Mosaic registered and tiles loaded from Planetary Computer by the browser |
+| Catalogue | `GET /api/datasets` | `data/catalog.json`, written by the export script |
+| Place search | Proxied and cached | Nominatim called by the browser |
+| New analysis | Runs | Refused, with an explanation |
+| Stored analysis | Read from the store | Static files under `data/analyses/<id>/` |
+
+The layer presets exist twice, in `backend/app/services/imagery.py` and in
+`hosted.ts`. Tests on both sides assert the same index expressions so the two
+cannot drift silently. `backend/scripts/export_static.py <analysis id>` writes
+the static copy of an analysis.
+
 ## Known limits of this version
 
 - **Speed.** An analysis reads its scenes from cloud storage on demand. A

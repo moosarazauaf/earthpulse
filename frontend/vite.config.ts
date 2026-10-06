@@ -6,9 +6,12 @@ import { defineConfig } from "vitest/config";
 // base URL, so they are copied next to the bundle rather than imported.
 const CESIUM_BUILD = "node_modules/cesium/Build/Cesium";
 const CESIUM_BASE = "cesium";
+// "/" locally; "/earthpulse/" when built for GitHub Pages.
+const BASE = process.env.VITE_BASE ?? "/";
 
 export default defineConfig({
-  define: { CESIUM_BASE_URL: JSON.stringify(`/${CESIUM_BASE}`) },
+  base: BASE,
+  define: { CESIUM_BASE_URL: JSON.stringify(`${BASE}${CESIUM_BASE}`) },
   plugins: [
     react(),
     viteStaticCopy({

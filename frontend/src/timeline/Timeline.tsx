@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { FIRST_YEAR, currentYear } from "../app/logic";
 import { type CompareMode, useStore } from "../app/store";
+import { Credit } from "../ui/Credit";
 
 /** Time each year stays on screen during playback; tiles need a moment to arrive. */
 const PLAY_INTERVAL_MS = 2200;
@@ -82,6 +83,7 @@ export function Timeline() {
             <span>{compare.year}</span>
           </label>
         )}
+        <Credit />
       </div>
     </footer>
   );

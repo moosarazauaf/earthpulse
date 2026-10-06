@@ -4,7 +4,7 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-SOFTWARE_VERSION = "0.1.0"
+SOFTWARE_VERSION = "0.1.1"
 # Paths are anchored to the backend folder so the service behaves the same
 # whatever directory it is started from.
 BACKEND_DIR = Path(__file__).resolve().parents[2]

@@ -5,6 +5,23 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-06
+
+### Added
+- Hosted mode for static deployment: with no analysis service configured, the
+  client requests imagery layers from Planetary Computer directly and serves
+  exported analyses as stored results. New analyses are refused with an
+  explanation instead of failing.
+- `backend/scripts/export_static.py`, which exports a finished analysis for
+  the hosted demo; the Lahore District 1993 and 2025 NDVI analysis is included.
+- GitHub Pages deployment workflow. Live at
+  https://moosarazauaf.github.io/earthpulse/.
+- Author credit in the interface and the README.
+
+### Changed
+- Imagery layers no longer request tiles below their first zoom level.
+- The dev server reads the API address from `frontend/.env.development`.
+
 ## [0.1.0] - 2026-10-06
 
 First working release: explore four decades of imagery on a globe and run a

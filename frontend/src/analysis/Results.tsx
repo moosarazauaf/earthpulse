@@ -1,5 +1,5 @@
 /** Results of a finished analysis: numbers, charts, regions, exports. */
-import { absolute, api } from "../app/api";
+import { HOSTED, absolute, api } from "../app/api";
 import { formatArea, formatIndex, formatSigned } from "../app/logic";
 import { useStore } from "../app/store";
 import type { ChangeResult, IndexId, TimeSeriesResult } from "../app/types";
@@ -16,6 +16,7 @@ const INDEX_ROWS: { id: IndexId; label: string }[] = [
 
 function Header({ result }: { result: ChangeResult | TimeSeriesResult }) {
   const set = useStore((s) => s.set);
+  const created = useStore((s) => s.job.record?.createdAt);
   return (
     <>
       <div className="result-head">
@@ -25,6 +26,12 @@ function Header({ result }: { result: ChangeResult | TimeSeriesResult }) {
         </div>
         <KindBadge kind={result.valueKind} />
       </div>
+      {HOSTED && (
+        <p className="muted">
+          Stored result{created ? `, computed by the EarthPulse backend on ${created.slice(0, 10)}` : ""}. This hosted
+          demo displays it; it did not compute it in your browser.
+        </p>
+      )}
       {result.valueKind === "SIMULATED" && (
         <p className="note">This result was computed on synthetic demo data. It is not a satellite observation.</p>
       )}

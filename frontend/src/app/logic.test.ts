@@ -109,3 +109,14 @@ describe("formatting", () => {
     expect(formatSigned(null)).toBe("n/a");
   });
 });
+
+describe("hosted-mode tile presets", () => {
+  it("match the backend's index expressions, including the reflectance offset", async () => {
+    const { tileQuery } = await import("./hosted");
+    const expression = (query: string) => new URLSearchParams(query).get("expression");
+    expect(expression(tileQuery("landsat", 1993, "ndvi"))).toBe("(nir08-red)/(nir08+red-14545.4545)");
+    expect(expression(tileQuery("sentinel2", 2018, "ndvi"))).toBe("(B08-B04)/(B08+B04)");
+    expect(expression(tileQuery("sentinel2", 2026, "ndvi"))).toBe("(B08-B04)/(B08+B04-2000.0000)");
+    expect(new URLSearchParams(tileQuery("landsat", 1993, "truecolor")).getAll("assets")).toEqual(["red", "green", "blue"]);
+  });
+});

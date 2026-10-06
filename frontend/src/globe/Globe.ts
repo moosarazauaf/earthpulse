@@ -39,6 +39,9 @@ const AOI_COLOR = Color.fromCssColorString("#5fd0c5");
 const LOSS_COLOR = Color.fromCssColorString("#ff8a5c");
 const GAIN_COLOR = Color.fromCssColorString("#7bd88f");
 
+const BLANK_TILE = document.createElement("canvas");
+BLANK_TILE.width = BLANK_TILE.height = 1;
+
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function ringPositions(ring: number[][]): Cartesian3[] {
@@ -188,6 +191,11 @@ export class Globe {
       maximumLevel: info.maxZoom,
       credit: info.dataset.attribution,
     });
+    // Below the layer's first zoom level one tile would need dozens of scenes,
+    // so nothing is requested there and the basemap shows through.
+    const requestImage = provider.requestImage.bind(provider);
+    provider.requestImage = (x, y, level, request) =>
+      level < info.minZoom ? Promise.resolve(BLANK_TILE) : requestImage(x, y, level, request);
     // Insert under the labels layer so place names stay readable.
     const index = this.viewer.imageryLayers.indexOf(this.labels);
     return this.viewer.imageryLayers.addImageryProvider(provider, index);

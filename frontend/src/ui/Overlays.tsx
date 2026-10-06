@@ -1,7 +1,9 @@
 /** Things that sit above the globe for a moment: the opening, story captions, notices, the sources sheet. */
 import { useEffect, useRef } from "react";
 
+import { HOSTED } from "../app/api";
 import { useStore } from "../app/store";
+import { STORED_ANALYSIS } from "../demo/stored";
 import { exploreEvidence, startLahoreTour, stopTour } from "../demo/lahore";
 
 const NOTICE_SECONDS = 6;
@@ -9,6 +11,7 @@ const NOTICE_SECONDS = 6;
 export function Intro() {
   const open = useStore((s) => s.introOpen);
   const set = useStore((s) => s.set);
+  const loadAnalysis = useStore((s) => s.loadAnalysis);
   if (!open) return null;
   return (
     <div className="intro" role="dialog" aria-modal="false" aria-labelledby="intro-title">
@@ -27,10 +30,17 @@ export function Intro() {
           <strong>Explore Earth</strong>
           <span>Move through 40 years of imagery with the timeline. Zoom to a region to load it.</span>
         </button>
-        <button onClick={() => set({ introOpen: false, mode: "change" })}>
-          <strong>Analyse an area</strong>
-          <span>Draw an area and measure vegetation, water or built-up change between two years.</span>
-        </button>
+        {HOSTED ? (
+          <button onClick={() => { set({ introOpen: false, mode: "change" }); void loadAnalysis(STORED_ANALYSIS.id); }}>
+            <strong>See a real analysis</strong>
+            <span>{STORED_ANALYSIS.title}: where the vegetation index fell and rose, with the scenes behind it.</span>
+          </button>
+        ) : (
+          <button onClick={() => set({ introOpen: false, mode: "change" })}>
+            <strong>Analyse an area</strong>
+            <span>Draw an area and measure vegetation, water or built-up change between two years.</span>
+          </button>
+        )}
       </div>
     </div>
   );

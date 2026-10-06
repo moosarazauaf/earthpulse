@@ -1,9 +1,12 @@
 /** Choose an area and a question, then run a real analysis. */
 import { useState } from "react";
 
+import { HOSTED } from "../app/api";
 import { FIRST_YEAR, SENTINEL2_FIRST_YEAR, currentYear, seasonNotStarted, seasonPeriod } from "../app/logic";
 import { useStore } from "../app/store";
 import type { AoiGeometry, IndexId } from "../app/types";
+import { STORED_ANALYSIS } from "../demo/stored";
+import { REPOSITORY_URL } from "../ui/Credit";
 
 const SEASONS = [
   { id: "year", label: "Whole year", start: 1, end: 12 },
@@ -23,7 +26,7 @@ const SERIES_POINTS = 5;
 const DEFAULT_MAX_CLOUD = 20;
 
 export async function loadLahore(): Promise<{ geometry: AoiGeometry; label: string }> {
-  const response = await fetch("/data/lahore-district.geojson");
+  const response = await fetch(`${import.meta.env.BASE_URL}data/lahore-district.geojson`);
   const feature = await response.json();
   return { geometry: feature.geometry as AoiGeometry, label: "Lahore District" };
 }
@@ -138,16 +141,33 @@ export function AnalysisForm() {
         </p>
       </section>
 
-      {problem && <p className="note" role="status">{problem}</p>}
-      <div className="actions">
-        <button className="primary" disabled={!!problem || running} onClick={() => run("change")}>
-          Detect change
-        </button>
-        <button disabled={!!problem || running} onClick={() => run("series")}
-          title={`Mean indices for ${SERIES_POINTS} years between the two dates`}>
-          Index series
-        </button>
-      </div>
+      {HOSTED ? (
+        <section>
+          <p className="note">
+            This hosted demo has no analysis service, so it cannot run a new analysis. Run EarthPulse
+            locally to analyse your own area, or open a stored result that the backend computed.
+          </p>
+          <div className="actions">
+            <button className="primary" onClick={() => void s.loadAnalysis(STORED_ANALYSIS.id)}>
+              Open stored analysis: {STORED_ANALYSIS.title}
+            </button>
+            <a className="button" href={REPOSITORY_URL} target="_blank" rel="noreferrer">Run it locally</a>
+          </div>
+        </section>
+      ) : (
+        <>
+          {problem && <p className="note" role="status">{problem}</p>}
+          <div className="actions">
+            <button className="primary" disabled={!!problem || running} onClick={() => run("change")}>
+              Detect change
+            </button>
+            <button disabled={!!problem || running} onClick={() => run("series")}
+              title={`Mean indices for ${SERIES_POINTS} years between the two dates`}>
+              Index series
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
