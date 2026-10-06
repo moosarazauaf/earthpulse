@@ -2,6 +2,8 @@
 import { create } from "zustand";
 
 import { ApiError, api, pollAnalysis } from "./api";
+import { type DeviceProfile, type RunHandle, runWaterInBrowser } from "../engine/client";
+import type { Progress, WaterRequest } from "../engine/water";
 import { clampYear, currentYear, datasetForYear } from "./logic";
 import type {
   AnalysisRecord,
@@ -29,6 +31,8 @@ export interface Aoi {
 }
 
 interface Job {
+  /** Set while an analysis runs in this browser: real counts from the engine. */
+  progress?: Progress;
   status: "idle" | "submitting" | "running" | "complete" | "failed";
   record: AnalysisRecord | null;
   error: ApiErrorBody | null;
@@ -56,7 +60,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "explore" | "change" | "floods" | "research";
+  mode: "explore" | "change" | "floods" | "water" | "research";
   sourcesOpen: boolean;
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
@@ -71,12 +75,14 @@ interface State {
   runChange: (request: ChangeRequest) => Promise<void>;
   runTimeSeries: (request: TimeSeriesRequest) => Promise<void>;
   runFlood: (request: FloodRequest) => Promise<void>;
+  runWater: (request: WaterRequest, device: DeviceProfile) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
 }
 
 const IDLE: Job = { status: "idle", record: null, error: null };
 let abort: AbortController | null = null;
+let localRun: RunHandle | null = null;
 
 export const useStore = create<State>((set, get) => {
   /** Shared by both analysis types: submit, then follow the real job state. */
@@ -158,6 +164,35 @@ export const useStore = create<State>((set, get) => {
     runChange: (request) => follow(() => api.submitChange(request)),
     runTimeSeries: (request) => follow(() => api.submitTimeSeries(request)),
     runFlood: (request) => follow(() => api.submitFlood(request)),
+    runWater: async (request, device) => {
+      abort?.abort();
+      localRun?.cancel();
+      set({ job: { status: "running", record: null, error: null }, selectedDetection: null });
+      const run = runWaterInBrowser(request, device, (progress) => {
+        if (localRun === run) set({ job: { status: "running", record: null, error: null, progress } });
+      });
+      localRun = run;
+      try {
+        const result = await run.promise;
+        if (localRun !== run) return;
+        const dataset = get().catalog?.datasets.find((d) => d.id === request.dataset);
+        if (dataset) result.provenance.dataset = dataset;
+        set({
+          job: { status: "complete", record: null, error: null },
+          result,
+          overlay: { ...get().overlay, key: "persistence" },
+          mode: "water",
+        });
+      } catch (error) {
+        if (localRun !== run) return;
+        set({
+          job: {
+            status: "failed", record: null,
+            error: { code: "browser_engine", message: error instanceof Error ? error.message : "Analysis could not be completed." },
+          },
+        });
+      }
+    },
     loadAnalysis: async (id) => {
       try {
         const record = await api.analysis(id);
@@ -169,6 +204,8 @@ export const useStore = create<State>((set, get) => {
     },
     cancelJob: () => {
       abort?.abort();
+      localRun?.cancel();
+      localRun = null;
       set({ job: IDLE });
     },
   };

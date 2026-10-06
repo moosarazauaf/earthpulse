@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { ApiError, api } from "../app/api";
 import { datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
-import { type Detection, type ImageryLayerInfo, type MappedResult, type Overlay, isMapped } from "../app/types";
+import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedResult, type Overlay, hasLayers, isMapped } from "../app/types";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -131,11 +131,12 @@ export function GlobeViewer() {
 
   // Analysis outputs.
   const mapped: MappedResult | null = isMapped(s.result) ? s.result : null;
+  const layered: LayeredResult | null = hasLayers(s.result) ? s.result : null;
   useEffect(() => {
-    const overlays: Record<string, Overlay> | null = mapped?.overlays ?? null;
+    const overlays: Record<string, Overlay> | null = layered?.overlays ?? null;
     const overlay = overlays && s.overlay.key ? overlays[s.overlay.key] ?? null : null;
     void instance?.setOverlay(overlay, s.overlay.opacity);
-  }, [mapped, s.overlay.key, s.overlay.opacity]);
+  }, [layered, s.overlay.key, s.overlay.opacity]);
   useEffect(() => {
     void instance?.setDetections(mapped, s.overlay.detections);
   }, [mapped, s.overlay.detections]);

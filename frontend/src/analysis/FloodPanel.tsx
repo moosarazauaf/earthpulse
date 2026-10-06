@@ -7,7 +7,7 @@ import { useStore } from "../app/store";
 import type { FloodResult, Period } from "../app/types";
 import { STORED_FLOOD } from "../demo/stored";
 import { REPOSITORY_URL } from "../ui/Credit";
-import { AreaPicker } from "./AnalysisForm";
+import { AreaStep } from "./AnalysisForm";
 import { BackscatterHistogram } from "./charts";
 import { Exports, ResultHeader } from "./Results";
 
@@ -65,7 +65,7 @@ export function FloodForm() {
 
   return (
     <div className="form">
-      <AreaPicker />
+      <AreaStep />
       <section>
         <h3>2. Dates</h3>
         <Window legend="Before the flood" value={before} onChange={setBefore} />

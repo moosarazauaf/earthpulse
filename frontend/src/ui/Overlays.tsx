@@ -41,6 +41,10 @@ export function Intro() {
               : "Flood extent from Sentinel-1 radar, which sees through cloud, with the land it covered."}
           </span>
         </button>
+        <button onClick={() => set({ introOpen: false, mode: "water" })}>
+          <strong>Track surface water</strong>
+          <span>Choose a lake, reservoir or river reach and map its water year by year. Runs on your own computer.</span>
+        </button>
         {HOSTED ? (
           <button onClick={() => { set({ introOpen: false, mode: "change" }); void loadAnalysis(STORED_ANALYSIS.id); }}>
             <strong>See a real analysis</strong>

@@ -26,7 +26,7 @@ export function ResultHeader({ result }: { result: AnalysisResult }) {
         </div>
         <KindBadge kind={result.valueKind} />
       </div>
-      {HOSTED && (
+      {HOSTED && result.provenance.computedOn !== "browser" && (
         <p className="muted">
           Stored result{created ? `, computed by the EarthPulse backend on ${created.slice(0, 10)}` : ""}. This hosted
           demo displays it; it did not compute it in your browser.
@@ -38,20 +38,21 @@ export function ResultHeader({ result }: { result: AnalysisResult }) {
       {result.warnings.map((w) => <p key={w} className="note">{w}</p>)}
       <div className="actions">
         <button onClick={() => set({ mode: "research" })}>View evidence</button>
-        <button onClick={() => {
+        {result.provenance.computedOn !== "browser" && <button onClick={() => {
           const url = shareUrl();
           window.history.replaceState(null, "", url);
           void navigator.clipboard?.writeText(url).then(
             () => set({ notice: "Link to this analysis copied to the clipboard." }),
             () => set({ notice: "The link to this analysis is now in the address bar." }),
           );
-        }}>Share analysis</button>
+        }}>Share analysis</button>}
       </div>
     </>
   );
 }
 
 export function Exports({ result }: { result: AnalysisResult }) {
+  if (result.type === "water") return null; // WaterWatch exports from the browser itself
   const observed = result.provenance.provider.observed;
   return (
     <section>

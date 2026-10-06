@@ -34,7 +34,13 @@ Carried over to later releases:
       water excluded, recession, flooded cropland and built-up area (ESA WorldCover)
 - [ ] FloodLens: elevation context (the Copernicus DEM is not readable without credentials),
       VH polarisation, flood duration, affected roads, Earth Engine script
-- [ ] WaterWatch: surface-water area, persistence and trend
+- [x] WaterWatch: yearly surface-water maps, area series, persistence, lost and gained
+      water, year player. Runs in the browser.
+- [x] Browser analysis engine sized to the visitor's device
+- [x] Area prompt with drawing and shapefile / GeoJSON upload
+- [ ] Move change detection and FloodLens into the browser engine
+- [ ] Shareable links and GeoTIFF export for browser-run analyses
+- [ ] WaterWatch: AWEI option, Otsu threshold, seasonality within a year
 - [ ] UrbanEye: built-up growth profile, surface temperature where thermal data exists
 - [ ] ForestEye: loss, gain and disturbance with explicit terminology
 - [ ] FireWatch: NASA FIRMS active-fire detections

@@ -11,6 +11,40 @@ Until a backend is deployed the public site runs in hosted mode: imagery,
 timeline and comparison work, and analyses computed elsewhere are shown as
 stored results. See the "Hosted mode" section of ARCHITECTURE.md.
 
+## What needs a server and what does not
+
+| Feature | Where it computes | Needs the backend? |
+|---|---|---|
+| Globe, layers, timeline, comparison | Visitor's browser | No |
+| WaterWatch | Visitor's browser | No |
+| Change detection, FloodLens | Python backend | Yes, until they are ported to the browser engine |
+
+Analyses that run in the browser use the visitor's own processor, memory and
+connection. The site then costs the same to run for one visitor or for a
+thousand: GitHub Pages only serves the application's files.
+
+### Why not Streamlit
+
+Streamlit was considered for hosting and not chosen, for three reasons.
+
+1. A Streamlit app runs every visitor's work on the server. That is the
+   opposite of using the visitor's computer, and on a free tier (about 1 GB
+   of memory shared by all visitors) a few simultaneous analyses would
+   exhaust it.
+2. It would replace the interface. The 3D globe, swipe comparison, drawing
+   tools and timeline are browser code; Streamlit can only embed them in a
+   frame, with clumsy communication between the frame and Python.
+3. It does not remove the need for a host. It is a host with tighter limits
+   than the one recommended below.
+
+### Growing beyond free hosting
+
+Signs that it is time to pay for hosting: GitHub Pages' soft limits (100 GB
+of traffic a month, 1 GB site size) are approached, or the imagery provider
+starts throttling requests from the site, or backend analyses queue for
+minutes. The frontend can move to any static host unchanged, and the backend
+is a container, so neither move requires code changes.
+
 ## Choosing a free host for the backend
 
 An analysis holds several hundred megabytes of rasters in memory and spends

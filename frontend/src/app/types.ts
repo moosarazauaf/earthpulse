@@ -133,7 +133,7 @@ export interface DetectionProps {
 
 export interface Provenance {
   provider: { id: string; name: string; observed: boolean };
-  dataset: DatasetInfo;
+  dataset?: DatasetInfo;
   index?: IndexInfo;
   indices?: IndexInfo[];
   method: string;
@@ -153,6 +153,10 @@ export interface Provenance {
   threshold?: { valueDb: number; source: "otsu" | "user" | "fallback"; separability: number | null };
   speckleFilter?: string;
   landCover?: { name: string; provider: string; license: string; attribution: string } | null;
+  // Analyses computed in the visitor's browser
+  computedOn?: "browser";
+  device?: { cores: number; memoryGb: number | null };
+  seconds?: number;
 }
 
 interface ResultBase {
@@ -240,7 +244,45 @@ export interface FloodResult extends ResultBase {
   overlays: Record<string, Overlay>;
 }
 
-export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult;
+export interface WaterYear {
+  year: number;
+  period: [string, string];
+  status: "OBSERVED" | "NO_DATA";
+  reason?: string;
+  waterHa: number | null;
+  validFraction: number;
+  platforms: string[];
+  scenes: SceneInfo[];
+}
+
+export interface WaterResult extends ResultBase {
+  type: "water";
+  summary: {
+    aoiAreaHa: number;
+    firstYear: number;
+    lastYear: number;
+    firstHa: number;
+    lastHa: number;
+    changeHa: number;
+    changePercent: number | null;
+    lostHa: number;
+    gainedHa: number;
+    stableHa: number;
+    permanentHa: number;
+    occasionalHa: number;
+    trendHaPerYear: number | null;
+    trendYears: number;
+    threshold: number;
+  };
+  series: WaterYear[];
+  overlays: Record<string, Overlay>;
+}
+
+export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult;
+/** Results that put rasters on the globe. */
+export type LayeredResult = ChangeResult | FloodResult | WaterResult;
+export const hasLayers = (r: AnalysisResult | null): r is LayeredResult =>
+  r !== null && r.type !== "timeseries";
 /** Results that put rasters and regions on the globe. */
 export type MappedResult = ChangeResult | FloodResult;
 export const isMapped = (r: AnalysisResult | null): r is MappedResult =>

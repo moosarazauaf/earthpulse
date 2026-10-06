@@ -4,7 +4,7 @@ import { useState } from "react";
 import { LegendBar } from "../analysis/charts";
 import { SENTINEL2_FIRST_YEAR, datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
-import { type Overlay, type RenderId, isMapped } from "../app/types";
+import { type Overlay, type RenderId, hasLayers } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
@@ -20,6 +20,7 @@ const OVERLAY_LABELS: Record<string, string> = {
   before: "Before",
   after: "After",
   flood: "Flood extent",
+  persistence: "Persistence",
   vv_before: "Radar before",
   vv_flood: "Radar flood",
   vv_after: "Radar after",
@@ -30,7 +31,7 @@ export function LayerPanel() {
   const [open, setOpen] = useState(true);
   const dataset = datasetForYear(s.preferredDataset, s.year);
   const sentinelBlocked = s.preferredDataset === "sentinel2" && dataset === "landsat";
-  const mapped = isMapped(s.result) ? s.result : null;
+  const mapped = hasLayers(s.result) ? s.result : null;
   const overlays: Record<string, Overlay> = mapped?.overlays ?? {};
   const shown = s.overlay.key ? overlays[s.overlay.key] : undefined;
 
@@ -96,7 +97,7 @@ export function LayerPanel() {
             <section>
               <header className="row"><h3>Analysis result</h3><KindBadge kind={mapped.valueKind} /></header>
               <div className="options" role="radiogroup" aria-label="Result layer">
-                {Object.entries(overlays).map(([key, overlay]) => (
+                {Object.entries(overlays).filter(([key]) => !/^y\d{4}$/.test(key)).map(([key, overlay]) => (
                   <button key={key} role="radio" aria-checked={s.overlay.key === key} title={overlay.title}
                     className={s.overlay.key === key ? "on" : ""}
                     onClick={() => s.setOverlay({ key: s.overlay.key === key ? null : key })}>
@@ -123,9 +124,13 @@ export function LayerPanel() {
                 </>
               )}
               <label className="check">
-                <input type="checkbox" checked={s.overlay.detections}
-                  onChange={(e) => s.setOverlay({ detections: e.target.checked })} />
-                {mapped.type === "flood" ? (
+                {mapped.type !== "water" && (
+                  <input type="checkbox" checked={s.overlay.detections}
+                    onChange={(e) => s.setOverlay({ detections: e.target.checked })} />
+                )}
+                {mapped.type === "water" ? (
+                  <span className="muted">Yearly maps are chosen in the WaterWatch panel.</span>
+                ) : mapped.type === "flood" ? (
                   <span>Outlines of flooded areas</span>
                 ) : (
                   <span>Detected regions <i className="swatch loss" aria-hidden="true" /> decrease{" "}

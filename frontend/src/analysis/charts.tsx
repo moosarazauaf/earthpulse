@@ -2,7 +2,7 @@
 import { useState } from "react";
 
 import { formatIndex } from "../app/logic";
-import type { IndexId, SeriesEntry } from "../app/types";
+import type { IndexId, SeriesEntry, WaterYear } from "../app/types";
 
 const W = 320;
 const H = 150;
@@ -170,6 +170,60 @@ export function SeriesChart({ series }: { series: SeriesEntry[] }) {
             <span>Mean over the area, one composite per year</span>
           </span>
         )}
+      </figcaption>
+    </figure>
+  );
+}
+
+/** Water area per mapped year. Years without imagery are gaps; partly observed years are hollow. */
+export function WaterSeriesChart({ series }: { series: WaterYear[] }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const first = series[0]?.year ?? 0;
+  const last = series[series.length - 1]?.year ?? 1;
+  const top = Math.max(1, ...series.map((e) => e.waterHa ?? 0)) * 1.1;
+  const x = (year: number) => PAD.left + 8 + ((year - first) / Math.max(1, last - first)) * (PLOT_W - 16);
+  const y = (value: number) => PAD.top + (1 - value / top) * PLOT_H;
+  const hovered = hover === null ? null : series[hover];
+  let path = "";
+  let open = false;
+  for (const entry of series) {
+    if (entry.waterHa === null) {
+      open = false;
+      continue;
+    }
+    path += `${open ? "L" : "M"}${x(entry.year).toFixed(1)},${y(entry.waterHa).toFixed(1)} `;
+    open = true;
+  }
+  const label = (ha: number) => (ha >= 10_000 ? `${(ha / 100).toFixed(0)} km²` : `${ha.toFixed(0)} ha`);
+  return (
+    <figure className="chart">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Surface water area for each mapped year.">
+        <line x1={PAD.left} x2={W - PAD.right} y1={y(0)} y2={y(0)} className="axis" />
+        <text x={PAD.left - 4} y={y(0) + 3} textAnchor="end" className="tick">0</text>
+        <text x={PAD.left - 4} y={y(top / 1.1) + 3} textAnchor="end" className="tick">{label(top / 1.1).replace(/ .*/, "")}</text>
+        <g className="s-mndwi">
+          <path d={path} className="line" />
+          {series.map((entry, i) => (
+            <g key={entry.year}>
+              <text x={x(entry.year)} y={H - 6} textAnchor="middle" className="tick">{entry.year}</text>
+              {entry.waterHa === null ? (
+                <text x={x(entry.year)} y={PAD.top + 10} textAnchor="middle" className="tick gap">no data</text>
+              ) : (
+                <circle cx={x(entry.year)} cy={y(entry.waterHa)} r={hover === i ? 5 : 3.5}
+                  className={entry.validFraction >= 0.9 ? "dot solid" : "dot"} />
+              )}
+              <rect x={x(entry.year) - 14} y={PAD.top} width={28} height={PLOT_H} fill="transparent"
+                onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} />
+            </g>
+          ))}
+        </g>
+      </svg>
+      <figcaption>
+        {hovered
+          ? hovered.waterHa === null
+            ? `${hovered.year}: ${hovered.reason ?? "no data"}`
+            : `${hovered.year}: ${label(hovered.waterHa)} of water, ${(hovered.validFraction * 100).toFixed(0)}% of the area observed`
+          : "Water area per mapped year. Hollow points are years where part of the area was not observed."}
       </figcaption>
     </figure>
   );

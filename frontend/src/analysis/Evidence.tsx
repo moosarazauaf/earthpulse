@@ -12,6 +12,10 @@ function claim(result: AnalysisResult): string {
     const years = result.series.filter((e) => e.values).map((e) => e.year);
     return `Mean spectral indices over the area were measured for ${years.length} years between ${years[0]} and ${years[years.length - 1]}.`;
   }
+  if (result.type === "water") {
+    const m = result.summary;
+    return `Surface water covered ${formatArea(m.firstHa)} in ${m.firstYear} and ${formatArea(m.lastHa)} in ${m.lastYear}.`;
+  }
   if (result.type === "flood") {
     return `${formatArea(result.summary.floodedAreaHa)} that was not water before ${result.request.before.end} was mapped as water between ${result.request.flood.start} and ${result.request.flood.end}.`;
   }
@@ -76,8 +80,8 @@ function GeeScript({ analysisId }: { analysisId: string }) {
 export function Evidence({ result }: { result: AnalysisResult }) {
   const p = result.provenance;
   const rows: [string, string][] = [
-    ["Dataset", `${p.dataset.name} (${p.dataset.provider})`],
-    ["Processing level", p.dataset.processing_level],
+    ["Dataset", p.dataset ? `${p.dataset.name} (${p.dataset.provider})` : "n/a"],
+    ["Processing level", p.dataset?.processing_level ?? "n/a"],
     ["Accessed through", p.provider.name],
     ["Native resolution", `${p.nativeResolutionM} m`],
     ["Working resolution", `${p.workingResolutionM} m, ${p.crs}`],
@@ -99,8 +103,11 @@ export function Evidence({ result }: { result: AnalysisResult }) {
     if (p.speckleFilter) rows.push(["Speckle filter", p.speckleFilter]);
     if (p.landCover) rows.push(["Land cover", `${p.landCover.name} (${p.landCover.provider}), ${p.landCover.license}`]);
   }
+  if (p.computedOn === "browser") {
+    rows.push(["Computed", `In the visitor's browser (${p.device?.cores} threads${p.device?.memoryGb ? `, about ${p.device.memoryGb} GB` : ""}) in ${p.seconds} s`]);
+  }
   rows.push(["Software", `EarthPulse ${result.softwareVersion}`]);
-  rows.push(["License", p.dataset.license]);
+  rows.push(["License", p.dataset?.license ?? "n/a"]);
 
   return (
     <div className="results">
@@ -127,7 +134,7 @@ export function Evidence({ result }: { result: AnalysisResult }) {
           ))}
         </section>
       )}
-      {result.type === "timeseries" && (
+      {(result.type === "timeseries" || result.type === "water") && (
         <section>
           <h3>Satellite scenes used</h3>
           {result.series.map((e) => e.scenes
@@ -139,7 +146,7 @@ export function Evidence({ result }: { result: AnalysisResult }) {
         <h3>Uncertainty and limits</h3>
         <p>{p.uncertainty ?? "No formal accuracy assessment has been made for this result."}</p>
         {result.warnings.map((w) => <p key={w} className="note">{w}</p>)}
-        <p className="muted">{p.dataset.attribution}.</p>
+        {p.dataset && <p className="muted">{p.dataset.attribution}.</p>}
       </section>
       {result.type === "change" && p.provider.observed && <GeeScript analysisId={result.id} />}
     </div>

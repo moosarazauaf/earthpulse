@@ -4,7 +4,7 @@
  * The tour only moves the camera and the timeline over real imagery. It
  * states no statistics; those come from an analysis the user runs afterwards.
  */
-import { loadLahore } from "../analysis/AnalysisForm";
+import { loadLahore } from "../analysis/AreaPrompt";
 import { currentYear } from "../app/logic";
 import { useStore } from "../app/store";
 import { getGlobe } from "../globe/GlobeViewer";

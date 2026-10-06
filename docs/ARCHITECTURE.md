@@ -121,6 +121,40 @@ Comparison uses Cesium's imagery split: the earlier year is clipped to the
 left of the divider and the later year to the right. Both are layers on the
 same globe, so pan and zoom cannot drift apart.
 
+## Browser analysis engine
+
+`frontend/src/engine/` is a second implementation of the analysis pipeline
+that runs on the visitor's machine. It exists because the satellite archive
+allows browsers to read its files directly (CORS with range requests), which
+means an analysis needs no server at all.
+
+```
+engine/
+  geo.ts      UTM projection (proj4), grids, polygon rasterisation, areas
+  pc.ts       STAC search, read tokens, scene selection
+  raster.ts   GeoTIFF window reads (geotiff.js), reflectance scaling, cloud
+              masks, median composite, reprojection of result images
+  water.ts    WaterWatch
+  worker.ts   web worker entry: runs an analysis off the main thread
+  client.ts   device profile, quality levels, starting a run
+```
+
+The rules are the same as in the Python engine: a north-up UTM grid at a
+whole multiple of the sensor's pixel size, per-pixel QA masking, a median of
+clear looks, areas from pixel counts in metres. The engine reads each file
+with one windowed request at the grid's resolution, so only the overview
+blocks under the area are downloaded.
+
+What the visitor's device decides: the pixel budget (250 000, 700 000 or
+1 600 000 pixels for fast, balanced and detailed) and the number of parallel
+downloads, from `navigator.hardwareConcurrency` and `navigator.deviceMemory`.
+Firefox and Safari do not report memory; 4 GB is assumed there.
+
+Differences from the Python engine, all stated in the result: two scenes per
+footprint and at most six per year instead of three and twelve; nearest
+neighbour reads; no vectorised regions; results are not stored, so they have
+a local ID and no shareable link.
+
 ## Hosted mode
 
 When `VITE_API_BASE` is not set at build time, the client runs without the
@@ -132,7 +166,8 @@ built.
 | Annual imagery layers | Tiles proxied and cached by the API | Mosaic registered and tiles loaded from Planetary Computer by the browser |
 | Catalogue | `GET /api/datasets` | `data/catalog.json`, written by the export script |
 | Place search | Proxied and cached | Nominatim called by the browser |
-| New analysis | Runs | Refused, with an explanation |
+| Change detection, FloodLens | Run on the backend | Refused, with an explanation; stored results shown |
+| WaterWatch | Runs in the browser | Runs in the browser |
 | Stored analysis | Read from the store | Static files under `data/analyses/<id>/` |
 
 The layer presets exist twice, in `backend/app/services/imagery.py` and in

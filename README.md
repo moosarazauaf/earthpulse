@@ -11,8 +11,8 @@ that comes with its evidence.
 
 Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
 
-> Status: Phase 2 in progress. Exploration, comparison, index change analysis
-> and flood mapping work on real data. Forests, water, fire, carbon, classification, the
+> Status: Phase 2 in progress. Exploration, comparison, index change analysis,
+> flood mapping and surface-water tracking work on real data. Forests, cities, fire, carbon, classification, the
 > assistant and story mode are not built yet. [CHANGELOG.md](CHANGELOG.md)
 > lists what works; [docs/ROADMAP.md](docs/ROADMAP.md) lists what does not.
 
@@ -29,6 +29,12 @@ Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
 - **Map floods.** FloodLens maps flood extent from Sentinel-1 radar for a
   before and a flood window, separates water that was already there, and
   reports the cropland and built-up land under water.
+- **Track water.** WaterWatch maps surface water year by year for a lake,
+  reservoir or river reach, and shows its area through time, how persistent
+  each water pixel is, and what was lost or gained. It runs entirely in the
+  visitor's browser, on their own computer, so it works on the live site.
+- **Start from your area.** Every analysis begins by asking for an area: draw
+  a rectangle or polygon, or upload a zipped shapefile or GeoJSON file.
 - **Prove.** Each result has an Analysis ID, the list of scenes used, the
   method, its limits, exports, and an Earth Engine script that names the same
   scenes.
@@ -44,11 +50,14 @@ growth with changes in cropping, and no accuracy assessment has been made.
 The live demo is the frontend alone, served by GitHub Pages. It can do
 everything that needs only imagery: the globe, the annual layers, the
 timeline, comparison and the Lahore tour, with tiles requested from Planetary
-Computer by the browser. It cannot run a new analysis, because that needs the
-Python service in `backend/`. Instead it ships one real analysis that the
-backend computed (Lahore District, NDVI, 1993 and 2025) and labels it as a
-stored result. To analyse your own area, run both parts locally as described
-under Quick start.
+Computer by the browser. Analyses come in two kinds:
+
+- **WaterWatch runs on the live site.** It is computed in the visitor's
+  browser, which reads the satellite files directly. No server is involved.
+- **Change detection and FloodLens still need the Python service** in
+  `backend/`. On the live site they show real analyses the backend computed
+  earlier, labelled as stored results. Moving them into the browser engine is
+  on the roadmap.
 
 ## Design rule
 

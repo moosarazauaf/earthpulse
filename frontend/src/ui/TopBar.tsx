@@ -11,10 +11,11 @@ const MODES = [
   { id: "explore", label: "Explore" },
   { id: "change", label: "Change" },
   { id: "floods", label: "Floods" },
+  { id: "water", label: "Water" },
   { id: "research", label: "Research" },
 ] as const;
 /** Modules on the roadmap. Listed so the plan is visible, disabled so nothing is faked. */
-const PLANNED = ["Cities", "Forests", "Water", "Carbon"];
+const PLANNED = ["Cities", "Forests", "Carbon"];
 
 export function shareUrl(): string {
   const s = useStore.getState();

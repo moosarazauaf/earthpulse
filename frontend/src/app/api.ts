@@ -70,7 +70,7 @@ async function local<T>(call: Promise<T>): Promise<T> {
 
 /** Turn a path from an API response into something the browser can load. */
 export const absolute = (path: string) =>
-  path.startsWith("http") ? path : HOSTED ? hosted.fileUrl(path) : `${API_BASE}${path}`;
+  path.startsWith("http") || path.startsWith("blob:") ? path : HOSTED ? hosted.fileUrl(path) : `${API_BASE}${path}`;
 
 const live = {
   catalog: () => request<Catalog>("/api/datasets"),

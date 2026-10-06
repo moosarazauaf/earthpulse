@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { AreaPrompt } from "./analysis/AreaPrompt";
 import { ContextPanel } from "./analysis/ContextPanel";
 import { decodeView } from "./app/logic";
 import { useStore } from "./app/store";
@@ -46,6 +47,7 @@ export function App() {
       <ContextPanel />
       <SwipeHandle />
       <Intro />
+      <AreaPrompt />
       <StoryCaption />
       <Notice />
       <div id="timeline"><Timeline /></div>

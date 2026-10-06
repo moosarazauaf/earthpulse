@@ -5,6 +5,7 @@ import { useStore } from "../app/store";
 import { AnalysisForm } from "./AnalysisForm";
 import { Evidence } from "./Evidence";
 import { FloodForm, FloodResults } from "./FloodPanel";
+import { WaterForm, WaterResults } from "./WaterPanel";
 import { ChangeResults, SeriesResults } from "./Results";
 
 const STAGE_LABELS: Record<string, string> = {
@@ -17,27 +18,42 @@ const STAGE_LABELS: Record<string, string> = {
   GENERATING_RESULTS: "Generating results",
 };
 
-/** Lists the server's stages and marks the one it reports being in. No timers. */
+/**
+ * Progress of a running analysis. For a server job this is the stage the
+ * server reports; for a browser job it is the engine's own file count. Neither
+ * is a timer.
+ */
 function Progress() {
   const job = useStore((s) => s.job);
   const cancel = useStore((s) => s.cancelJob);
-  const stages = (job.record?.stages ?? Object.keys(STAGE_LABELS)).filter((x) => x !== "COMPLETE");
-  const current = job.record ? stages.indexOf(job.record.stage) : -1;
+  const local = job.progress;
+  const stages = (job.record?.stages ?? Object.keys(STAGE_LABELS)).filter((x) => x !== "COMPLETE" && (!local || x !== "QUEUED"));
+  const stage = local?.stage ?? job.record?.stage;
+  const current = stage ? stages.indexOf(stage) : -1;
+  const reading = local && local.stage === "PROCESSING_IMAGERY" && local.total > 0;
   return (
     <section className="progress" role="status" aria-live="polite">
-      <h3>Running analysis{job.record ? ` ${job.record.id}` : ""}</h3>
+      <h3>{local ? "Running on this device" : `Running analysis${job.record ? ` ${job.record.id}` : ""}`}</h3>
       <ol>
-        {stages.map((stage, i) => (
-          <li key={stage} className={i < current ? "done" : i === current ? "now" : ""}>
-            <i aria-hidden="true" />{STAGE_LABELS[stage] ?? stage}
+        {stages.map((name, i) => (
+          <li key={name} className={i < current ? "done" : i === current ? "now" : ""}>
+            <i aria-hidden="true" />{STAGE_LABELS[name] ?? name}
             {i === current && <span className="sr-only"> (in progress)</span>}
           </li>
         ))}
       </ol>
+      {local && (
+        <>
+          {reading && <progress max={local.total} value={local.done} aria-label="Files read" />}
+          <p>{local.detail}</p>
+        </>
+      )}
       <p className="muted">
-        Scenes are read from the archive on demand. A district-sized area takes two to four minutes.
+        {local
+          ? "Your browser is downloading only the parts of each satellite scene that cover your area. Keep this tab open."
+          : "Scenes are read from the archive on demand. A district-sized area takes two to four minutes."}
       </p>
-      <button className="link" onClick={cancel}>Stop waiting</button>
+      <button className="link" onClick={cancel}>{local ? "Cancel" : "Stop waiting"}</button>
     </section>
   );
 }
@@ -51,7 +67,7 @@ export function ContextPanel() {
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";
-  const title = mode === "research" ? "Evidence" : mode === "floods" ? "FloodLens" : "What changed here?";
+  const title = mode === "research" ? "Evidence" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : "What changed here?";
 
   return (
     <aside className={`panel right${open ? "" : " collapsed"}`} aria-label={title}>
@@ -79,10 +95,11 @@ export function ContextPanel() {
               {!running && result?.type === "change" && <ChangeResults result={result} />}
               {!running && result?.type === "timeseries" && <SeriesResults result={result} />}
               {!running && result?.type === "flood" && <FloodResults result={result} />}
+              {!running && result?.type === "water" && <WaterResults result={result} />}
               {!running && (
                 <details className="form-wrap" open={!result}>
                   <summary>{result ? "New analysis" : "Set up an analysis"}</summary>
-                  {mode === "floods" ? <FloodForm /> : <AnalysisForm />}
+                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : <AnalysisForm />}
                 </details>
               )}
             </>

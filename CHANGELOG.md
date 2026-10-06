@@ -20,8 +20,24 @@ Phase 2 in progress.
 - `backend/Dockerfile` and `docs/DEPLOY.md` for hosting the backend; the
   Pages build reads the backend address from a repository variable.
 
+- **Browser analysis engine** (`frontend/src/engine/`). Scene search,
+  cloud-optimised GeoTIFF reading, cloud masking, compositing and map
+  rendering run in a web worker on the visitor's machine. The grid size and
+  download parallelism follow the device's reported cores and memory, and the
+  visitor can choose fast, balanced or detailed.
+- **WaterWatch**, built on that engine: yearly MNDWI water maps, area series
+  with gaps kept as gaps, persistence, lost and gained water, a year player on
+  the globe, and CSV, JSON and PNG export. It works on the hosted site.
+- **Area prompt.** Entering an analysis mode asks which area to study, with
+  draw rectangle, draw polygon, upload (zipped shapefile or GeoJSON) and
+  example areas. Uploaded files are read in the browser.
+
 ### Known limits
-- No accuracy assessment of the flood maps. Elevation context is missing.
+- Change detection and FloodLens still run only on the Python backend.
+- Browser-run results live in the tab; they have no shareable link yet.
+- Shapefile upload is unit tested on parsed input but has not been tried with
+  a real .zip in a browser.
+- No accuracy assessment of the flood maps or the water maps. Elevation context is missing.
 - The Dockerfile has not been built on a host yet.
 
 ## [0.1.1] - 2026-10-06
