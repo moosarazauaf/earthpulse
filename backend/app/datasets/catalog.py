@@ -72,7 +72,38 @@ SENTINEL2 = Dataset(
     qa_asset="SCL",
 )
 
+SENTINEL1 = Dataset(
+    id="sentinel1",
+    name="Sentinel-1 Radiometrically Terrain Corrected",
+    provider="ESA / Copernicus; terrain correction by Catalyst for Microsoft",
+    processing_level="GRD, radiometrically terrain corrected gamma-nought (linear power)",
+    resolution_m=10,
+    temporal_coverage="2014 to present",
+    license="CC BY 4.0",
+    attribution="Contains modified Copernicus Sentinel data, processed by Catalyst",
+    reference_url="https://planetarycomputer.microsoft.com/dataset/sentinel-1-rtc",
+    collection="sentinel-1-rtc",
+    first_year=2014,
+    bands={"vv": "vv", "vh": "vh"},
+)
+
+# Datasets offered for optical index analysis and map layers.
 DATASETS: dict[str, Dataset] = {d.id: d for d in (LANDSAT, SENTINEL2)}
+
+# ESA WorldCover 2021 v200 (10 m). A classified product, so anything derived
+# from it inherits its classification error. Class codes from the WorldCover
+# Product User Manual v2.0.
+WORLDCOVER = {
+    "name": "ESA WorldCover 2021 v200",
+    "provider": "ESA / VITO",
+    "resolution_m": 10,
+    "license": "CC BY 4.0",
+    "reference_url": "https://esa-worldcover.org/",
+    "attribution": "© ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data",
+}
+WORLDCOVER_CROPLAND = 40
+WORLDCOVER_BUILT_UP = 50
+WORLDCOVER_PERMANENT_WATER = 80
 
 
 def get_dataset(dataset_id: str) -> Dataset:

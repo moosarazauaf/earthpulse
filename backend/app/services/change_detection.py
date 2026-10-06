@@ -79,8 +79,9 @@ def run(request: ChangeRequest, analysis_id: str, settings: Settings, stage: Sta
     analysed_ha = float(valid.sum()) * pixel_ha
     loss = valid & (delta <= -threshold)
     gain = valid & (delta >= threshold)
-    detections = _detections(loss, gain, index_before, index_after, grid,
-                             request.min_area_ha, before, after)
+    detections = vectorise_regions(loss, gain, index_before, index_after, grid,
+                             request.min_area_ha, before.composite.clear_count,
+                             after.composite.clear_count)
 
     stage("GENERATING_RESULTS")
     out_dir = settings.data_dir / "analyses" / analysis_id
@@ -156,9 +157,13 @@ def _histogram(values: np.ndarray) -> dict[str, list[float]]:
     return {"binEdges": [float(e) for e in edges], "counts": [int(c) for c in counts]}
 
 
-def _detections(loss, gain, index_before, index_after, grid: Grid, min_area_ha: float,
-                before: Acquisition, after: Acquisition) -> dict[str, Any]:
-    """Vectorise contiguous change regions and describe each one."""
+def vectorise_regions(loss, gain, index_before, index_after, grid: Grid, min_area_ha: float,
+                      count_before: np.ndarray, count_after: np.ndarray) -> dict[str, Any]:
+    """Vectorise contiguous regions of two boolean masks and describe each one.
+
+    index_before/after are the per-pixel values summarised for each region;
+    count_before/after are the number of observations behind them.
+    """
     classes = np.zeros(loss.shape, dtype=np.uint8)
     classes[loss] = 1
     classes[gain] = 2
@@ -202,8 +207,8 @@ def _detections(loss, gain, index_before, index_after, grid: Grid, min_area_ha: 
                 "before": _mean(b[ok]),
                 "after": _mean(a[ok]),
                 "change": _mean(a[ok] - b[ok]),
-                "clearObservationsBefore": _median(before.composite.clear_count[rows, cols][member]),
-                "clearObservationsAfter": _median(after.composite.clear_count[rows, cols][member]),
+                "clearObservationsBefore": _median(count_before[rows, cols][member]),
+                "clearObservationsAfter": _median(count_after[rows, cols][member]),
                 "centroid": [centroid.x, centroid.y],
             },
         })

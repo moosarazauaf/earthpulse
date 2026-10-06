@@ -14,13 +14,13 @@ from app.core.errors import AppError, NotFound
 from app.core.ratelimit import limit_analysis
 from app.gee.generator import generate_change_script
 from app.geospatial.geometry import parse_aoi
-from app.models import ChangeRequest, TimeSeriesRequest
-from app.services import change_detection, jobs, timeseries
+from app.models import ChangeRequest, FloodRequest, TimeSeriesRequest
+from app.services import change_detection, flood, jobs, timeseries
 
 router = APIRouter(prefix="/api", tags=["analysis"])
 
 ID_PATTERN = r"^EP-\d{4}-[A-Z0-9]{1,16}-[0-9A-F]{5}$"
-FILE_PATTERN = r"^(change|before|after)\.(png|tif)$"
+FILE_PATTERN = r"^(change|before|after|flood|vv_before|vv_flood|vv_after)\.(png|tif)$"
 MEDIA = {"png": "image/png", "tif": "image/tiff"}
 
 
@@ -34,6 +34,11 @@ def _submit(kind: str, request: Any, runner: jobs.Runner) -> dict[str, str]:
 @router.post("/analysis/change", status_code=202, dependencies=[Depends(limit_analysis)])
 def submit_change(request: ChangeRequest) -> dict[str, str]:
     return _submit("change", request, change_detection.run)
+
+
+@router.post("/analysis/flood", status_code=202, dependencies=[Depends(limit_analysis)])
+def submit_flood(request: FloodRequest) -> dict[str, str]:
+    return _submit("flood", request, flood.run)
 
 
 @router.post("/analysis/timeseries", status_code=202, dependencies=[Depends(limit_analysis)])
@@ -101,6 +106,14 @@ def _csv(result: dict[str, Any]) -> str:
             writer.writerow([e["year"], *e["period"], e["status"], v.get("ndvi"), v.get("ndwi"),
                              v.get("mndwi"), v.get("ndbi"), e.get("validFraction"),
                              " ".join(e.get("platforms", [])), len(e.get("scenes", []))])
+    elif result["type"] == "flood":
+        writer.writerow(["id", "area_ha", "vv_before_db", "vv_flood_db", "vv_change_db",
+                         "centroid_lon", "centroid_lat", "passes_before", "passes_flood"])
+        for f in result["detections"]["features"]:
+            p = f["properties"]
+            writer.writerow([f["id"], round(p["areaHa"], 4), p["before"], p["after"], p["change"],
+                             *p["centroid"], p["clearObservationsBefore"],
+                             p["clearObservationsAfter"]])
     else:
         index = result["provenance"]["index"]["id"]
         writer.writerow(["id", "direction", "area_ha", f"{index}_before", f"{index}_after",
@@ -129,8 +142,8 @@ def export(
                                  media_type="text/javascript", headers=headers)
     if format == "json":
         return Response(json.dumps(result), media_type="application/json", headers=headers)
-    if result["type"] != "change":
-        raise AppError("GeoJSON export is available for change analyses.")
+    if "detections" not in result:
+        raise AppError("GeoJSON export is available for analyses that map regions.")
     collection = dict(result["detections"])
     # Foreign members carry the provenance with the geometry (RFC 7946 s6.1).
     collection["earthpulse"] = {

@@ -23,7 +23,7 @@ def _wait(analysis_id: str) -> dict:
 def test_health_and_catalogue():
     assert client.get("/api/health").json()["status"] == "ok"
     body = client.get("/api/datasets").json()
-    assert {d["id"] for d in body["datasets"]} == {"landsat", "sentinel2"}
+    assert {d["id"] for d in body["datasets"]} == {"landsat", "sentinel2", "sentinel1"}
     for dataset in body["datasets"]:
         for key in ("provider", "resolution_m", "license", "attribution", "reference_url",
                     "access_date", "processing_level", "temporal_coverage"):

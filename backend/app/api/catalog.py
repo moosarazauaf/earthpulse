@@ -8,7 +8,7 @@ from app.core import http
 from app.core.config import SOFTWARE_VERSION
 from app.core.errors import UpstreamUnavailable
 from app.core.ratelimit import limit_analysis
-from app.datasets.catalog import DATASETS
+from app.datasets.catalog import DATASETS, SENTINEL1, WORLDCOVER
 from app.geospatial.indices import INDICES
 from app.services.imagery import RENDERS
 
@@ -29,7 +29,8 @@ def health() -> dict[str, str]:
 @router.get("/datasets")
 def datasets() -> dict[str, Any]:
     return {
-        "datasets": [d.public() for d in DATASETS.values()],
+        "datasets": [d.public() for d in (*DATASETS.values(), SENTINEL1)],
+        "referenceLayers": [WORLDCOVER],
         "indices": [
             {"id": i.id, "name": i.name, "formula": i.formula, "measures": i.measures,
              "reference": i.reference, "defaultThreshold": i.default_threshold}

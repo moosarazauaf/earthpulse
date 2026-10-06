@@ -22,6 +22,10 @@ class Scene:
     assets: dict[str, str] = field(default_factory=dict, repr=False)
     processing_baseline: float | None = None
     collection: str = ""
+    # Radar scenes: the viewing geometry must match between dates.
+    relative_orbit: int | None = None
+    orbit_state: str | None = None
+    geometry: dict | None = field(default=None, repr=False)  # footprint, EPSG:4326
 
     def public(self) -> dict:
         return {
@@ -30,6 +34,8 @@ class Scene:
             "platform": self.platform,
             "cloudCover": self.cloud_cover,
             "footprint": self.footprint_key,
+            "relativeOrbit": self.relative_orbit,
+            "orbitState": self.orbit_state,
         }
 
 
@@ -64,12 +70,20 @@ class ImageryProvider(Protocol):
         bbox: tuple[float, float, float, float],
         start: str,
         end: str,
-        max_cloud: float,
+        max_cloud: float | None,
         platforms: list[str] | None = None,
     ) -> list[Scene]:
-        """Scenes intersecting bbox in [start, end], least cloudy first."""
+        """Scenes intersecting bbox in [start, end], least cloudy first.
+
+        max_cloud is None for sensors without a cloud measure (radar); those
+        are returned oldest first.
+        """
         ...
 
     def read(self, scene: Scene, asset: str, grid: Grid, categorical: bool) -> np.ndarray:
         """Read one asset resampled onto grid. Returns raw stored values."""
+        ...
+
+    def read_static(self, layer: str, grid: Grid) -> np.ndarray:
+        """Read a dateless reference layer (for example land cover) onto grid."""
         ...

@@ -45,6 +45,10 @@ GDAL_ENV = {
 }
 # Source pixels read beyond the grid edge so resampling has neighbours.
 WINDOW_PAD = 2
+# Length of a degree of latitude; adequate for choosing an overview level.
+METRES_PER_DEGREE = 111_320.0
+# Reference layers: name -> (collection, asset, id fragment selecting the version).
+STATIC_LAYERS = {"worldcover": ("esa-worldcover", "map", "2021_v200")}
 
 
 class PlanetaryComputerProvider:
@@ -63,10 +67,14 @@ class PlanetaryComputerProvider:
         bbox: tuple[float, float, float, float],
         start: str,
         end: str,
-        max_cloud: float,
+        max_cloud: float | None,
         platforms: list[str] | None = None,
     ) -> list[Scene]:
-        query: dict = {"eo:cloud_cover": {"lte": max_cloud}}
+        query: dict = {}
+        sort_field = "properties.datetime"
+        if max_cloud is not None:
+            query["eo:cloud_cover"] = {"lte": max_cloud}
+            sort_field = "properties.eo:cloud_cover"
         if platforms:
             query["platform"] = {"in": platforms}
         body = {
@@ -74,7 +82,7 @@ class PlanetaryComputerProvider:
             "bbox": list(bbox),
             "datetime": f"{start}T00:00:00Z/{end}T23:59:59Z",
             "query": query,
-            "sortby": [{"field": "properties.eo:cloud_cover", "direction": "asc"}],
+            "sortby": [{"field": sort_field, "direction": "asc"}],
             "limit": SEARCH_LIMIT,
         }
         response = http.request("POST", STAC_SEARCH, json=body)
@@ -87,9 +95,11 @@ class PlanetaryComputerProvider:
         props = feature["properties"]
         if dataset.id == "landsat":
             key = f"{props.get('landsat:wrs_path')}/{props.get('landsat:wrs_row')}"
+        elif dataset.id == "sentinel1":
+            key = f"orbit {props.get('sat:relative_orbit')}"
         else:
             key = str(props.get("s2:mgrs_tile"))
-        wanted = [*dataset.bands.values(), dataset.qa_asset]
+        wanted = [a for a in (*dataset.bands.values(), dataset.qa_asset) if a]
         assets = {
             name: feature["assets"][name]["href"]
             for name in wanted
@@ -105,6 +115,9 @@ class PlanetaryComputerProvider:
             assets=assets,
             processing_baseline=float(baseline) if baseline else None,
             collection=dataset.collection,
+            relative_orbit=props.get("sat:relative_orbit"),
+            orbit_state=props.get("sat:orbit_state"),
+            geometry=feature.get("geometry"),
         )
 
     # ---- read --------------------------------------------------------------
@@ -131,17 +144,39 @@ class PlanetaryComputerProvider:
             return data["token"]
 
     def read(self, scene: Scene, asset: str, grid: Grid, categorical: bool) -> np.ndarray:
-        """Read the part of an asset under the grid, then resample onto the grid.
+        href = scene.assets.get(asset)
+        if not href:
+            raise NoImagery(f"Scene {scene.id} has no '{asset}' band.")
+        return self._read_href(href, scene.collection, grid, categorical)
+
+    def read_static(self, layer: str, grid: Grid) -> np.ndarray:
+        """Mosaic the tiles of a reference layer that cover the grid."""
+        collection, asset, version = STATIC_LAYERS[layer]
+        west, south, east, north = transform_bounds(
+            CRS.from_epsg(grid.epsg), CRS.from_epsg(4326), *grid.bounds, densify_pts=21)
+        response = http.request("POST", STAC_SEARCH, json={
+            "collections": [collection], "bbox": [west, south, east, north], "limit": 50})
+        if response.status_code != 200:
+            raise UpstreamUnavailable("Satellite imagery is temporarily unavailable.")
+        tiles = [f["assets"][asset]["href"] for f in response.json().get("features", [])
+                 if version in f["id"]]
+        out: np.ndarray | None = None
+        for href in tiles:
+            part = self._read_href(href, collection, grid, categorical=True)
+            out = part if out is None else np.where(out == 0, part, out)  # 0 is no data
+        if out is None:
+            raise NoImagery("The reference layer does not cover this area.")
+        return out
+
+    def _read_href(self, href: str, collection: str, grid: Grid, categorical: bool) -> np.ndarray:
+        """Read the part of a file under the grid, then resample onto the grid.
 
         The window is read at roughly the grid's resolution, which lets GDAL
         serve it from the file's overviews instead of fetching full-resolution
         blocks over the network.
         """
-        href = scene.assets.get(asset)
-        if not href:
-            raise NoImagery(f"Scene {scene.id} has no '{asset}' band.")
         http.require_allowed(href)
-        url = f"/vsicurl/{href}?{self._token(scene.collection)}"
+        url = f"/vsicurl/{href}?{self._token(collection)}"
         resampling = Resampling.nearest if categorical else Resampling.bilinear
         dst_crs = CRS.from_epsg(grid.epsg)
         try:
@@ -161,7 +196,9 @@ class PlanetaryComputerProvider:
                 window = window.round_offsets().round_lengths()
                 if window.width < 1 or window.height < 1:
                     return out
-                step = max(1, int(grid.resolution // src.res[0]))
+                # Source pixel size in metres (geographic rasters are in degrees).
+                source_res = src.res[0] * (METRES_PER_DEGREE if src.crs.is_geographic else 1.0)
+                step = max(1, int(grid.resolution // source_res))
                 shape = (max(1, math.ceil(window.height / step)),
                          max(1, math.ceil(window.width / step)))
                 data = src.read(1, window=window, out_shape=shape, resampling=resampling)

@@ -65,6 +65,33 @@ class ChangeRequest(AnalysisBase):
         return self
 
 
+class FloodRequest(ApiModel):
+    aoi: dict[str, Any]
+    label: str | None = Field(default=None, max_length=60)
+    before: Period
+    flood: Period
+    # Optional third window, to see how much of the flood had receded.
+    after: Period | None = None
+    # VV threshold in dB separating water from land. None lets Otsu's method
+    # choose it from the flood-period histogram.
+    threshold_db: float | None = Field(default=None, ge=-30.0, le=-5.0)
+    min_area_ha: float = Field(default=1.0, ge=0, le=10_000)
+    provider: ProviderId = "planetary-computer"
+
+    @field_validator("label")
+    @classmethod
+    def _clean_label(cls, value: str | None) -> str | None:
+        return value.strip() or None if value else None
+
+    @model_validator(mode="after")
+    def _ordered(self) -> "FloodRequest":
+        if self.flood.start <= self.before.end:
+            raise ValueError("the flood period must start after the 'before' period ends")
+        if self.after and self.after.start <= self.flood.end:
+            raise ValueError("the 'after' period must start after the flood period ends")
+        return self
+
+
 class TimeSeriesRequest(AnalysisBase):
     years: list[int] = Field(min_length=2, max_length=12)
     # Compositing window inside each year, as month numbers.
