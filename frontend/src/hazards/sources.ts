@@ -182,6 +182,50 @@ export function parseAlerts(body: unknown): Alert[] {
   return alerts.sort((a, b) => rank(a) - rank(b) || b.to.localeCompare(a.to));
 }
 
+// ---- earthquakes -------------------------------------------------------------------
+const USGS_QUAKES = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson";
+
+export interface Quake {
+  id: string;
+  magnitude: number;
+  place: string;
+  time: string;
+  lon: number;
+  lat: number;
+  depthKm: number;
+  url: string;
+}
+
+/** Earthquakes from the USGS feed, strongest first; malformed entries are dropped. */
+export function parseQuakes(body: unknown): Quake[] {
+  const features = (body as { features?: { id?: string; geometry?: { coordinates?: number[] }; properties?: Record<string, unknown> }[] } | null)?.features;
+  if (!Array.isArray(features)) return [];
+  const quakes: Quake[] = [];
+  for (const feature of features) {
+    const p = feature.properties ?? {};
+    const [lon, lat, depth] = feature.geometry?.coordinates ?? [];
+    if (typeof lon !== "number" || typeof lat !== "number" || typeof p.mag !== "number" || p.type !== "earthquake") continue;
+    const url = String(p.url ?? "");
+    quakes.push({
+      id: String(feature.id),
+      magnitude: p.mag,
+      place: String(p.place ?? "Unnamed location"),
+      time: new Date(Number(p.time)).toISOString(),
+      lon,
+      lat,
+      depthKm: typeof depth === "number" ? depth : 0,
+      url: url.startsWith("https://earthquake.usgs.gov/") ? url : "https://earthquake.usgs.gov/",
+    });
+  }
+  return quakes.sort((a, b) => b.magnitude - a.magnitude);
+}
+
+export async function fetchQuakes(): Promise<Quake[]> {
+  const response = await fetch(USGS_QUAKES);
+  if (!response.ok) throw new Error("The earthquake service did not respond.");
+  return parseQuakes(await response.json());
+}
+
 export async function fetchAlerts(): Promise<Alert[]> {
   const response = await fetch(alertsUrl());
   if (!response.ok) throw new Error("The alert service did not respond.");

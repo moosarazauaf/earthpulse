@@ -32,6 +32,10 @@ export function LivePanel() {
   const active = useStore((s) => s.hazardLayers);
   const loadAlerts = useStore((s) => s.loadAlerts);
   const set = useStore((s) => s.set);
+  const quakes = useStore((s) => s.quakes);
+  const quakesOn = useStore((s) => s.quakesOn);
+  const loadQuakes = useStore((s) => s.loadQuakes);
+  const feedsAt = useStore((s) => s.feedsAt);
   const [filter, setFilter] = useState<AlertType | "all">("all");
 
   useEffect(() => {
@@ -63,6 +67,23 @@ export function LivePanel() {
               )}
             </li>
           ))}
+        </ul>
+        <ul className="hazard-layers">
+          <li>
+            <label className="check">
+              <input type="checkbox" checked={quakesOn}
+                onChange={(e) => { set({ quakesOn: e.target.checked }); if (e.target.checked && quakes === null) void loadQuakes(); }} />
+              <span><strong>Where has the ground shaken?</strong></span>
+              <KindBadge kind="OBSERVED" />
+            </label>
+            {quakesOn && (
+              <p className="muted">
+                Earthquakes of magnitude 4.5 and above in the past 7 days, from the USGS.
+                {quakes && quakes[0] ? ` ${quakes.length} recorded; the strongest was M${quakes[0].magnitude.toFixed(1)}, ${quakes[0].place}.` : quakes ? " None recorded." : " Loading…"}
+                {" "}Magnitudes are revised as more stations report.
+              </p>
+            )}
+          </li>
         </ul>
         <p className="muted">No open landslide forecast could be connected yet, so landslides are not shown.</p>
       </section>
@@ -108,6 +129,8 @@ export function LivePanel() {
           </div>
         )}
         <p className="muted">
+          {feedsAt ? `Read at ${feedsAt.slice(11, 16)} UTC. ` : ""}
+          <button className="link" onClick={() => void loadAlerts()}>Refresh</button>{" "}
           Alerts from the Global Disaster Alert and Coordination System (UN and European Commission), last{" "}
           {ALERT_WINDOW_DAYS} days. Red and orange are GDACS's own estimates of likely humanitarian impact,
           made automatically. They are not official warnings: for decisions about safety, follow your

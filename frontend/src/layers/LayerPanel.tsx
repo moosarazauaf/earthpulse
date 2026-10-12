@@ -131,7 +131,7 @@ export function LayerPanel() {
                 {mapped.type === "water" ? (
                   <span className="muted">Yearly maps are chosen in the WaterWatch panel.</span>
                 ) : mapped.type === "flood" ? (
-                  <span>Outlines of flooded areas</span>
+                  <span>{mapped.provenance.computedOn === "browser" ? "Boxes around the largest flooded areas" : "Outlines of flooded areas"}</span>
                 ) : (
                   <span>Detected regions <i className="swatch loss" aria-hidden="true" /> decrease{" "}
                     <i className="swatch gain" aria-hidden="true" /> increase</span>

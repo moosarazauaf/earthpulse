@@ -137,6 +137,7 @@ export function GlobeViewer() {
   const live = s.mode === "live";
   useEffect(() => instance?.setHazardLayers(live ? s.hazardLayers : []), [live, s.hazardLayers]);
   useEffect(() => instance?.setAlerts(live ? s.alerts ?? [] : [], s.selectedAlert?.id ?? null), [live, s.alerts, s.selectedAlert]);
+  useEffect(() => instance?.setQuakes(live && s.quakesOn ? s.quakes ?? [] : []), [live, s.quakesOn, s.quakes]);
   useEffect(() => {
     // Far enough out to see the region the event affects.
     if (s.selectedAlert) void instance?.flyTo(s.selectedAlert.lon, s.selectedAlert.lat, 2_500_000, 2);

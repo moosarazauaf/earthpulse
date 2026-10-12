@@ -134,6 +134,9 @@ engine/
   pc.ts       STAC search, read tokens, scene selection
   raster.ts   GeoTIFF window reads (geotiff.js), reflectance scaling, cloud
               masks, median composite, reprojection of result images
+  common.ts   regions, histograms, colour ramps, result images
+  change.ts   bi-temporal index change detection
+  flood.ts    FloodLens (Sentinel-1)
   water.ts    WaterWatch
   worker.ts   web worker entry: runs an analysis off the main thread
   client.ts   device profile, quality levels, starting a run
@@ -151,9 +154,11 @@ downloads, from `navigator.hardwareConcurrency` and `navigator.deviceMemory`.
 Firefox and Safari do not report memory; 4 GB is assumed there.
 
 Differences from the Python engine, all stated in the result: two scenes per
-footprint and at most six per year instead of three and twelve; nearest
-neighbour reads; no vectorised regions; results are not stored, so they have
-a local ID and no shareable link.
+footprint and at most six per period instead of three and twelve; two radar
+passes per window instead of four; a grid that steps through the files'
+overview levels; regions drawn as bounding boxes; results are not stored, so
+they have a local ID and no shareable link. On the same flood the two engines
+therefore agree in pattern and differ in totals.
 
 ## Hosted mode
 
@@ -166,8 +171,8 @@ built.
 | Annual imagery layers | Tiles proxied and cached by the API | Mosaic registered and tiles loaded from Planetary Computer by the browser |
 | Catalogue | `GET /api/datasets` | `data/catalog.json`, written by the export script |
 | Place search | Proxied and cached | Nominatim called by the browser |
-| Change detection, FloodLens | Run on the backend | Refused, with an explanation; stored results shown |
-| WaterWatch | Runs in the browser | Runs in the browser |
+| Change detection, FloodLens, WaterWatch | Run in the browser | Run in the browser |
+| Index series, Earth Engine script | Run on the backend | Not available |
 | Stored analysis | Read from the store | Static files under `data/analyses/<id>/` |
 
 The layer presets exist twice, in `backend/app/services/imagery.py` and in

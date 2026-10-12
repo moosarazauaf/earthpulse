@@ -34,7 +34,7 @@ describe("projection and grids", () => {
     const full = buildGrid(aoi, 30, 10_000_000);
     expect(full.res).toBe(30);
     const coarse = buildGrid(aoi, 30, 20_000);
-    expect(coarse.res % 30).toBe(0);
+    expect([60, 120, 240, 480]).toContain(coarse.res); // an overview level, not an arbitrary multiple
     expect(coarse.res).toBeGreaterThan(30);
     expect(coarse.width * coarse.height).toBeLessThanOrEqual(20_000);
   });
@@ -237,5 +237,105 @@ describe("live hazards", () => {
     expect(alertsUrl(now)).toContain("fromDate=2026-09-28&toDate=2026-10-12");
     // Every layer states what it is and what it is not.
     for (const layer of HAZARD_LAYERS) expect(layer.caveat.length).toBeGreaterThan(40);
+  });
+});
+
+describe("regions", () => {
+  it("separates regions by class and by connectivity, largest first", async () => {
+    const { findRegions, regionsToGeoJson } = await import("./common");
+    // 6 x 4 grid: a 3-pixel class-1 region, a diagonal 2-pixel class-1 region, and one class-2 pixel.
+    const classes = new Uint8Array([
+      1, 1, 0, 0, 0, 2,
+      1, 0, 0, 0, 0, 0,
+      0, 0, 0, 1, 0, 0,
+      0, 0, 0, 0, 1, 0,
+    ]);
+    const before = new Float32Array(24).fill(0.6);
+    const after = new Float32Array(24).fill(0.2);
+    const regions = findRegions(classes, 6, 4, 1, before, after);
+    expect(regions.map((r) => [r.value, r.pixels])).toEqual([[1, 3], [1, 2], [2, 1]]);
+    expect(regions[0]?.before).toBeCloseTo(0.6);
+    expect(findRegions(classes, 6, 4, 2, before, after)).toHaveLength(2); // the minimum size drops the single pixel
+
+    const grid = { epsg: 32643, res: 100, west: 400_000, north: 3_500_000, width: 6, height: 4 };
+    const collection = regionsToGeoJson(regions, grid, (v) => (v === 1 ? "decrease" : "increase"));
+    const first = collection.features[0];
+    expect(first?.properties.areaHa).toBeCloseTo(3); // three 1 ha pixels, not the 4 ha bounding box
+    expect(first?.properties.direction).toBe("decrease");
+    expect(first?.properties.change).toBeCloseTo(-0.4);
+    expect(first?.geometry.coordinates[0]).toHaveLength(5);
+    expect(collection.totalRegions).toBe(3);
+  });
+});
+
+describe("FloodLens rules", () => {
+  it("converts power to decibels and rejects fill", async () => {
+    const { toDb } = await import("./flood");
+    const out = toDb(new Float32Array([1, 0.1, 0.01, 0, -32768, NaN]));
+    expect(out[0]).toBeCloseTo(0);
+    expect(out[1]).toBeCloseTo(-10);
+    expect(out[2]).toBeCloseTo(-20);
+    expect([...out.slice(3)].every(Number.isNaN)).toBe(true);
+  });
+
+  it("smooths speckle without filling gaps", async () => {
+    const { boxMean } = await import("./flood");
+    const out = boxMean(new Float32Array([1, 1, 1, 1, NaN, 1, 1, 1, 10]), 3, 3);
+    expect(out[4]).toBeNaN();
+    expect(out[0]).toBeCloseTo(1);
+    expect(out[8]).toBeCloseTo((1 + 1 + 10) / 3);
+  });
+
+  it("finds a threshold between two populations and distrusts a single one", async () => {
+    const { otsuThreshold } = await import("./flood");
+    // Deterministic bell-shaped samples around a centre.
+    const bell = (centre: number, spread: number, n: number) =>
+      Array.from({ length: n }, (_, i) => centre + spread * Math.tan(((i + 0.5) / n - 0.5) * 2.2));
+    const two = new Float32Array([...bell(-21, 0.8, 3000), ...bell(-8, 1.0, 7000)]);
+    const all = new Uint8Array(two.length).fill(1);
+    const mixed = otsuThreshold(two, all);
+    // Any value in the empty gap between the two populations separates them equally well.
+    expect(mixed.threshold).toBeGreaterThan(-19.5);
+    expect(mixed.threshold).toBeLessThan(-10);
+    expect(mixed.separability).toBeGreaterThan(0.8);
+    const one = new Float32Array(bell(-8, 1.0, 10_000));
+    expect(otsuThreshold(one, new Uint8Array(one.length).fill(1)).separability).toBeLessThan(0.7);
+  });
+
+  it("judges an orbit by the window where it covers the area least", async () => {
+    const { orbitCoverage } = await import("./flood");
+    const aoi = rectangleAoi(0, 0, 1, 1);
+    const full = [[[-1, -1], [2, -1], [2, 2], [-1, 2], [-1, -1]]];
+    const partial = [[[-1, -1], [0.21, -1], [0.21, 2], [-1, 2], [-1, -1]]]; // covers 21% of the area
+    const coverage = orbitCoverage([
+      [{ orbit: 5, footprint: full }, { orbit: 107, footprint: full }],
+      [{ orbit: 5, footprint: full }, { orbit: 107, footprint: partial }],
+    ], aoi);
+    expect(coverage[5]).toBe(1);
+    expect(coverage[107]).toBeCloseTo(0.21, 1);
+  });
+});
+
+describe("ideas adapted from God's Eye View", () => {
+  it("reads typed coordinates and leaves place names for search", async () => {
+    const { parseCoordinates } = await import("../app/logic");
+    expect(parseCoordinates("31.52, 74.35")).toEqual({ lat: 31.52, lon: 74.35 });
+    expect(parseCoordinates(" -34.6 -58.4 ")).toEqual({ lat: -34.6, lon: -58.4 });
+    expect(parseCoordinates("Lahore")).toBeNull();
+    expect(parseCoordinates("95, 10")).toBeNull(); // not a latitude
+    expect(parseCoordinates("31.5, 74.3, 12")).toBeNull();
+  });
+
+  it("parses earthquakes strongest first and ignores non-earthquake events", async () => {
+    const { parseQuakes } = await import("../hazards/sources");
+    const quake = (id: string, mag: unknown, type = "earthquake") => ({
+      id, geometry: { coordinates: [112.2, -8.3, 121] },
+      properties: { mag, place: "Somewhere", time: 1791782889720, type, url: "https://earthquake.usgs.gov/earthquakes/eventpage/" + id },
+    });
+    const quakes = parseQuakes({ features: [quake("a", 4.6), quake("b", 6.1), quake("c", 5, "quarry blast"), quake("d", null)] });
+    expect(quakes.map((q) => q.id)).toEqual(["b", "a"]);
+    expect(quakes[0]?.depthKm).toBe(121);
+    expect(quakes[0]?.time.startsWith("2026-")).toBe(true);
+    expect(parseQuakes({})).toEqual([]);
   });
 });

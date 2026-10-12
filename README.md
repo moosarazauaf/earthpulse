@@ -68,12 +68,17 @@ everything that needs only imagery: the globe, the annual layers, the
 timeline, comparison and the Lahore tour, with tiles requested from Planetary
 Computer by the browser. Analyses come in two kinds:
 
-- **WaterWatch runs on the live site.** It is computed in the visitor's
-  browser, which reads the satellite files directly. No server is involved.
-- **Change detection and FloodLens still need the Python service** in
-  `backend/`. On the live site they show real analyses the backend computed
-  earlier, labelled as stored results. Moving them into the browser engine is
-  on the roadmap.
+- **Change detection, FloodLens and WaterWatch all run on the live site.**
+  They are computed in the visitor's browser, which reads the satellite files
+  directly. No server is involved.
+- **The multi-year index series and the Earth Engine script generator still
+  need the Python service** in `backend/`.
+- The site also ships two analyses the backend computed earlier (Lahore
+  District NDVI, and the Indus flood at Layyah), labelled as stored results.
+
+The browser and the backend implement the same methods but differ in detail
+(scenes per period, working resolution, how regions are outlined), so their
+numbers for the same area are close, not identical.
 
 ## Install it as an app
 
@@ -166,6 +171,16 @@ cd frontend && npm test
 - [docs/DEPLOY.md](docs/DEPLOY.md): hosting the frontend and the backend
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [SECURITY.md](SECURITY.md)
+
+## Acknowledgements
+
+The Live view and several interface ideas (grouped layers that each state
+their source and limits, click-to-inspect markers, one-click reset of the
+globe, typing coordinates into search) were informed by studying
+[God's Eye View](https://github.com/bilawalsidhu/gods-eye-view) by Bilawal
+Sidhu and Sameh Khamis, which is MIT licensed. No code, assets or data from
+that project are included here; EarthPulse covers environmental change and
+hazards and does not track aircraft, vessels, cameras or people.
 
 ## Author
 

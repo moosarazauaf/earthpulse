@@ -2,12 +2,24 @@
  * Runs analyses off the main thread so the globe stays responsive while the
  * visitor's machine does the work.
  */
-import { type Progress, type WaterRequest, runWater } from "./water";
+import { type BrowserChangeRequest, runChange } from "./change";
+import type { EngineHooks, Progress } from "./common";
+import { type BrowserFloodRequest, runFlood } from "./flood";
+import { type WaterRequest, runWater } from "./water";
 
-export type WorkerRequest = { kind: "water"; request: WaterRequest };
+export type WorkerRequest =
+  | { kind: "water"; request: WaterRequest }
+  | { kind: "change"; request: BrowserChangeRequest }
+  | { kind: "flood"; request: BrowserFloodRequest };
+
+export type EngineResult =
+  | Awaited<ReturnType<typeof runWater>>
+  | Awaited<ReturnType<typeof runChange>>
+  | Awaited<ReturnType<typeof runFlood>>;
+
 export type WorkerMessage =
   | { type: "progress"; progress: Progress }
-  | { type: "done"; result: Awaited<ReturnType<typeof runWater>> }
+  | { type: "done"; result: EngineResult }
   | { type: "error"; message: string };
 
 async function encode(rgba: Uint8ClampedArray, width: number, height: number): Promise<Blob> {
@@ -23,14 +35,16 @@ async function encode(rgba: Uint8ClampedArray, width: number, height: number): P
 const post = (message: WorkerMessage) => (self as unknown as Worker).postMessage(message);
 
 self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
+  const hooks: EngineHooks = { progress: (progress) => post({ type: "progress", progress }), encode };
   try {
-    const result = await runWater(event.data.request, {
-      progress: (progress) => post({ type: "progress", progress }),
-      encode,
-    });
+    const job = event.data;
+    const result =
+      job.kind === "water" ? await runWater(job.request, hooks)
+      : job.kind === "change" ? await runChange(job.request, hooks)
+      : await runFlood(job.request, hooks);
     post({ type: "done", result });
   } catch (error) {
-    const offline = error instanceof TypeError; // fetch reports network failure this way
+    const offline = error instanceof TypeError; // fetch reports a network failure this way
     post({
       type: "error",
       message: offline

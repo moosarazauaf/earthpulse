@@ -5,6 +5,7 @@ import { useStore } from "../app/store";
 import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesResult, isMapped } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 import { shareUrl } from "../ui/TopBar";
+import { downloadText } from "./download";
 import { ChangeHistogram, SeriesChart } from "./charts";
 
 const MAX_LISTED_REGIONS = 8;
@@ -51,8 +52,39 @@ export function ResultHeader({ result }: { result: AnalysisResult }) {
   );
 }
 
+/** Results computed in this tab are saved from the browser; there is no server copy to link to. */
+function BrowserExports({ result }: { result: AnalysisResult }) {
+  const key = useStore((s) => s.overlay.key);
+  const overlays: Record<string, { url: string; title: string; bounds: number[]; legend: unknown }> = isMapped(result) ? result.overlays : {};
+  const shown = key ? overlays[key] : undefined;
+  const record = () => JSON.stringify({
+    ...result,
+    // Image data stays in the tab; the record keeps where each image belongs.
+    overlays: Object.fromEntries(Object.entries(overlays).map(([k, o]) => [k, { title: o.title, bounds: o.bounds, legend: o.legend }])),
+  }, null, 1);
+  const regions = () => JSON.stringify({
+    ...(isMapped(result) ? result.detections : {}),
+    earthpulse: { id: result.id, softwareVersion: result.softwareVersion, valueKind: result.valueKind, provenance: result.provenance, warnings: result.warnings },
+  });
+  return (
+    <section>
+      <h3>Export</h3>
+      <div className="exports">
+        {isMapped(result) && <button className="link" onClick={() => downloadText(`${result.id}.geojson`, "application/geo+json", regions())}>Regions (GeoJSON)</button>}
+        <button className="link" onClick={() => downloadText(`${result.id}.json`, "application/json", record())}>Full record (JSON)</button>
+        {shown && key && <a href={shown.url} download={`${result.id}-${key}.png`}>Map shown (PNG)</a>}
+      </div>
+      <p className="muted">
+        Computed in {result.provenance.seconds} s on this device. The result exists only in this browser tab; export it to keep it.
+        Regions are saved as bounding boxes with their true areas.
+      </p>
+    </section>
+  );
+}
+
 export function Exports({ result }: { result: AnalysisResult }) {
-  if (result.type === "water") return null; // WaterWatch exports from the browser itself
+  if (result.type === "water") return null; // WaterWatch has its own export section
+  if (result.provenance.computedOn === "browser") return <BrowserExports result={result} />;
   const observed = result.provenance.provider.observed;
   return (
     <section>

@@ -27,6 +27,19 @@ Phase 2 in progress.
   GFM). Each layer says whether it is observed or modelled and what it is not.
 - **Installable app.** A web manifest and service worker let browsers install
   EarthPulse as a standalone window. Nothing is cached.
+- Earthquakes of the past week (USGS) in the Live view, search by typed
+  coordinates with no network request, a Reset view control, and the time the
+  live feeds were last read. These ideas were adapted from God's Eye View
+  (MIT); no code, assets or data were taken from it.
+- **Change detection and FloodLens in the browser.** Both now run on the
+  visitor's device and therefore on the hosted site: the same composites,
+  indices, thresholds, orbit selection, Otsu test, land-cover intersection and
+  warnings as the backend. Regions are found by connected-component labelling
+  and drawn as bounding boxes with their true areas.
+- File reads time out and retry, so one stalled download no longer blocks an
+  analysis, and the analysis grid now steps through the files' own overview
+  levels (30, 60, 120 m ...), which reads provider-averaged pixels instead of
+  subsampling a finer level.
 - **Browser analysis engine** (`frontend/src/engine/`). Scene search,
   cloud-optimised GeoTIFF reading, cloud masking, compositing and map
   rendering run in a web worker on the visitor's machine. The grid size and
@@ -43,7 +56,9 @@ Phase 2 in progress.
 - No landslide layer: no open landslide forecast service could be reached.
 - Live layers are other agencies' products shown as published; EarthPulse has not validated them.
 - The installed app was not test-installed; only the manifest and worker were built.
-- Change detection and FloodLens still run only on the Python backend.
+- Radar is slow on a slow connection: each Sentinel-1 pass costs about 10 MB.
+- The browser and backend engines give close but not identical numbers.
+- The index series and the Earth Engine script still need the backend.
 - Browser-run results live in the tab; they have no shareable link yet.
 - Shapefile upload is unit tested on parsed input but has not been tried with
   a real .zip in a browser.

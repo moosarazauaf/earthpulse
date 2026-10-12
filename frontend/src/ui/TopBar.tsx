@@ -2,7 +2,7 @@
 import { type FormEvent, useState } from "react";
 
 import { ApiError, api } from "../app/api";
-import { encodeView } from "../app/logic";
+import { encodeView, parseCoordinates } from "../app/logic";
 import { useStore } from "../app/store";
 import type { Place } from "../app/types";
 import { getGlobe } from "../globe/GlobeViewer";
@@ -16,6 +16,8 @@ const MODES = [
   { id: "research", label: "Research" },
 ] as const;
 /** Modules on the roadmap. Listed so the plan is visible, disabled so nothing is faked. */
+/** Camera height after flying to typed coordinates: a district-sized view. */
+const COORDINATE_VIEW_HEIGHT_M = 120_000;
 const PLANNED = ["Cities", "Forests", "Carbon"];
 
 export function shareUrl(): string {
@@ -43,6 +45,14 @@ export function TopBar() {
   async function search(event: FormEvent) {
     event.preventDefault();
     if (query.trim().length < 2) return;
+    // Coordinates need no lookup: fly straight there.
+    const point = parseCoordinates(query);
+    if (point) {
+      setPlaces(null);
+      setMessage(null);
+      void getGlobe()?.flyTo(point.lon, point.lat, COORDINATE_VIEW_HEIGHT_M);
+      return;
+    }
     setBusy(true);
     setMessage(null);
     try {
@@ -96,7 +106,7 @@ export function TopBar() {
       </nav>
 
       <form className="search" role="search" onSubmit={search}>
-        <input type="search" value={query} placeholder="Search a place" aria-label="Search a place"
+        <input type="search" value={query} placeholder="Place, or lat, lon" aria-label="Search a place or type latitude, longitude"
           onChange={(e) => setQuery(e.target.value)} />
         <button type="submit" disabled={busy}>{busy ? "…" : "Go"}</button>
         {(places?.length || message) && (
@@ -114,6 +124,7 @@ export function TopBar() {
         )}
       </form>
 
+      <button className="ghost" onClick={() => void getGlobe()?.resetView()} title="Back to the whole Earth">Reset view</button>
       <button className="ghost" onClick={share}>Share</button>
     </header>
   );

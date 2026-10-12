@@ -1,12 +1,12 @@
 /** WaterWatch: track surface water through time, computed on the visitor's device. */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { FIRST_YEAR, SENTINEL2_FIRST_YEAR, currentYear, formatArea, formatSigned } from "../app/logic";
 import { useStore } from "../app/store";
 import type { WaterResult } from "../app/types";
-import { PIXEL_BUDGET, type Quality, deviceProfile, workingResolution } from "../engine/client";
-import { projectAoi } from "../engine/geo";
+import { PIXEL_BUDGET } from "../engine/client";
 import { AreaStep } from "./AnalysisForm";
+import { DeviceStep, useDevice } from "./DeviceStep";
 import { downloadText } from "./download";
 import { ResultHeader } from "./Results";
 import { WaterSeriesChart } from "./charts";
@@ -18,11 +18,6 @@ const SEASONS = [
   { id: "q3", label: "Jul to Sep", start: 7, end: 9 },
   { id: "q4", label: "Oct to Dec", start: 10, end: 12 },
 ] as const;
-const QUALITIES: { id: Quality; label: string }[] = [
-  { id: "fast", label: "Fast" },
-  { id: "balanced", label: "Balanced" },
-  { id: "detailed", label: "Detailed" },
-];
 const STEP_CHOICES = [3, 5, 7, 9];
 const DEFAULT_MAX_CLOUD = 20;
 /** Time each year stays on the globe during playback. */
@@ -35,13 +30,12 @@ function spreadYears(first: number, last: number, count: number): number[] {
 
 export function WaterForm() {
   const s = useStore();
-  const device = useMemo(deviceProfile, []);
+  const { device, quality, setQuality } = useDevice();
   const thisYear = currentYear();
   const [first, setFirst] = useState(2000);
   const [last, setLast] = useState(thisYear - 1);
   const [steps, setSteps] = useState(5);
   const [seasonId, setSeasonId] = useState<(typeof SEASONS)[number]["id"]>("q4");
-  const [quality, setQuality] = useState<Quality>(device.recommended);
   const [threshold, setThreshold] = useState("0");
 
   const season = SEASONS.find((x) => x.id === seasonId) ?? SEASONS[0];
@@ -49,7 +43,6 @@ export function WaterForm() {
   const native = dataset === "landsat" ? 30 : 10;
   const years = spreadYears(first, last, steps);
   const running = s.job.status === "submitting" || s.job.status === "running";
-  const area = useMemo(() => (s.aoi ? projectAoi(s.aoi.geometry).areaM2 : 0), [s.aoi]);
   const parsedThreshold = Number(threshold);
 
   let problem: string | null = null;
@@ -109,26 +102,8 @@ export function WaterForm() {
         </label>
       </section>
 
-      <section>
-        <h3>3. Your device</h3>
-        <p>
-          This analysis runs in your browser, on this computer: {device.cores} processor threads
-          {device.memoryGb ? `, about ${device.memoryGb} GB of memory reported` : ", memory not reported by this browser"}.
-        </p>
-        <div className="seg" role="radiogroup" aria-label="Quality">
-          {QUALITIES.map((q) => (
-            <button key={q.id} role="radio" aria-checked={quality === q.id} className={quality === q.id ? "on" : ""} onClick={() => setQuality(q.id)}>
-              {q.label}{q.id === device.recommended ? " ·  suggested" : ""}
-            </button>
-          ))}
-        </div>
-        <p className="muted">
-          {area > 0
-            ? `For this area, ${quality} works at about ${workingResolution(area, native, quality)} m (${dataset === "landsat" ? "Landsat, 30 m" : "Sentinel-2, 10 m"} native). `
-            : ""}
-          Higher quality downloads more data and needs more memory. Nothing is sent to an EarthPulse server.
-        </p>
-      </section>
+      <DeviceStep step={3} device={device} quality={quality} setQuality={setQuality}
+        nativeRes={native} sensor={dataset === "landsat" ? "Landsat" : "Sentinel-2"} />
 
       {problem && <p className="note" role="status">{problem}</p>}
       <div className="actions">

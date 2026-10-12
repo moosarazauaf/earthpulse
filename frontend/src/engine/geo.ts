@@ -94,10 +94,17 @@ export function projectAoi(geometry: AoiGeometry): ProjectedAoi {
   return { epsg, rings, areaM2: ringsArea(rings), lonLatBounds: box };
 }
 
-/** Smallest grid covering the rings, coarsened in whole multiples of the native pixel to fit the budget. */
+/**
+ * Smallest grid covering the rings, coarsened to fit the pixel budget.
+ *
+ * The pixel size doubles at each step (30, 60, 120 m ...) so it always equals
+ * one of the overview levels stored in the source files. The read then takes
+ * that overview as it is: each value is the provider's average of the sensor
+ * pixels beneath it, with no subsampling and no more download than needed.
+ */
 export function buildGrid(aoi: ProjectedAoi, nativeRes: number, maxPixels: number): Grid {
   const [minX, minY, maxX, maxY] = bounds(aoi.rings);
-  for (let factor = 1; ; factor += 1) {
+  for (let factor = 1; ; factor *= 2) {
     const res = nativeRes * factor;
     const west = Math.floor(minX / res) * res;
     const north = Math.ceil(maxY / res) * res;

@@ -97,6 +97,18 @@ export function decodeView(query: string): Partial<ViewState> {
   return out;
 }
 
+/**
+ * Read "31.52, 74.35" or "31.52 74.35" as latitude then longitude.
+ * Returns null for anything else, so place names fall through to search.
+ */
+export function parseCoordinates(text: string): { lat: number; lon: number } | null {
+  const match = /^\s*(-?\d+(?:\.\d+)?)\s*[,\s]\s*(-?\d+(?:\.\d+)?)\s*$/.exec(text);
+  if (!match) return null;
+  const lat = Number(match[1]);
+  const lon = Number(match[2]);
+  return Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? { lat, lon } : null;
+}
+
 // ---- number formatting -----------------------------------------------------
 export function formatArea(hectares: number): string {
   if (hectares >= 10_000) return `${(hectares / 100).toLocaleString("en", { maximumFractionDigits: 0 })} km²`;

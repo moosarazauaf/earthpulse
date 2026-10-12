@@ -38,7 +38,9 @@ Carried over to later releases:
       water, year player. Runs in the browser.
 - [x] Browser analysis engine sized to the visitor's device
 - [x] Area prompt with drawing and shapefile / GeoJSON upload
-- [ ] Move change detection and FloodLens into the browser engine
+- [x] Change detection and FloodLens in the browser engine
+- [ ] Index series and Earth Engine script in the browser engine
+- [ ] Traced region outlines in the browser engine (currently bounding boxes)
 - [ ] Shareable links and GeoTIFF export for browser-run analyses
 - [ ] WaterWatch: AWEI option, Otsu threshold, seasonality within a year
 - [ ] UrbanEye: built-up growth profile, surface temperature where thermal data exists

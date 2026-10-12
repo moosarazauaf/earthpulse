@@ -2,9 +2,11 @@
 import { create } from "zustand";
 
 import { ApiError, api, pollAnalysis } from "./api";
-import { type DeviceProfile, type RunHandle, runWaterInBrowser } from "../engine/client";
-import type { Progress, WaterRequest } from "../engine/water";
-import { type Alert, fetchAlerts } from "../hazards/sources";
+import { type DeviceProfile, PIXEL_BUDGET, type Quality, type RunHandle, runInBrowser } from "../engine/client";
+import type { WorkerRequest } from "../engine/worker";
+import type { Progress } from "../engine/common";
+import type { WaterRequest } from "../engine/water";
+import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import { clampYear, currentYear, datasetForYear } from "./logic";
 import type {
   AnalysisRecord,
@@ -69,6 +71,12 @@ interface State {
   /** Ids of the hazard map layers switched on. */
   hazardLayers: string[];
   loadAlerts: () => Promise<void>;
+  /** Earthquakes of the past week; null until loaded, shown when `quakesOn`. */
+  quakes: Quake[] | null;
+  quakesOn: boolean;
+  /** When the live feeds were last read, so a stale view is visible as stale. */
+  feedsAt: string | null;
+  loadQuakes: () => Promise<void>;
   sourcesOpen: boolean;
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
@@ -80,9 +88,9 @@ interface State {
   setOverlay: (partial: Partial<State["overlay"]>) => void;
   setAoi: (aoi: Aoi | null) => void;
   loadCatalog: () => Promise<void>;
-  runChange: (request: ChangeRequest) => Promise<void>;
+  runChange: (request: ChangeRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runTimeSeries: (request: TimeSeriesRequest) => Promise<void>;
-  runFlood: (request: FloodRequest) => Promise<void>;
+  runFlood: (request: FloodRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runWater: (request: WaterRequest, device: DeviceProfile) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
@@ -114,6 +122,36 @@ export const useStore = create<State>((set, get) => {
           ? { code: error.code, message: error.message, hint: error.hint }
           : { code: "error", message: "Analysis could not be completed." };
       set({ job: { status: "failed", record: null, error: body } });
+    }
+  }
+
+  /**
+   * Run an analysis in this browser. Progress comes from the engine's own
+   * counts; the result is shown on the given layer and mode when it arrives.
+   */
+  async function runLocal(job: WorkerRequest, device: DeviceProfile, layer: string, mode: State["mode"], datasetId: string) {
+    abort?.abort();
+    localRun?.cancel();
+    set({ job: { status: "running", record: null, error: null }, selectedDetection: null });
+    const run = runInBrowser(job, device, (progress) => {
+      if (localRun === run) set({ job: { status: "running", record: null, error: null, progress } });
+    });
+    localRun = run;
+    try {
+      const result = await run.promise;
+      if (localRun !== run) return;
+      const dataset = get().catalog?.datasets.find((d) => d.id === datasetId);
+      if (dataset) result.provenance.dataset = dataset;
+      // Browser results mark regions with bounding boxes, which crowd the map; they start hidden.
+      set({ job: { status: "complete", record: null, error: null }, result, overlay: { ...get().overlay, key: layer, detections: false }, mode });
+    } catch (error) {
+      if (localRun !== run) return;
+      set({
+        job: {
+          status: "failed", record: null,
+          error: { code: "browser_engine", message: error instanceof Error ? error.message : "Analysis could not be completed." },
+        },
+      });
     }
   }
 
@@ -161,10 +199,20 @@ export const useStore = create<State>((set, get) => {
     alertsError: null,
     selectedAlert: null,
     hazardLayers: ["fires"],
+    quakes: null,
+    quakesOn: false,
+    feedsAt: null,
+    loadQuakes: async () => {
+      try {
+        set({ quakes: await fetchQuakes() });
+      } catch {
+        set({ quakes: [], notice: "Earthquakes could not be loaded from USGS." });
+      }
+    },
     loadAlerts: async () => {
       set({ alertsError: null });
       try {
-        set({ alerts: await fetchAlerts() });
+        set({ alerts: await fetchAlerts(), feedsAt: new Date().toISOString() });
       } catch {
         set({ alertsError: "Live alerts could not be loaded. The alert service may be busy." });
       }
@@ -181,38 +229,12 @@ export const useStore = create<State>((set, get) => {
         set({ notice: error instanceof ApiError ? `${error.message} ${error.hint ?? ""}` : null });
       }
     },
-    runChange: (request) => follow(() => api.submitChange(request)),
+    runChange: (request, device, quality) =>
+      runLocal({ kind: "change", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "change", "change", request.dataset),
     runTimeSeries: (request) => follow(() => api.submitTimeSeries(request)),
-    runFlood: (request) => follow(() => api.submitFlood(request)),
-    runWater: async (request, device) => {
-      abort?.abort();
-      localRun?.cancel();
-      set({ job: { status: "running", record: null, error: null }, selectedDetection: null });
-      const run = runWaterInBrowser(request, device, (progress) => {
-        if (localRun === run) set({ job: { status: "running", record: null, error: null, progress } });
-      });
-      localRun = run;
-      try {
-        const result = await run.promise;
-        if (localRun !== run) return;
-        const dataset = get().catalog?.datasets.find((d) => d.id === request.dataset);
-        if (dataset) result.provenance.dataset = dataset;
-        set({
-          job: { status: "complete", record: null, error: null },
-          result,
-          overlay: { ...get().overlay, key: "persistence" },
-          mode: "water",
-        });
-      } catch (error) {
-        if (localRun !== run) return;
-        set({
-          job: {
-            status: "failed", record: null,
-            error: { code: "browser_engine", message: error instanceof Error ? error.message : "Analysis could not be completed." },
-          },
-        });
-      }
-    },
+    runFlood: (request, device, quality) =>
+      runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
+    runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),
     loadAnalysis: async (id) => {
       try {
         const record = await api.analysis(id);

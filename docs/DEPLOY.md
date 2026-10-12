@@ -16,8 +16,8 @@ stored results. See the "Hosted mode" section of ARCHITECTURE.md.
 | Feature | Where it computes | Needs the backend? |
 |---|---|---|
 | Globe, layers, timeline, comparison | Visitor's browser | No |
-| WaterWatch | Visitor's browser | No |
-| Change detection, FloodLens | Python backend | Yes, until they are ported to the browser engine |
+| Change detection, FloodLens, WaterWatch | Visitor's browser | No |
+| Index series, Earth Engine script | Python backend | Yes |
 
 Analyses that run in the browser use the visitor's own processor, memory and
 connection. The site then costs the same to run for one visitor or for a

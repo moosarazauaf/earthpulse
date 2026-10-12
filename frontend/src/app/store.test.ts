@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as engine from "../engine/client";
 import { api } from "./api";
 import { useStore } from "./store";
 import type { AnalysisRecord, ChangeRequest, ChangeResult } from "./types";
@@ -53,29 +54,49 @@ describe("layers and timeline", () => {
 });
 
 describe("analysis panel state", () => {
-  it("shows the stage the server reports, then the result", async () => {
-    const result = { id: "EP-2026-TEST-ABCDE", type: "change", aoi: AOI, label: "Test" } as unknown as ChangeResult;
-    vi.spyOn(api, "submitChange").mockResolvedValue({ id: "EP-2026-TEST-ABCDE" });
-    const stages: string[] = [];
-    vi.spyOn(api, "analysis").mockImplementation(async () => {
-      stages.push(useStore.getState().job.record?.stage ?? "none");
-      return record("COMPLETE", "COMPLETE", result);
+  const DEVICE = { cores: 8, memoryGb: 8, recommended: "balanced" as const, concurrency: 8 };
+
+  it("shows the engine's own progress, then the result", async () => {
+    const result = { id: "EP-2026-TEST-L0001", type: "change", aoi: AOI, label: "Test", provenance: {} } as unknown as ChangeResult;
+    const seen: (string | undefined)[] = [];
+    vi.spyOn(engine, "runInBrowser").mockImplementation((job, _device, onProgress) => {
+      expect(job.kind).toBe("change");
+      // The pixel budget for the chosen quality reaches the engine.
+      expect((job.request as { maxPixels: number }).maxPixels).toBe(engine.PIXEL_BUDGET.fast);
+      return {
+        cancel: () => undefined,
+        promise: Promise.resolve().then(() => {
+          onProgress({ stage: "PROCESSING_IMAGERY", done: 3, total: 10, detail: "Reading file 3 of 10" });
+          seen.push(useStore.getState().job.progress?.detail);
+          return result;
+        }),
+      };
     });
-    await useStore.getState().runChange(REQUEST);
+    await useStore.getState().runChange(REQUEST, DEVICE, "fast");
     const state = useStore.getState();
+    expect(seen).toEqual(["Reading file 3 of 10"]);
     expect(state.job.status).toBe("complete");
-    expect(state.result?.id).toBe("EP-2026-TEST-ABCDE");
+    expect(state.result?.id).toBe("EP-2026-TEST-L0001");
     expect(state.overlay.key).toBe("change"); // the result layer is put on the globe
-    expect(state.mode).toBe("change"); // and the panel opens on it
-    expect(state.aoi?.label).toBe("Test"); // a shared analysis brings its own area
+    expect(state.mode).toBe("change");
   });
 
-  it("surfaces a failed analysis with the server's message", async () => {
-    vi.spyOn(api, "submitChange").mockResolvedValue({ id: "EP-2026-TEST-ABCDE" });
-    vi.spyOn(api, "analysis").mockResolvedValue(record("FAILED", "ACQUIRING_DATA"));
-    await useStore.getState().runChange(REQUEST);
+  it("surfaces a failed analysis with the engine's message", async () => {
+    vi.spyOn(engine, "runInBrowser").mockReturnValue({
+      cancel: () => undefined,
+      promise: Promise.reject(new Error("No scene covers this area.")),
+    });
+    await useStore.getState().runChange(REQUEST, DEVICE, "fast");
     expect(useStore.getState().job.status).toBe("failed");
     expect(useStore.getState().job.error?.message).toBe("No scene covers this area.");
     expect(useStore.getState().result).toBeNull();
+  });
+
+  it("loads a stored server analysis and opens it in the right mode", async () => {
+    const stored = { id: "EP-2026-TEST-ABCDE", type: "flood", aoi: AOI, label: "Stored", provenance: {} } as unknown as ChangeResult;
+    vi.spyOn(api, "analysis").mockResolvedValue(record("COMPLETE", "COMPLETE", stored));
+    await useStore.getState().loadAnalysis("EP-2026-TEST-ABCDE");
+    expect(useStore.getState().mode).toBe("floods");
+    expect(useStore.getState().aoi?.label).toBe("Stored"); // a stored analysis brings its own area
   });
 });

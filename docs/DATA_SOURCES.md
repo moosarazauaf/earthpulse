@@ -83,6 +83,7 @@ validate them.
 | Fire danger forecast | Copernicus GWIS, Fire Weather Index from ECMWF forecasts | Modelled | Copernicus, free with attribution |
 | River flood forecast (days 1-3, 4-10) | Copernicus GloFAS flood summary | Modelled | Copernicus, free with attribution |
 | Observed flood extent | Copernicus Global Flood Monitoring, Sentinel-1 | Derived | Copernicus, free with attribution |
+| Earthquakes, M4.5+, past 7 days | USGS Earthquake Hazards Program GeoJSON feed | Observed | U.S. public domain |
 
 Limits stated in the interface: a fire detection is a hot spot, not a
 confirmed wildfire; fire danger is not a prediction that a fire will start;

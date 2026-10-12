@@ -7,7 +7,7 @@ import { useStore } from "../app/store";
 import type { IndexId } from "../app/types";
 import { STORED_ANALYSIS } from "../demo/stored";
 import { AreaChoices } from "./AreaPrompt";
-import { REPOSITORY_URL } from "../ui/Credit";
+import { DeviceStep, useDevice } from "./DeviceStep";
 
 const SEASONS = [
   { id: "year", label: "Whole year", start: 1, end: 12 },
@@ -60,6 +60,7 @@ export function AnalysisForm() {
   const [afterYear, setAfterYear] = useState(thisYear - 1);
   const [seasonId, setSeasonId] = useState<(typeof SEASONS)[number]["id"]>("q4");
   const [threshold, setThreshold] = useState("");
+  const { device, quality, setQuality } = useDevice();
 
   const season = SEASONS.find((x) => x.id === seasonId) ?? SEASONS[0];
   const dataset = s.preferredDataset === "sentinel2" && beforeYear >= SENTINEL2_FIRST_YEAR ? "sentinel2" : "landsat";
@@ -83,7 +84,7 @@ export function AnalysisForm() {
         after: seasonPeriod(afterYear, season.start, season.end),
         threshold: threshold && parsed >= 0.02 && parsed <= 1 ? parsed : undefined,
         minAreaHa: 0.5,
-      });
+      }, device, quality);
     } else {
       void s.runTimeSeries({
         ...common,
@@ -135,33 +136,27 @@ export function AnalysisForm() {
         </p>
       </section>
 
-      {HOSTED ? (
-        <section>
-          <p className="note">
-            This hosted demo has no analysis service, so it cannot run a new analysis. Run EarthPulse
-            locally to analyse your own area, or open a stored result that the backend computed.
-          </p>
-          <div className="actions">
-            <button className="primary" onClick={() => void s.loadAnalysis(STORED_ANALYSIS.id)}>
-              Open stored analysis: {STORED_ANALYSIS.title}
-            </button>
-            <a className="button" href={REPOSITORY_URL} target="_blank" rel="noreferrer">Run it locally</a>
-          </div>
-        </section>
-      ) : (
-        <>
-          {problem && <p className="note" role="status">{problem}</p>}
-          <div className="actions">
-            <button className="primary" disabled={!!problem || running} onClick={() => run("change")}>
-              Detect change
-            </button>
-            <button disabled={!!problem || running} onClick={() => run("series")}
-              title={`Mean indices for ${SERIES_POINTS} years between the two dates`}>
-              Index series
-            </button>
-          </div>
-        </>
-      )}
+      <DeviceStep step={3} device={device} quality={quality} setQuality={setQuality}
+        nativeRes={dataset === "landsat" ? 30 : 10} sensor={dataset === "landsat" ? "Landsat" : "Sentinel-2"} />
+
+      {problem && <p className="note" role="status">{problem}</p>}
+      <div className="actions">
+        <button className="primary" disabled={!!problem || running} onClick={() => run("change")}>
+          Detect change on this device
+        </button>
+        {/* The index series still runs on the Python backend, so it is offered only where one exists. */}
+        {!HOSTED && (
+          <button disabled={!!problem || running} onClick={() => run("series")}
+            title={`Mean indices for ${SERIES_POINTS} years between the two dates`}>
+            Index series
+          </button>
+        )}
+        {HOSTED && (
+          <button onClick={() => void s.loadAnalysis(STORED_ANALYSIS.id)} title="A district-wide result computed earlier by the backend">
+            Open stored example
+          </button>
+        )}
+      </div>
     </div>
   );
 }

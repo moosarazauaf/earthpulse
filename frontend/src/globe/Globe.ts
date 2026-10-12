@@ -3,6 +3,7 @@
  * describe what should be shown; the Globe makes the scene match.
  */
 import {
+  Cartesian2,
   Cartesian3,
   Cartographic,
   Color,
@@ -27,7 +28,7 @@ import {
 
 import { absolute } from "../app/api";
 import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
-import { type Alert, HAZARD_LAYERS, wmsParameters } from "../hazards/sources";
+import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
 
 const ESRI_IMAGERY =
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
@@ -43,6 +44,7 @@ const LOSS_COLOR = Color.fromCssColorString("#ff8a5c");
 const GAIN_COLOR = Color.fromCssColorString("#7bd88f");
 const ALERT_RED = Color.fromCssColorString("#ff5a5a");
 const ALERT_ORANGE = Color.fromCssColorString("#ffa53c");
+const QUAKE_COLOR = Color.fromCssColorString("#d9a6ff");
 
 const BLANK_TILE = document.createElement("canvas");
 BLANK_TILE.width = BLANK_TILE.height = 1;
@@ -415,6 +417,37 @@ export class Globe {
       });
     });
     this.render();
+  }
+
+  private quakeEntities: Entity[] = [];
+
+  /** Earthquake markers; the ring grows with magnitude, which is also written beside it. */
+  setQuakes(quakes: Quake[]) {
+    for (const entity of this.quakeEntities) this.viewer.entities.remove(entity);
+    this.quakeEntities = quakes.map((quake) => this.viewer.entities.add({
+      id: `quake:${quake.id}`,
+      position: Cartesian3.fromDegrees(quake.lon, quake.lat),
+      point: {
+        pixelSize: 4 + (quake.magnitude - 4) * 5,
+        color: Color.TRANSPARENT,
+        outlineColor: QUAKE_COLOR,
+        outlineWidth: 2,
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+      label: quake.magnitude >= 5.5 ? {
+        text: `M${quake.magnitude.toFixed(1)}`,
+        font: "11px sans-serif",
+        fillColor: QUAKE_COLOR,
+        pixelOffset: new Cartesian2(0, -16),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      } : undefined,
+    }));
+    this.render();
+  }
+
+  /** Back to the whole Earth. */
+  resetView(): Promise<void> {
+    return this.flyTo(HOME.lon, HOME.lat, HOME.height, 2);
   }
 
   highlightDetection(detection: Detection | null) {

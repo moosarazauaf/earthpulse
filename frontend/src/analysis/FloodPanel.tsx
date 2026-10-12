@@ -6,8 +6,8 @@ import { formatArea } from "../app/logic";
 import { useStore } from "../app/store";
 import type { FloodResult, Period } from "../app/types";
 import { STORED_FLOOD } from "../demo/stored";
-import { REPOSITORY_URL } from "../ui/Credit";
 import { AreaStep } from "./AnalysisForm";
+import { DeviceStep, useDevice } from "./DeviceStep";
 import { BackscatterHistogram } from "./charts";
 import { Exports, ResultHeader } from "./Results";
 
@@ -40,6 +40,7 @@ export function FloodForm() {
   const [after, setAfter] = useState<Period>(DEFAULTS.after);
   const [useAfter, setUseAfter] = useState(true);
   const [threshold, setThreshold] = useState("");
+  const { device, quality, setQuality } = useDevice();
   const running = s.job.status === "submitting" || s.job.status === "running";
 
   let problem: string | null = null;
@@ -60,7 +61,7 @@ export function FloodForm() {
       after: useAfter ? after : undefined,
       thresholdDb: threshold && parsed <= -5 && parsed >= -30 ? parsed : undefined,
       minAreaHa: 1,
-    });
+    }, device, quality);
   }
 
   return (
@@ -81,31 +82,22 @@ export function FloodForm() {
             onChange={(e) => setThreshold(e.target.value)} />
         </label>
         <p className="muted">
+          Radar files are large: on a slow connection choose Fast, which downloads about a quarter as much.
           Uses Sentinel-1 radar, which sees through cloud. Each window should span at least 12 days so
           the same orbit passes over. Water under crops or between buildings is not detected.
         </p>
       </section>
-      {HOSTED ? (
-        <section>
-          <p className="note">
-            This hosted demo has no analysis service, so it cannot run a new flood analysis. Run EarthPulse
-            locally for your own area, or open a stored result that the backend computed.
-          </p>
-          <div className="actions">
-            <button className="primary" onClick={() => void s.loadAnalysis(STORED_FLOOD.id)}>
-              Open stored analysis: {STORED_FLOOD.title}
-            </button>
-            <a className="button" href={REPOSITORY_URL} target="_blank" rel="noreferrer">Run it locally</a>
-          </div>
-        </section>
-      ) : (
-        <>
-          {problem && <p className="note" role="status">{problem}</p>}
-          <div className="actions">
-            <button className="primary" disabled={!!problem || running} onClick={run}>Map the flood</button>
-          </div>
-        </>
-      )}
+      <DeviceStep step={3} device={device} quality={quality} setQuality={setQuality} nativeRes={10} sensor="Sentinel-1" />
+
+      {problem && <p className="note" role="status">{problem}</p>}
+      <div className="actions">
+        <button className="primary" disabled={!!problem || running} onClick={run}>Map the flood on this device</button>
+        {HOSTED && (
+          <button onClick={() => void s.loadAnalysis(STORED_FLOOD.id)} title="A result computed earlier by the backend">
+            Open stored example
+          </button>
+        )}
+      </div>
     </div>
   );
 }

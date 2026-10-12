@@ -10,6 +10,20 @@ import { type OpticalDataset, type Scene, readToken } from "./pc";
 /** Spacing, in pixels, of the lattice on which coordinates are reprojected exactly. */
 const LATTICE = 32;
 
+/** Attempts per file and how long one attempt may take before it is abandoned. */
+const READ_ATTEMPTS = 3;
+// Long enough for a 10 MB radar window on a slow connection (about 50 KB/s per file).
+const READ_TIMEOUT_MS = 240_000;
+/**
+ * Fetch in 256 KB blocks. A file header then arrives in one request instead
+ * of one per overview level, and neighbouring tiles share requests.
+ */
+// The library accepts these at run time (measured: 49 requests fall to 13 for one
+// radar read) but its type declarations omit them, hence the cast.
+const READER_OPTIONS = { blockSize: 262_144, cacheSize: 64 } as unknown as Parameters<typeof fromUrl>[1];
+/** Length of a degree of latitude; adequate for choosing a read resolution. */
+const METRES_PER_DEGREE = 111_320;
+
 // Landsat Collection 2 Level-2: reflectance = DN * 0.0000275 - 0.2, DN 0 is fill.
 const LANDSAT_SCALE = 0.0000275;
 const LANDSAT_OFFSET = -0.2;
@@ -25,8 +39,9 @@ const S2_SCL_REJECT = new Set([0, 1, 3, 8, 9, 10, 11]);
 type Numeric = Uint8Array | Uint16Array | Int16Array | Float32Array;
 
 /**
- * Read one file onto the grid. The read is made at the grid's resolution, so
- * the library fetches only the overview blocks under the area.
+ * Read one file onto the grid, giving up on a stalled download and trying
+ * again. A visitor's connection can drop a request without ever failing it,
+ * and one hung file would otherwise hold up the whole analysis.
  */
 export async function readOntoGrid(
   href: string,
@@ -36,7 +51,40 @@ export async function readOntoGrid(
   categorical: boolean,
   signal?: AbortSignal,
 ): Promise<Numeric> {
-  const tiff = await fromUrl(`${href}?${await readToken(collection)}`, {}, signal);
+  let failure: unknown;
+  for (let attempt = 0; attempt < READ_ATTEMPTS; attempt += 1) {
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    signal?.addEventListener("abort", cancel);
+    const timer = setTimeout(cancel, READ_TIMEOUT_MS);
+    try {
+      return await readOnce(href, collection, sourceEpsg, grid, categorical, controller.signal);
+    } catch (error) {
+      failure = error;
+      if (signal?.aborted) break; // the visitor cancelled; do not retry
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", cancel);
+    }
+  }
+  throw failure instanceof TypeError || (failure as { name?: string } | null)?.name === "AbortError"
+    ? new Error("A satellite file could not be downloaded after several attempts. Check your connection, or try the Fast setting.")
+    : failure;
+}
+
+/**
+ * One attempt. The read is made at the grid's resolution, so the library
+ * fetches only the overview blocks under the area.
+ */
+async function readOnce(
+  href: string,
+  collection: string,
+  sourceEpsg: number,
+  grid: Grid,
+  categorical: boolean,
+  signal: AbortSignal,
+): Promise<Numeric> {
+  const tiff = await fromUrl(`${href}?${await readToken(collection)}`, READER_OPTIONS, signal);
   // Nearest neighbour for every layer: interpolating would blend the fill value
   // 0 into real reflectance at scene edges. `categorical` is kept for callers
   // that later need a smoother read of continuous data.
@@ -51,8 +99,10 @@ export async function readOntoGrid(
   }
   // The scene is in a neighbouring UTM zone: read its window, then resample.
   const [west, south, east, north] = gridBoundsIn(grid, sourceEpsg);
-  const width = Math.max(1, Math.ceil((east - west) / grid.res));
-  const height = Math.max(1, Math.ceil((north - south) / grid.res));
+  // Pixel size in the source's own units: metres for UTM, degrees for EPSG:4326.
+  const step = sourceEpsg === 4326 ? grid.res / METRES_PER_DEGREE : grid.res;
+  const width = Math.max(1, Math.ceil((east - west) / step));
+  const height = Math.max(1, Math.ceil((north - south) / step));
   const [source] = (await tiff.readRasters({
     bbox: [west, south, east, north], width, height, samples: [0], fillValue: 0, resampleMethod, signal,
   })) as unknown as Numeric[];
