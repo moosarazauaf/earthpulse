@@ -16,7 +16,23 @@ Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
 > assistant and story mode are not built yet. [CHANGELOG.md](CHANGELOG.md)
 > lists what works; [docs/ROADMAP.md](docs/ROADMAP.md) lists what does not.
 
+## Who it is for
+
+EarthPulse serves two audiences with the same globe.
+
+- **Anyone**: the **Live** view shows current disaster alerts, where fire is
+  being detected, and where rivers are forecast to flood, each from the agency
+  that publishes it and each labelled as an observation or a forecast.
+- **Researchers**: the analysis modes (Change, Floods, Water) run documented
+  methods on an area you choose and hand back the evidence, the scenes used
+  and exports.
+
 ## What it does today
+
+- **Live hazards.** Red and orange alerts from GDACS, active fire detections
+  from NASA VIIRS, river flood forecasts and observed flood extent from
+  Copernicus GloFAS, and fire danger from Copernicus GWIS. EarthPulse shows
+  these; it does not produce them, and it is not a warning service.
 
 - **Explore.** A 3D globe with annual Landsat (1984 on, 30 m) and Sentinel-2
   (2016 on, 10 m) layers in true colour, false colour, NDVI, NDWI, MNDWI and
@@ -58,6 +74,13 @@ Computer by the browser. Analyses come in two kinds:
   `backend/`. On the live site they show real analyses the backend computed
   earlier, labelled as stored results. Moving them into the browser engine is
   on the roadmap.
+
+## Install it as an app
+
+EarthPulse can be installed from the browser and then opens in its own window
+like a desktop program: in Chrome or Edge, use the install icon in the address
+bar (or the menu, "Install EarthPulse"). It needs a connection, because the
+imagery and hazard feeds are always fetched fresh.
 
 ## Design rule
 

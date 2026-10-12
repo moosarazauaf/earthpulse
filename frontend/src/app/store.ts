@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { ApiError, api, pollAnalysis } from "./api";
 import { type DeviceProfile, type RunHandle, runWaterInBrowser } from "../engine/client";
 import type { Progress, WaterRequest } from "../engine/water";
+import { type Alert, fetchAlerts } from "../hazards/sources";
 import { clampYear, currentYear, datasetForYear } from "./logic";
 import type {
   AnalysisRecord,
@@ -60,7 +61,14 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "explore" | "change" | "floods" | "water" | "research";
+  mode: "live" | "explore" | "change" | "floods" | "water" | "research";
+  // live hazards
+  alerts: Alert[] | null;
+  alertsError: string | null;
+  selectedAlert: Alert | null;
+  /** Ids of the hazard map layers switched on. */
+  hazardLayers: string[];
+  loadAlerts: () => Promise<void>;
   sourcesOpen: boolean;
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
@@ -149,6 +157,18 @@ export const useStore = create<State>((set, get) => {
     notice: null,
 
     set: (partial) => set(partial),
+    alerts: null,
+    alertsError: null,
+    selectedAlert: null,
+    hazardLayers: ["fires"],
+    loadAlerts: async () => {
+      set({ alertsError: null });
+      try {
+        set({ alerts: await fetchAlerts() });
+      } catch {
+        set({ alertsError: "Live alerts could not be loaded. The alert service may be busy." });
+      }
+    },
     setYear: (year) => set({ year: clampYear(year) }),
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),

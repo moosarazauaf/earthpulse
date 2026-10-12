@@ -20,6 +20,13 @@ Phase 2 in progress.
 - `backend/Dockerfile` and `docs/DEPLOY.md` for hosting the backend; the
   Pages build reads the backend address from a repository variable.
 
+- **Live hazards mode**, aimed at the general public: red and orange alerts
+  from GDACS as markers and a list, and map layers for active fire detections
+  (NASA VIIRS), fire danger forecast (Copernicus GWIS), river flood forecasts
+  for days 1 to 3 and 4 to 10, and observed flood extent (Copernicus GloFAS /
+  GFM). Each layer says whether it is observed or modelled and what it is not.
+- **Installable app.** A web manifest and service worker let browsers install
+  EarthPulse as a standalone window. Nothing is cached.
 - **Browser analysis engine** (`frontend/src/engine/`). Scene search,
   cloud-optimised GeoTIFF reading, cloud masking, compositing and map
   rendering run in a web worker on the visitor's machine. The grid size and
@@ -33,6 +40,9 @@ Phase 2 in progress.
   example areas. Uploaded files are read in the browser.
 
 ### Known limits
+- No landslide layer: no open landslide forecast service could be reached.
+- Live layers are other agencies' products shown as published; EarthPulse has not validated them.
+- The installed app was not test-installed; only the manifest and worker were built.
 - Change detection and FloodLens still run only on the Python backend.
 - Browser-run results live in the tab; they have no shareable link yet.
 - Shapefile upload is unit tested on parsed input but has not been tried with

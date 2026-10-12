@@ -20,11 +20,14 @@ import {
   SplitDirection,
   Terrain,
   UrlTemplateImageryProvider,
+  VerticalOrigin,
   Viewer,
+  WebMapServiceImageryProvider,
 } from "cesium";
 
 import { absolute } from "../app/api";
 import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
+import { type Alert, HAZARD_LAYERS, wmsParameters } from "../hazards/sources";
 
 const ESRI_IMAGERY =
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
@@ -38,6 +41,8 @@ const HOME = { lon: 60, lat: 22, height: 2.2e7 };
 const AOI_COLOR = Color.fromCssColorString("#5fd0c5");
 const LOSS_COLOR = Color.fromCssColorString("#ff8a5c");
 const GAIN_COLOR = Color.fromCssColorString("#7bd88f");
+const ALERT_RED = Color.fromCssColorString("#ff5a5a");
+const ALERT_ORANGE = Color.fromCssColorString("#ffa53c");
 
 const BLANK_TILE = document.createElement("canvas");
 BLANK_TILE.width = BLANK_TILE.height = 1;
@@ -352,6 +357,63 @@ export class Globe {
       this.detections = source;
       await this.viewer.dataSources.add(source);
     }
+    this.render();
+  }
+
+  // ---- live hazards ------------------------------------------------------------
+  private hazards = new Map<string, ImageryLayer>();
+  private alertEntities: Entity[] = [];
+
+  /** Show exactly the hazard layers whose ids are given. */
+  setHazardLayers(ids: string[]) {
+    for (const [id, layer] of this.hazards) {
+      if (!ids.includes(id)) {
+        this.viewer.imageryLayers.remove(layer, true);
+        this.hazards.delete(id);
+      }
+    }
+    for (const id of ids) {
+      const definition = HAZARD_LAYERS.find((l) => l.id === id);
+      if (!definition || this.hazards.has(id)) continue;
+      const provider = new WebMapServiceImageryProvider({
+        url: definition.url,
+        layers: definition.layers,
+        parameters: wmsParameters(definition),
+        credit: definition.attribution,
+      });
+      const index = this.viewer.imageryLayers.indexOf(this.labels);
+      const layer = this.viewer.imageryLayers.addImageryProvider(provider, index);
+      layer.alpha = 0.85;
+      this.hazards.set(id, layer);
+    }
+    this.render();
+  }
+
+  /** Markers for alerts. Level is shown by colour and by the letter inside the marker. */
+  setAlerts(alerts: Alert[], selectedId: string | null) {
+    for (const entity of this.alertEntities) this.viewer.entities.remove(entity);
+    this.alertEntities = alerts.map((alert) => {
+      const red = alert.level === "Red";
+      const selected = alert.id === selectedId;
+      return this.viewer.entities.add({
+        id: `alert:${alert.id}`,
+        position: Cartesian3.fromDegrees(alert.lon, alert.lat),
+        point: {
+          pixelSize: selected ? 22 : 16,
+          color: (red ? ALERT_RED : ALERT_ORANGE).withAlpha(0.9),
+          outlineColor: Color.WHITE,
+          outlineWidth: selected ? 3 : 1.5,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: {
+          text: red ? "R" : "O",
+          font: "bold 11px sans-serif",
+          fillColor: Color.BLACK,
+          verticalOrigin: VerticalOrigin.CENTER,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+      });
+    });
     this.render();
   }
 

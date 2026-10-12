@@ -8,6 +8,7 @@ import type { Place } from "../app/types";
 import { getGlobe } from "../globe/GlobeViewer";
 
 const MODES = [
+  { id: "live", label: "Live" },
   { id: "explore", label: "Explore" },
   { id: "change", label: "Change" },
   { id: "floods", label: "Floods" },

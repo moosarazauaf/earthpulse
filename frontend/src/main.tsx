@@ -14,6 +14,12 @@ declare global {
 declare const CESIUM_BASE_URL: string;
 window.CESIUM_BASE_URL = CESIUM_BASE_URL;
 
+// Registering a service worker lets browsers offer "Install app". Production
+// only, so it never interferes with the development server.
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => undefined);
+}
+
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
     <App />

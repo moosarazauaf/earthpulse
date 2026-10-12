@@ -2,6 +2,7 @@
 import { useState } from "react";
 
 import { useStore } from "../app/store";
+import { LivePanel } from "../hazards/LivePanel";
 import { AnalysisForm } from "./AnalysisForm";
 import { Evidence } from "./Evidence";
 import { FloodForm, FloodResults } from "./FloodPanel";
@@ -64,6 +65,16 @@ export function ContextPanel() {
   const result = useStore((s) => s.result);
   const set = useStore((s) => s.set);
   const [open, setOpen] = useState(true);
+  if (mode === "live") {
+    return (
+      <aside className={`panel right${open ? "" : " collapsed"}`} aria-label="Live hazards">
+        <button className="panel-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
+          <span>Live hazards</span><span aria-hidden="true">{open ? "−" : "+"}</span>
+        </button>
+        {open && <div className="panel-body"><LivePanel /></div>}
+      </aside>
+    );
+  }
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";

@@ -191,3 +191,51 @@ describe("uploaded areas", () => {
     expect(() => areaFromGeoJson(projected)).toThrow(/longitude and latitude/);
   });
 });
+
+describe("live hazards", () => {
+  it("parses alerts, ranks ongoing events first, and drops malformed entries", async () => {
+    const { parseAlerts } = await import("../hazards/sources");
+    const feature = (type: string, level: string, current: string, to: string, coordinates: unknown = [70, 30]) => ({
+      geometry: { type: "Point", coordinates },
+      properties: {
+        eventtype: type, alertlevel: level, iscurrent: current, eventid: to, episodeid: 1, name: `${type} ${to}`,
+        country: "Testland", fromdate: "2026-10-01T00:00:00", todate: `${to}T00:00:00`, source: "TEST",
+        severitydata: { severitytext: "severe" }, url: { report: "https://www.gdacs.org/report.aspx?x=1" },
+      },
+    });
+    const alerts = parseAlerts({ features: [
+      feature("FL", "Orange", "false", "2026-10-05"),
+      feature("WF", "Red", "false", "2026-10-03"),
+      feature("TC", "Orange", "true", "2026-10-09"),
+      feature("EQ", "Green", "true", "2026-10-09"), // not red or orange
+      feature("XX", "Red", "true", "2026-10-09"), // unknown type
+      feature("FL", "Red", "true", "2026-10-09", [999, 30]), // impossible position
+    ] });
+    expect(alerts.map((a) => `${a.type}/${a.level}`)).toEqual(["TC/Orange", "WF/Red", "FL/Orange"]);
+    expect(alerts[0]?.ongoing).toBe(true);
+    expect(alerts[1]?.to).toBe("2026-10-03");
+    expect(parseAlerts(null)).toEqual([]);
+    expect(parseAlerts({ features: "nope" })).toEqual([]);
+  });
+
+  it("never links an alert to a site other than the agency's", async () => {
+    const { parseAlerts } = await import("../hazards/sources");
+    const [alert] = parseAlerts({ features: [{
+      geometry: { coordinates: [1, 2] },
+      properties: { eventtype: "FL", alertlevel: "Red", url: { report: "https://evil.example/x" } },
+    }] });
+    expect(alert?.reportUrl).toBe("https://www.gdacs.org/");
+  });
+
+  it("asks for the last full day of fire detections and the newest forecast", async () => {
+    const { HAZARD_LAYERS, alertsUrl, wmsParameters } = await import("../hazards/sources");
+    const now = new Date("2026-10-12T06:00:00Z");
+    const fires = HAZARD_LAYERS.find((l) => l.id === "fires");
+    const forecast = HAZARD_LAYERS.find((l) => l.id === "flood-forecast");
+    expect(fires && wmsParameters(fires, now).time).toBe("2026-10-11");
+    expect(forecast && wmsParameters(forecast, now).time).toBeUndefined();
+    expect(alertsUrl(now)).toContain("fromDate=2026-09-28&toDate=2026-10-12");
+    // Every layer states what it is and what it is not.
+    for (const layer of HAZARD_LAYERS) expect(layer.caveat.length).toBeGreaterThan(40);
+  });
+});

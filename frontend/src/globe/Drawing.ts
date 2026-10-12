@@ -82,7 +82,9 @@ export class Drawing {
     if (this.tool === "none") {
       const picked = this.globe.viewer.scene.pick(position);
       const entity = picked?.id instanceof Entity ? picked.id : null;
-      this.onPick(entity?.properties?.direction ? String(entity.id) : null);
+      // Alert markers carry an "alert:" id; detection outlines carry a direction.
+      const id = entity ? String(entity.id) : null;
+      this.onPick(id && (id.startsWith("alert:") || entity?.properties?.direction) ? id : null);
       return;
     }
     const point = this.locate(position);

@@ -67,4 +67,7 @@ Carried over to later releases:
 
 ## Phase 6 — Global scale (`v0.6.0`)
 
-- [ ] Event feed, regional scan, hotspot clustering
+- [x] Live hazards: GDACS alerts, active fires, fire danger, flood forecast, observed floods
+- [ ] Landslide hazard layer (needs an open, reachable source)
+- [ ] Alerts filtered to the visitor's own region; alert polygons instead of points
+- [ ] Regional scan, hotspot clustering

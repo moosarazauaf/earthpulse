@@ -37,6 +37,24 @@ Streamlit was considered for hosting and not chosen, for three reasons.
 3. It does not remove the need for a host. It is a host with tighter limits
    than the one recommended below.
 
+### A desktop app
+
+There are two ways to give EarthPulse its own window on a computer.
+
+**Installed web app (done).** The site ships a manifest and service worker, so
+Chrome and Edge can install it. It behaves like a desktop program and runs the
+same browser engine, which already uses the machine's processor cores and
+memory through a web worker.
+
+**Native build with Tauri or Electron (not done).** This would add things a
+browser cannot do: reading large local rasters and shapefiles without upload
+limits, using GDAL and Python directly, a local cache of downloaded scenes,
+and no browser memory ceiling (roughly 2 to 4 GB per tab). It costs installers
+for each operating system, code signing (unsigned Windows installers trigger a
+security warning), an update mechanism, and it loses the zero-install reach
+that the public audience needs. It suits the research audience and makes sense
+once the browser engine's limits are actually being hit.
+
 ### Growing beyond free hosting
 
 Signs that it is time to pay for hosting: GitHub Pages' soft limits (100 GB

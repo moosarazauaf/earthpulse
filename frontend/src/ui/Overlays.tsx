@@ -22,6 +22,10 @@ export function Intro() {
         change, and shows the evidence behind every number.
       </p>
       <div className="cards">
+        <button className="lead" onClick={() => set({ introOpen: false, mode: "live" })}>
+          <strong>What is happening now</strong>
+          <span>Current disaster alerts, where fire is being detected, and where rivers are forecast to flood. From GDACS, NASA and Copernicus.</span>
+        </button>
         <button onClick={() => void startLahoreTour()}>
           <strong>Lahore, 1993 to today</strong>
           <span>A guided look at three decades of Landsat imagery over one district.</span>

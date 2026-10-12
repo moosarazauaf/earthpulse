@@ -43,10 +43,14 @@ export function GlobeViewer() {
       globe,
       (geometry) => useStore.getState().setAoi({ geometry, label: "Drawn area" }),
       (id) => {
-        const { result } = useStore.getState();
-        const features = isMapped(result) ? result.detections.features : [];
+        const state = useStore.getState();
+        if (id?.startsWith("alert:")) {
+          state.set({ selectedAlert: state.alerts?.find((a) => `alert:${a.id}` === id) ?? null, mode: "live" });
+          return;
+        }
+        const features = isMapped(state.result) ? state.result.detections.features : [];
         const found = id === null ? null : features.find((f) => String(f.id) === id) ?? null;
-        useStore.getState().set({ selectedDetection: found as Detection | null });
+        state.set({ selectedDetection: found as Detection | null });
       },
     );
     const onKey = (event: KeyboardEvent) => {
@@ -128,6 +132,15 @@ export function GlobeViewer() {
     if (s.aoi) void instance?.flyToBounds(geometryBounds(s.aoi.geometry));
   }, [s.aoi]);
   useEffect(() => drawing.current?.setTool(s.drawTool), [s.drawTool]);
+
+  // Live hazards: layers and alert markers are shown only in Live mode.
+  const live = s.mode === "live";
+  useEffect(() => instance?.setHazardLayers(live ? s.hazardLayers : []), [live, s.hazardLayers]);
+  useEffect(() => instance?.setAlerts(live ? s.alerts ?? [] : [], s.selectedAlert?.id ?? null), [live, s.alerts, s.selectedAlert]);
+  useEffect(() => {
+    // Far enough out to see the region the event affects.
+    if (s.selectedAlert) void instance?.flyTo(s.selectedAlert.lon, s.selectedAlert.lat, 2_500_000, 2);
+  }, [s.selectedAlert]);
 
   // Analysis outputs.
   const mapped: MappedResult | null = isMapped(s.result) ? s.result : null;

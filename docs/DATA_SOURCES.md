@@ -71,6 +71,25 @@ The basemap is a mosaic of many acquisition dates. It gives context and is
 never presented as evidence for a date. The boundary used for international
 borders in the label layer is Esri's and implies no position on any border.
 
+## Live hazard feeds
+
+Shown in the Live view exactly as published. EarthPulse does not compute or
+validate them.
+
+| Layer | Source | Kind | Terms |
+|---|---|---|---|
+| Red and orange alerts | GDACS, Global Disaster Alert and Coordination System (UN OCHA and European Commission JRC), `gdacs.org/gdacsapi` | Estimated impact | Free with attribution |
+| Active fire detections | NASA FIRMS through GIBS, VIIRS on NOAA-20, 375 m, previous UTC day | Observed | NASA open data |
+| Fire danger forecast | Copernicus GWIS, Fire Weather Index from ECMWF forecasts | Modelled | Copernicus, free with attribution |
+| River flood forecast (days 1-3, 4-10) | Copernicus GloFAS flood summary | Modelled | Copernicus, free with attribution |
+| Observed flood extent | Copernicus Global Flood Monitoring, Sentinel-1 | Derived | Copernicus, free with attribution |
+
+Limits stated in the interface: a fire detection is a hot spot, not a
+confirmed wildfire; fire danger is not a prediction that a fire will start;
+GloFAS covers large rivers and not flash or urban floods; GDACS levels are
+automatic estimates and not official warnings. No landslide product is
+included because no open service answered when this was built.
+
 ## Synthetic data
 
 The `demo` provider generates a uniform vegetated scene in which a central
