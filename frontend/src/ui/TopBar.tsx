@@ -12,6 +12,7 @@ const MODES = [
   { id: "explore", label: "Explore" },
   { id: "change", label: "Change" },
   { id: "floods", label: "Floods" },
+  { id: "fires", label: "Fires" },
   { id: "water", label: "Water" },
   { id: "cities", label: "Cities" },
   { id: "research", label: "Research" },

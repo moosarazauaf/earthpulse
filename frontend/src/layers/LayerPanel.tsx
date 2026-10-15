@@ -22,6 +22,7 @@ const OVERLAY_LABELS: Record<string, string> = {
   flood: "Flood extent",
   persistence: "Persistence",
   growth: "Urban growth",
+  severity: "Burn severity",
   vv_before: "Radar before",
   vv_flood: "Radar flood",
   vv_after: "Radar after",

@@ -46,7 +46,7 @@ Carried over to later releases:
 - [x] UrbanEye: built-up growth 2017 to 2023 and what it replaced (Impact Observatory maps)
 - [ ] UrbanEye: Landsat-era built-up history before 2017, surface temperature
 - [ ] ForestEye: loss, gain and disturbance with explicit terminology
-- [ ] FireWatch: NASA FIRMS active-fire detections
+- [x] FireWatch: active-fire detections in Live, and dNBR burn severity (Key and Benson 2006)
 
 ## Phase 3 — Classification and carbon (`v0.3.0`)
 

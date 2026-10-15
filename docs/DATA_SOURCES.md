@@ -67,6 +67,7 @@ to the files, and its mosaic tile service for the annual map layers.
 | NDWI | (Green − NIR) / (Green + NIR) | McFeeters 1996 |
 | MNDWI | (Green − SWIR1) / (Green + SWIR1) | Xu 2006 |
 | NDBI | (SWIR1 − NIR) / (SWIR1 + NIR) | Zha, Gao and Ni 2003 |
+| NBR | (NIR − SWIR2) / (NIR + SWIR2); severity from dNBR = NBR before − NBR after | Key and Benson 2006 (FIREMON, USDA RMRS-GTR-164-CD) |
 
 NDBI responds to bare soil as well as built-up surfaces. EarthPulse reports it
 as an index and does not call a rise in it "urban expansion".

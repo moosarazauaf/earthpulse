@@ -32,8 +32,8 @@ export const COLLECTION: Record<OpticalDataset, string> = {
 };
 /** Common band name -> asset key, plus the per-pixel quality layer. */
 export const BANDS: Record<OpticalDataset, Record<string, string>> = {
-  landsat: { green: "green", red: "red", nir: "nir08", swir1: "swir16", qa: "qa_pixel" },
-  sentinel2: { green: "B03", red: "B04", nir: "B08", swir1: "B11", qa: "SCL" },
+  landsat: { green: "green", red: "red", nir: "nir08", swir1: "swir16", swir2: "swir22", qa: "qa_pixel" },
+  sentinel2: { green: "B03", red: "B04", nir: "B08", swir1: "B11", swir2: "B12", qa: "SCL" },
 };
 export const NATIVE_RES: Record<OpticalDataset, number> = { landsat: 30, sentinel2: 10 };
 export const FIRST_YEAR: Record<OpticalDataset, number> = { landsat: 1984, sentinel2: 2016 };

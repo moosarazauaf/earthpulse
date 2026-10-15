@@ -2,8 +2,10 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 
 export type DatasetId = "landsat" | "sentinel2";
-export type IndexId = "ndvi" | "ndwi" | "mndwi" | "ndbi";
-export type RenderId = "truecolor" | "falsecolor" | IndexId;
+export type IndexId = "ndvi" | "ndwi" | "mndwi" | "ndbi" | "nbr";
+/** Indices offered as annual map layers. NBR is used only for burn analysis. */
+export type LayerIndex = Exclude<IndexId, "nbr">;
+export type RenderId = "truecolor" | "falsecolor" | LayerIndex;
 /** How a value came to exist. Shown beside every result. */
 export type ValueKind = "OBSERVED" | "DERIVED" | "MODELED" | "ESTIMATED" | "SIMULATED";
 export type AoiGeometry = Polygon | MultiPolygon;
@@ -188,6 +190,8 @@ export interface ChangeResult extends ResultBase {
     gainPercent: number;
     thresholdSensitivity: { threshold: number; lossAreaHa: number; gainAreaHa: number }[];
     clearObservations: { before: number | null; after: number | null };
+    /** Burn severity classes from dNBR, present only for NBR analyses. */
+    severity?: { label: string; min: number | null; max: number | null; ha: number; color: string }[];
   };
   indices: Record<IndexId, { before: number | null; after: number | null; change: number | null }>;
   histogram: { binEdges: number[]; counts: number[] };

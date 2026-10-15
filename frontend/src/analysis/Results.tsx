@@ -6,6 +6,7 @@ import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesRe
 import { KindBadge } from "../ui/KindBadge";
 import { shareUrl } from "../ui/TopBar";
 import { downloadText } from "./download";
+import { SeverityTable } from "./FirePanel";
 import { ShareRunButton } from "./SharedRun";
 import { ChangeHistogram, SeriesChart } from "./charts";
 
@@ -116,6 +117,7 @@ export function ChangeResults({ result }: { result: ChangeResult }) {
   return (
     <div className="results">
       <ResultHeader result={result} />
+      <SeverityTable result={result} />
       <section>
         <h3>What changed here</h3>
         <p className="muted">{period(result.request.before)} compared with {period(result.request.after)}</p>

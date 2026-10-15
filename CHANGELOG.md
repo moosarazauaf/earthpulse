@@ -6,6 +6,9 @@ All notable changes are recorded here. Versions follow
 ## [Unreleased]
 
 ### Added
+- **FireWatch** (Fires mode): burn severity from dNBR with the Key and Benson
+  (2006) classes, area per class and a severity map, from Landsat or
+  Sentinel-2, in the browser. SWIR-2 is downloaded only for this analysis.
 - **UrbanEye** (Cities mode): built area per year from 2017 to 2023, where it
   grew, and what land it replaced, counted from the Impact Observatory annual
   land-cover maps in the browser. Labelled MODELED, since the maps are

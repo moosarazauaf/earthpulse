@@ -401,3 +401,25 @@ describe("UrbanEye rules", () => {
     expect(conversions(first, last, mask, 1)).toEqual({ 5: 1, 2: 1 });
   });
 });
+
+describe("FireWatch severity classes", () => {
+  it("places dNBR values in the Key and Benson (2006) classes", async () => {
+    const { SEVERITY, severityClass } = await import("./change");
+    const label = (dnbr: number) => SEVERITY[severityClass(dnbr)]?.label;
+    expect(label(-0.4)).toBe("Enhanced regrowth, high");
+    expect(label(0)).toBe("Unburned");
+    expect(label(0.1)).toBe("Low severity"); // lower limits are inclusive
+    expect(label(0.269)).toBe("Low severity");
+    expect(label(0.27)).toBe("Moderate-low severity");
+    expect(label(0.5)).toBe("Moderate-high severity");
+    expect(label(0.66)).toBe("High severity");
+    expect(label(1.2)).toBe("High severity");
+  });
+
+  it("defines NBR with SWIR-2 and the burn reference", async () => {
+    const { INDICES } = await import("./change");
+    expect(INDICES.nbr.positive).toBe("nir");
+    expect(INDICES.nbr.negative).toBe("swir2");
+    expect(INDICES.nbr.reference).toContain("Key and Benson");
+  });
+});

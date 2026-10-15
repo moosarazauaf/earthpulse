@@ -14,6 +14,8 @@ import { readAreaFile } from "./areaFile";
 const INDUS_AT_LAYYAH = { geometry: rectangleAoi(70.7, 30.75, 71.1, 31.25), label: "Indus at Layyah" };
 /** Mangla reservoir on the Jhelum, a water body whose extent varies strongly. */
 const MANGLA = { geometry: rectangleAoi(73.55, 33.02, 73.85, 33.3), label: "Mangla Reservoir" };
+/** Lahaina, Maui: the August 2023 wildfire, a well-documented burn for FireWatch. */
+const LAHAINA = { geometry: rectangleAoi(-156.705, 20.855, -156.625, 20.93), label: "Lahaina, Maui" };
 
 export async function loadLahore(): Promise<{ geometry: AoiGeometry; label: string }> {
   const response = await fetch(`${import.meta.env.BASE_URL}data/lahore-district.geojson`);
@@ -59,6 +61,7 @@ export function AreaChoices({ large = false }: { large?: boolean }) {
         <button onClick={() => void loadLahore().then(s.setAoi)}>Lahore District</button>
         <button onClick={() => s.setAoi(INDUS_AT_LAYYAH)}>Indus at Layyah</button>
         <button onClick={() => s.setAoi(MANGLA)}>Mangla Reservoir</button>
+        <button onClick={() => s.setAoi(LAHAINA)}>Lahaina fire, 2023</button>
       </div>
       {s.drawTool === "rectangle" && <p className="note">Click two opposite corners on the globe. Esc cancels.</p>}
       {s.drawTool === "polygon" && <p className="note">Click each corner, then double-click or press Enter to close. Esc cancels.</p>}
@@ -71,6 +74,7 @@ const QUESTIONS: Record<string, string> = {
   floods: "Where do you want to map flooding?",
   water: "Which water body or region do you want to track?",
   cities: "Which city or district do you want to follow?",
+  fires: "Where did the fire burn?",
 };
 
 export function AreaPrompt() {

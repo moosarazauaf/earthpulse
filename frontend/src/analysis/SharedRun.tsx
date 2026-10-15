@@ -53,7 +53,9 @@ export function SharedRunCard() {
     store.set({ pendingRun: null, introOpen: false });
     store.setAoi({ geometry: shared.request.aoi, label: shared.request.label ?? "Shared area" });
     const request = shared.request as never;
-    if (shared.kind === "change") void store.runChange(request, device, quality);
+    const burn = (shared.request as { index?: string }).index === "nbr";
+    if (shared.kind === "change" && burn) void store.runFire(request, device, quality);
+    else if (shared.kind === "change") void store.runChange(request, device, quality);
     else if (shared.kind === "flood") void store.runFlood(request, device, quality);
     else if (shared.kind === "urban") void store.runUrban({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
     else void store.runWater({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);

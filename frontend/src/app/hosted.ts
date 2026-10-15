@@ -15,7 +15,7 @@ import type {
   DatasetId,
   DatasetInfo,
   ImageryLayerInfo,
-  IndexId,
+  LayerIndex,
   Legend,
   Place,
   RenderId,
@@ -29,13 +29,13 @@ const BANDS: Record<DatasetId, Record<string, string>> = {
   landsat: { blue: "blue", green: "green", red: "red", nir: "nir08", swir1: "swir16" },
   sentinel2: { blue: "B02", green: "B03", red: "B04", nir: "B08", swir1: "B11" },
 };
-const INDEX_BANDS: Record<IndexId, [string, string]> = {
+const INDEX_BANDS: Record<LayerIndex, [string, string]> = {
   ndvi: ["nir", "red"],
   ndwi: ["green", "nir"],
   mndwi: ["green", "swir1"],
   ndbi: ["swir1", "nir"],
 };
-const INDEX_STYLE: Record<IndexId, { colormap: string; min: number; max: number; colors: string[] }> = {
+const INDEX_STYLE: Record<LayerIndex, { colormap: string; min: number; max: number; colors: string[] }> = {
   ndvi: { colormap: "rdylgn", min: -0.2, max: 0.8, colors: ["#a50026", "#f46d43", "#fee08b", "#ffffbf", "#a6d96a", "#1a9850", "#006837"] },
   ndwi: { colormap: "rdbu", min: -0.5, max: 0.5, colors: ["#67001f", "#d6604d", "#fddbc7", "#f7f7f7", "#92c5de", "#2166ac", "#053061"] },
   mndwi: { colormap: "rdbu", min: -0.5, max: 0.5, colors: ["#67001f", "#d6604d", "#fddbc7", "#f7f7f7", "#92c5de", "#2166ac", "#053061"] },

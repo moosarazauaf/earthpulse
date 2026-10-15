@@ -7,7 +7,7 @@
  */
 import type { ChangeRequest, IndexId } from "../app/types";
 import {
-  type EngineHooks, type EngineOverlay, M2_PER_HA, type Rgb, findRegions, hex, histogram, makeOverlay, mean, median,
+  type EngineHooks, type EngineOverlay, M2_PER_HA, type Rgb, classImage, findRegions, hex, histogram, makeOverlay, mean, median,
   rampImage, regionsToGeoJson, typicalDayOfYear,
 } from "./common";
 import { buildGrid, projectAoi, rasterMask } from "./geo";
@@ -18,6 +18,31 @@ import { compositeBands, normalizedDifference } from "./raster";
 const SCENES_PER_FOOTPRINT = 2;
 const MAX_SCENES = 6;
 const ANALYSIS_BANDS = ["green", "red", "nir", "swir1"];
+
+/**
+ * Burn severity from dNBR = NBR(before) - NBR(after), with the class limits of
+ * Key and Benson (2006), FIREMON Landscape Assessment (USDA RMRS-GTR-164-CD),
+ * there given as dNBR x 1000. Calibrated for Landsat; with Sentinel-2 they
+ * are a guide, not a calibrated scale.
+ */
+export const SEVERITY: { label: string; min: number | null; max: number | null; rgb: Rgb }[] = [
+  { label: "Enhanced regrowth, high", min: null, max: -0.25, rgb: [26, 120, 60] },
+  { label: "Enhanced regrowth, low", min: -0.25, max: -0.1, rgb: [120, 190, 110] },
+  { label: "Unburned", min: -0.1, max: 0.1, rgb: [235, 235, 220] },
+  { label: "Low severity", min: 0.1, max: 0.27, rgb: [250, 220, 90] },
+  { label: "Moderate-low severity", min: 0.27, max: 0.44, rgb: [245, 150, 50] },
+  { label: "Moderate-high severity", min: 0.44, max: 0.66, rgb: [225, 70, 40] },
+  { label: "High severity", min: 0.66, max: null, rgb: [120, 20, 90] },
+];
+
+/** Index of the severity class a dNBR value falls in. */
+export function severityClass(dnbr: number): number {
+  for (let k = 0; k < SEVERITY.length; k += 1) {
+    const c = SEVERITY[k] as (typeof SEVERITY)[number];
+    if ((c.min === null || dnbr >= c.min) && (c.max === null || dnbr < c.max)) return k;
+  }
+  return SEVERITY.length - 1;
+}
 const HISTOGRAM_BINS = 40;
 /** Composites centred this far apart in the calendar may differ through phenology alone. */
 const SEASON_MISMATCH_DAYS = 45;
@@ -28,6 +53,7 @@ export const INDICES: Record<IndexId, { name: string; positive: string; negative
   ndwi: { name: "NDWI", positive: "green", negative: "nir", measures: "Open surface water", reference: "McFeeters 1996", threshold: 0.15 },
   mndwi: { name: "MNDWI", positive: "green", negative: "swir1", measures: "Open surface water, less confused by built-up land than NDWI", reference: "Xu 2006", threshold: 0.15 },
   ndbi: { name: "NDBI", positive: "swir1", negative: "nir", measures: "Built-up and bare surfaces (does not separate the two)", reference: "Zha, Gao and Ni 2003", threshold: 0.1 },
+  nbr: { name: "NBR", positive: "nir", negative: "swir2", measures: "Burned land: charred surfaces lower NIR and raise SWIR-2", reference: "Key and Benson 2006", threshold: 0.1 },
 };
 
 const DELTA_COLORS: Rgb[] = [[165, 42, 42], [230, 140, 90], [245, 245, 240], [120, 190, 140], [20, 110, 70]];
@@ -73,14 +99,16 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
   const [beforeScenes, afterScenes] = found as [Scene[], Scene[]];
 
   // 2. Composites. Every file read is reported, so the progress bar is real.
-  const total = (beforeScenes.length + afterScenes.length) * (ANALYSIS_BANDS.length + 1);
+  // SWIR-2 is downloaded only when the burn index needs it.
+  const bandNames = request.index === "nbr" ? [...ANALYSIS_BANDS, "swir2"] : ANALYSIS_BANDS;
+  const total = (beforeScenes.length + afterScenes.length) * (bandNames.length + 1);
   let done = 0;
   const read = (label: string) => () => {
     done += 1;
     hooks.progress({ stage: "PROCESSING_IMAGERY", done, total, detail: `Reading the ${label} period: file ${done} of ${total}` });
   };
-  const before = await compositeBands(dataset, BANDS[dataset], ANALYSIS_BANDS, beforeScenes, grid, request.concurrency, read("earlier"), hooks.signal);
-  const after = await compositeBands(dataset, BANDS[dataset], ANALYSIS_BANDS, afterScenes, grid, request.concurrency, read("later"), hooks.signal);
+  const before = await compositeBands(dataset, BANDS[dataset], bandNames, beforeScenes, grid, request.concurrency, read("earlier"), hooks.signal);
+  const after = await compositeBands(dataset, BANDS[dataset], bandNames, afterScenes, grid, request.concurrency, read("later"), hooks.signal);
 
   // 3. Indices.
   hooks.progress({ stage: "CALCULATING_INDICES", done: total, total, detail: "Calculating indices" });
@@ -90,6 +118,7 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
   };
   const indices = {} as Record<IndexId, { before: number | null; after: number | null; change: number | null }>;
   for (const id of Object.keys(INDICES) as IndexId[]) {
+    if (!before.bands[INDICES[id].negative] || !before.bands[INDICES[id].positive]) continue; // band not downloaded
     const b = outside(indexOf(id, before.bands)), a = outside(indexOf(id, after.bands));
     const both = new Uint8Array(size);
     const diff = new Float32Array(size);
@@ -155,6 +184,21 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
     before: await makeOverlay(`${index.name} before`, rampImage(indexBefore, -0.2, 0.8, INDEX_COLORS), grid, ramp(INDEX_COLORS, -0.2, 0.8), hooks),
     after: await makeOverlay(`${index.name} after`, rampImage(indexAfter, -0.2, 0.8, INDEX_COLORS), grid, ramp(INDEX_COLORS, -0.2, 0.8), hooks),
   };
+  let severity: { label: string; min: number | null; max: number | null; ha: number; color: string }[] | undefined;
+  if (request.index === "nbr") {
+    const classes = new Uint8Array(size); // severity index + 1; 0 is no data
+    const counts = new Array<number>(SEVERITY.length).fill(0);
+    for (let i = 0; i < size; i += 1) {
+      if (!valid[i]) continue;
+      const k = severityClass(-(delta[i] as number)); // dNBR = before - after
+      classes[i] = k + 1;
+      counts[k] = (counts[k] as number) + 1;
+    }
+    severity = SEVERITY.map((c, k) => ({ label: c.label, min: c.min, max: c.max, ha: (counts[k] as number) * pixelHa, color: hex(c.rgb) }));
+    const colours = Object.fromEntries(SEVERITY.map((c, k) => [k + 1, c.rgb]));
+    overlays.severity = await makeOverlay("Burn severity (dNBR)", classImage(classes, colours), grid,
+      { classes: SEVERITY.slice().reverse().map((c) => ({ label: c.label, color: hex(c.rgb) })) }, hooks);
+  }
   const publicScene = (s: Scene) => ({ id: s.id, datetime: s.datetime, platform: s.platform, cloudCover: s.cloudCover, footprint: s.footprint });
   const { maxPixels: _budget, concurrency: _parallel, ...stored } = request;
   void _budget;
@@ -200,6 +244,7 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
       gainPercent: (gain / validCount) * 100,
       thresholdSensitivity: sensitivity.map((s) => ({ threshold: s.threshold, lossAreaHa: s.loss * pixelHa, gainAreaHa: s.gain * pixelHa })),
       clearObservations: { before: clear(before.clearCount), after: clear(after.clearCount) },
+      severity,
     },
     indices,
     histogram: histogram(delta, valid, HISTOGRAM_BINS, -1, 1),

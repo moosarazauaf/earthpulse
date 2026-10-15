@@ -65,6 +65,11 @@ the threshold is off by 1 dB.
 
 <img src="docs/media/flood.jpg" alt="FloodLens result for the Indus at Layyah, 2022: newly flooded land in red beside the river channel in blue, with flooded area, land cover and threshold sensitivity in the side panel" width="100%">
 
+### 🔥 Map how badly land burned
+**FireWatch** compares Landsat or Sentinel-2 before and after a fire, computes
+the differenced Normalized Burn Ratio (dNBR), and maps burn severity in the
+standard classes of Key and Benson (2006), with the area in each class.
+
 ### 🌱 Measure change
 Pick two years and a season; EarthPulse builds cloud-free composites for both,
 computes NDVI, NDWI, MNDWI or NDBI, and maps where the index moved past a

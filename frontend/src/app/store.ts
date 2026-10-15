@@ -65,7 +65,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "live" | "explore" | "change" | "floods" | "water" | "cities" | "research";
+  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "research";
   // live hazards
   alerts: Alert[] | null;
   alertsError: string | null;
@@ -97,6 +97,7 @@ interface State {
   runFlood: (request: FloodRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runWater: (request: WaterRequest, device: DeviceProfile) => Promise<void>;
   runUrban: (request: UrbanRequest, device: DeviceProfile) => Promise<void>;
+  runFire: (request: ChangeRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
 }
@@ -243,6 +244,8 @@ export const useStore = create<State>((set, get) => {
       runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
     runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),
     runUrban: (request, device) => runLocal({ kind: "urban", request }, device, "growth", "cities", "none"),
+    runFire: (request, device, quality) =>
+      runLocal({ kind: "change", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "severity", "fires", request.dataset),
     loadAnalysis: async (id) => {
       try {
         const record = await api.analysis(id);
