@@ -108,8 +108,8 @@ included because no open service answered when this was built.
 ## Hazard news
 
 Every hour a GitHub Actions job (`frontend/scripts/scan-news.ts`, run by
-`.github/workflows/pages.yml`) reads the public RSS feeds of about 40 news
-outlets and two UN services, listed in `frontend/src/news/feeds.ts`. It keeps
+`.github/workflows/pages.yml`) reads about 45 public RSS feeds from more than 30 news
+outlets and UN services, listed in `frontend/src/news/feeds.ts`. It keeps
 only the headline, link, outlet and time of items whose headline matches a
 hazard keyword rule (`frontend/src/news/classify.ts`); article text is never
 stored or shown. Each kept headline is placed from the place names in it,

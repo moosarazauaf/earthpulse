@@ -49,7 +49,7 @@ layer says who publishes it, whether it is an observation or a forecast, and
 what it is not. EarthPulse shows these products; it is not a warning service.
 
 ### 📰 Hazards in the news, and how they happened
-Every hour EarthPulse scans about 40 news outlets (BBC, The Guardian, NYT,
+Every hour EarthPulse scans more than 30 news outlets (BBC, The Guardian, NYT,
 Dawn, Rappler, ABC Australia, ReliefWeb and more) for earthquakes, floods,
 landslides, storms and wildfires, and puts each story on the globe with links
 to every outlet that reported it. Stories are checked against the USGS

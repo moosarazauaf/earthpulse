@@ -152,8 +152,36 @@ function StoryDetail({ story }: { story: NewsStory }) {
       </section>
       <WhyItHappened story={story} c={c} />
       <LookFromSpace story={story} />
+      <section>
+        <p className="muted">
+          Wrong place, or not a natural hazard?{" "}
+          <a href={reportUrl(story)} target="_blank" rel="noopener noreferrer">Report it on GitHub</a>. Each report
+          becomes a test case for the keyword and place rules, so the same mistake is not made twice.
+        </p>
+      </section>
     </>
   );
+}
+
+/** A pre-filled GitHub issue describing a story the scanner got wrong. Only public story data goes in it. */
+export function reportUrl(story: NewsStory): string {
+  const lines = [
+    "**What is wrong?** (wrong place / not a natural hazard / wrong hazard / other)",
+    "",
+    "",
+    "---",
+    `Story: \`${story.id}\``,
+    `Filed as: ${story.hazard} (${story.hazards.join(", ")})`,
+    `Placed at: ${story.place.name}${story.place.country ? `, ${story.place.country}` : ""} (${story.place.precision})`,
+    "Headlines:",
+    ...story.articles.slice(0, 5).map((a) => `- ${a.title} (${a.source}) ${a.url}`),
+  ];
+  const query = new URLSearchParams({
+    title: `News scan: ${story.articles[0]?.title.slice(0, 80) ?? story.id}`,
+    labels: "news-scan",
+    body: lines.join("\n"),
+  });
+  return `https://github.com/moosarazauaf/earthpulse/issues/new?${query.toString()}`;
 }
 
 function Evidence({ c, story }: { c: Corroboration; story: NewsStory }) {
