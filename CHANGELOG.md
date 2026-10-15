@@ -5,6 +5,8 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.8] - 2026-10-15
+
 ### Added
 - **Hazard news on the globe** (Live → In the news). Every hour a GitHub
   Actions job scans about 45 RSS feeds from more than 30 news outlets and UN services
