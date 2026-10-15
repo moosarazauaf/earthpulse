@@ -1,26 +1,75 @@
 /** Brand, mode navigation, place search and sharing. */
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { ApiError, api } from "../app/api";
 import { encodeView, parseCoordinates } from "../app/logic";
 import { useStore } from "../app/store";
 import type { Place } from "../app/types";
 import { getGlobe } from "../globe/GlobeViewer";
+import { ANALYSES, type AnalysisMode } from "./modes";
 
+/** Three entries for a newcomer: what is happening, look around, measure something. */
 const MODES = [
   { id: "live", label: "Live" },
   { id: "explore", label: "Explore" },
-  { id: "change", label: "Change" },
-  { id: "floods", label: "Floods" },
-  { id: "fires", label: "Fires" },
-  { id: "water", label: "Water" },
-  { id: "cities", label: "Cities" },
-  { id: "research", label: "Research" },
 ] as const;
-/** Modules on the roadmap. Listed so the plan is visible, disabled so nothing is faked. */
 /** Camera height after flying to typed coordinates: a district-sized view. */
 const COORDINATE_VIEW_HEIGHT_M = 120_000;
-const PLANNED = ["Forests", "Carbon"];
+
+/** The analyses, chosen by the question they answer. */
+export function AnalysisList({ onPick }: { onPick: (id: AnalysisMode) => void }) {
+  const mode = useStore((s) => s.mode);
+  return (
+    <ul className="analysis-list" role="menu">
+      {ANALYSES.map((a) => (
+        <li key={a.id} role="none">
+          <button role="menuitem" className={mode === a.id ? "on" : ""} onClick={() => onPick(a.id)}>
+            <strong>{a.question}</strong>
+            <span>{a.label} · {a.detail}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function AnalyseMenu() {
+  const mode = useStore((s) => s.mode);
+  const set = useStore((s) => s.set);
+  const [open, setOpen] = useState(false);
+  const [left, setLeft] = useState(0);
+  const button = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+  const active = ANALYSES.find((a) => a.id === mode);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: Event) => {
+      if (event instanceof KeyboardEvent ? event.key === "Escape" : !menu.current?.contains(event.target as Node) && !button.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
+  }, [open]);
+
+  return (
+    <>
+      <button ref={button} className={active ? "on" : ""} aria-haspopup="menu" aria-expanded={open}
+        onClick={() => { setLeft(button.current?.getBoundingClientRect().left ?? 0); setOpen(!open); }}>
+        {active ? `Analyse: ${active.label}` : "Analyse"} <span aria-hidden="true">▾</span>
+      </button>
+      {open && createPortal(
+        <div ref={menu} className="analyse-menu" style={{ left }}>
+          <p className="eyebrow">What do you want to measure?</p>
+          <AnalysisList onPick={(id) => { set({ mode: id }); setOpen(false); }} />
+          <p className="muted">Each analysis asks for an area, then runs on your own computer.</p>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}
 
 export function shareUrl(): string {
   const s = useStore.getState();
@@ -102,9 +151,7 @@ export function TopBar() {
             {m.label}
           </button>
         ))}
-        {PLANNED.map((name) => (
-          <button key={name} disabled title="Planned. See the roadmap.">{name}</button>
-        ))}
+        <AnalyseMenu />
       </nav>
 
       <form className="search" role="search" onSubmit={search}>

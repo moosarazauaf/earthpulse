@@ -1,5 +1,5 @@
 /** Left panel: what is drawn on the globe, and where it comes from. */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { LegendBar } from "../analysis/charts";
 import { SENTINEL2_FIRST_YEAR, datasetForYear } from "../app/logic";
@@ -30,8 +30,16 @@ const OVERLAY_LABELS: Record<string, string> = {
 
 export function LayerPanel() {
   const s = useStore();
-  // On a phone the panel starts closed so the globe is visible.
-  const [open, setOpen] = useState(() => window.innerWidth > 800);
+  // Closed at first so a newcomer sees the globe, not imagery settings; it opens on its
+  // own the first time Explore is chosen on a wide screen, where the imagery is the point.
+  const [open, setOpen] = useState(false);
+  const opened = useRef(false);
+  useEffect(() => {
+    if (s.mode === "explore" && !s.introOpen && !opened.current && window.innerWidth > 800) {
+      opened.current = true;
+      setOpen(true);
+    }
+  }, [s.mode, s.introOpen]);
   const dataset = datasetForYear(s.preferredDataset, s.year);
   const sentinelBlocked = s.preferredDataset === "sentinel2" && dataset === "landsat";
   const mapped = hasLayers(s.result) ? s.result : null;

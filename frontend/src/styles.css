@@ -377,3 +377,22 @@ details > summary { cursor: pointer; }
 details.muted summary { cursor: pointer; }
 .feeds { margin-top: 6px; grid-template-columns: 1fr 1fr; gap: 2px 8px; }
 .feeds a { color: var(--muted); }
+
+/* Analyse menu and the simpler opening card */
+.analyse-menu {
+  position: fixed; top: calc(var(--top) - 4px); z-index: 40; width: min(380px, calc(100vw - 16px));
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 6px; padding: 10px; display: grid; gap: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.analysis-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.analysis-list button { width: 100%; text-align: left; display: grid; gap: 2px; padding: 8px 10px; }
+.analysis-list strong { font-weight: 500; }
+.analysis-list span { font-size: 11px; color: var(--muted); }
+.analysis-list button.on { border-color: var(--cyan); }
+.cards.three { grid-template-columns: repeat(3, 1fr); }
+.cards.three .lead { grid-column: auto; }
+.examples { color: var(--muted); font-size: 12px; }
+@media (max-width: 800px) {
+  .analyse-menu { left: 8px !important; top: var(--top); }
+  .cards.three { grid-template-columns: 1fr; }
+}

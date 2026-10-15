@@ -1,10 +1,11 @@
 /** Things that sit above the globe for a moment: the opening, story captions, notices, the sources sheet. */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { HOSTED } from "../app/api";
 import { useStore } from "../app/store";
 import { STORED_ANALYSIS, STORED_FLOOD } from "../demo/stored";
 import { exploreEvidence, startLahoreTour, stopTour } from "../demo/lahore";
+import { AnalysisList } from "./TopBar";
 
 const NOTICE_SECONDS = 6;
 
@@ -12,60 +13,50 @@ export function Intro() {
   const open = useStore((s) => s.introOpen);
   const set = useStore((s) => s.set);
   const loadAnalysis = useStore((s) => s.loadAnalysis);
+  const [step, setStep] = useState<"start" | "analyse">("start");
   if (!open) return null;
+  const close = () => { setStep("start"); set({ introOpen: false, mode: "explore" }); };
   return (
     <div className="intro" role="dialog" aria-modal="false" aria-labelledby="intro-title">
-      <button className="ghost intro-close" onClick={() => set({ introOpen: false, mode: "explore" })} aria-label="Close and explore the globe">×</button>
-      <p className="eyebrow">Open satellite archives · reproducible analysis</p>
+      <button className="ghost intro-close" onClick={close} aria-label="Close and explore the globe">×</button>
+      <p className="eyebrow">Open satellite archives · live hazards · reproducible analysis</p>
       <h1 id="intro-title">See what is changing on Earth.</h1>
-      <p className="lede">
-        Pick a place and two dates. EarthPulse reads the Landsat and Sentinel-2 scenes, measures the
-        change, and shows the evidence behind every number.
-      </p>
-      <div className="cards">
-        <button className="lead" onClick={() => set({ introOpen: false, mode: "live" })}>
-          <strong>What is happening now</strong>
-          <span>Current disaster alerts, where fire is being detected, and where rivers are forecast to flood. From GDACS, NASA and Copernicus.</span>
-        </button>
-        <button onClick={() => void startLahoreTour()}>
-          <strong>Lahore, 1993 to today</strong>
-          <span>A guided look at three decades of Landsat imagery over one district.</span>
-        </button>
-        <button onClick={() => set({ introOpen: false, mode: "explore" })}>
-          <strong>Explore Earth</strong>
-          <span>Move through 40 years of imagery with the timeline. Zoom to a region to load it.</span>
-        </button>
-        <button onClick={() => {
-          set({ introOpen: false, mode: "floods" });
-          if (HOSTED) void loadAnalysis(STORED_FLOOD.id);
-        }}>
-          <strong>Map a flood</strong>
-          <span>
-            {HOSTED
-              ? `${STORED_FLOOD.title}: flood extent from Sentinel-1 radar, which sees through cloud.`
-              : "Flood extent from Sentinel-1 radar, which sees through cloud, with the land it covered."}
-          </span>
-        </button>
-        <button onClick={() => set({ introOpen: false, mode: "cities" })}>
-          <strong>Follow a city&apos;s growth</strong>
-          <span>Where built-up land spread from 2017, and whether it replaced crops, trees or open land.</span>
-        </button>
-        <button onClick={() => set({ introOpen: false, mode: "water" })}>
-          <strong>Track surface water</strong>
-          <span>Choose a lake, reservoir or river reach and map its water year by year. Runs on your own computer.</span>
-        </button>
-        {HOSTED ? (
-          <button onClick={() => { set({ introOpen: false, mode: "change" }); void loadAnalysis(STORED_ANALYSIS.id); }}>
-            <strong>See a real analysis</strong>
-            <span>{STORED_ANALYSIS.title}: where the vegetation index fell and rose, with the scenes behind it.</span>
-          </button>
-        ) : (
-          <button onClick={() => set({ introOpen: false, mode: "change" })}>
-            <strong>Analyse an area</strong>
-            <span>Draw an area and measure vegetation, water or built-up change between two years.</span>
-          </button>
-        )}
-      </div>
+      {step === "start" ? (
+        <>
+          <div className="cards three">
+            <button className="lead" onClick={() => set({ introOpen: false, mode: "live", liveTab: "news" })}>
+              <strong>What is happening now</strong>
+              <span>Earthquakes, floods, storms and fires in today&apos;s news, on the globe, with how each one happened.</span>
+            </button>
+            <button onClick={close}>
+              <strong>Explore 40 years of Earth</strong>
+              <span>Move through Landsat and Sentinel-2 imagery since 1984 and compare any two years.</span>
+            </button>
+            <button onClick={() => setStep("analyse")}>
+              <strong>Measure a place</strong>
+              <span>Floods, burn scars, lakes, city growth or vegetation change for an area you choose.</span>
+            </button>
+          </div>
+          <p className="examples">
+            Or start from an example:{" "}
+            <button className="link" onClick={() => void startLahoreTour()}>Lahore, 1993 to today</button>
+            {HOSTED && (
+              <>
+                {" · "}
+                <button className="link" onClick={() => { set({ introOpen: false, mode: "floods" }); void loadAnalysis(STORED_FLOOD.id); }}>{STORED_FLOOD.title}</button>
+                {" · "}
+                <button className="link" onClick={() => { set({ introOpen: false, mode: "change" }); void loadAnalysis(STORED_ANALYSIS.id); }}>{STORED_ANALYSIS.title}</button>
+              </>
+            )}
+          </p>
+        </>
+      ) : (
+        <>
+          <p className="lede">What do you want to measure? You will choose the area next; the analysis runs on your computer.</p>
+          <AnalysisList onPick={(id) => { setStep("start"); set({ introOpen: false, mode: id }); }} />
+          <button className="link" onClick={() => setStep("start")}>← Back</button>
+        </>
+      )}
     </div>
   );
 }

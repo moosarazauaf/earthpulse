@@ -23,6 +23,14 @@ All notable changes are recorded here. Versions follow
 - The Live panel is split into three tabs (news, agency alerts, map layers)
   so it opens on one short list instead of everything at once.
 
+### Changed
+- **Simpler first screen.** The top bar has three entries, Live, Explore and
+  Analyse; Analyse opens a menu that lists each analysis by the question it
+  answers ("Where did flood water spread?"). The opening card offers three
+  choices instead of seven, with the worked examples in one line beneath.
+  The disabled Forests and Carbon buttons are gone (they are on the roadmap).
+- The Layers panel starts closed and opens the first time Explore is chosen.
+
 ## [0.2.0-alpha.7] - 2026-10-15
 
 ### Added
