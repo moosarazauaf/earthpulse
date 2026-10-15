@@ -13,7 +13,7 @@ No account. No API key. No server. Satellite analyses run on your own computer.
 [![License: MIT](https://img.shields.io/badge/license-MIT-5fd0c5.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/moosarazauaf/earthpulse?include_prereleases&color=7bd88f)](https://github.com/moosarazauaf/earthpulse/releases)
 
-<img src="docs/media/live.jpg" alt="EarthPulse Live view: a 3D globe with current disaster alerts, active fire detections, river flood forecasts and earthquakes, with a panel explaining each layer's source and limits" width="100%">
+<img src="docs/media/news.jpg" alt="EarthPulse Live view: natural-hazard stories from the past 24 hours of news as coloured markers on a 3D globe, with headlines, outlets and agency matches in a side panel" width="100%">
 
 </div>
 
@@ -58,6 +58,8 @@ up to it, for example *"54 mm of rain in the 3 days before: wetter than in
 any year from 1991 to 2020"*. One click then proposes the satellite analysis
 that can test the story: flood water from radar, a burn scar, or landslide
 scars.
+
+<img src="docs/media/news-story.jpg" alt="A news story about flash flooding in Oklahoma City, with the outlet's headline, a chart of daily rain for the 30 days before, and the finding that 54 mm in 3 days was wetter than any year from 1991 to 2020" width="100%">
 
 ### 🛰️ Compare any two years since 1984
 Annual Landsat and Sentinel-2 layers in true colour, false colour and four
