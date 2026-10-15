@@ -17,6 +17,9 @@ All notable changes are recorded here. Versions follow
 
 ### Changed
 - The opening card is lower and shorter, so the globe is visible on arrival.
+- Phones: the mode menu is a scrollable strip (it was hidden, which made
+  every analysis unreachable on a phone), the top bar no longer overflows, the
+  layers panel starts closed, and the opening card has a close button.
 
 Phase 2 in progress.
 

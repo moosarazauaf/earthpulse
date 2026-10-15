@@ -29,7 +29,8 @@ const OVERLAY_LABELS: Record<string, string> = {
 
 export function LayerPanel() {
   const s = useStore();
-  const [open, setOpen] = useState(true);
+  // On a phone the panel starts closed so the globe is visible.
+  const [open, setOpen] = useState(() => window.innerWidth > 800);
   const dataset = datasetForYear(s.preferredDataset, s.year);
   const sentinelBlocked = s.preferredDataset === "sentinel2" && dataset === "landsat";
   const mapped = hasLayers(s.result) ? s.result : null;

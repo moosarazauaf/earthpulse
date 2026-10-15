@@ -125,7 +125,9 @@ export function TopBar() {
         )}
       </form>
 
-      <button className="ghost" onClick={() => void getGlobe()?.resetView()} title="Back to the whole Earth">Reset view</button>
+      <button className="ghost reset" onClick={() => void getGlobe()?.resetView()} title="Back to the whole Earth" aria-label="Reset view">
+        <span aria-hidden="true">⟲</span><span className="label"> Reset view</span>
+      </button>
       <button className="ghost" onClick={share}>Share</button>
     </header>
   );

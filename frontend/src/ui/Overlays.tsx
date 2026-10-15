@@ -15,6 +15,7 @@ export function Intro() {
   if (!open) return null;
   return (
     <div className="intro" role="dialog" aria-modal="false" aria-labelledby="intro-title">
+      <button className="ghost intro-close" onClick={() => set({ introOpen: false, mode: "explore" })} aria-label="Close and explore the globe">×</button>
       <p className="eyebrow">Open satellite archives · reproducible analysis</p>
       <h1 id="intro-title">See what is changing on Earth.</h1>
       <p className="lede">
