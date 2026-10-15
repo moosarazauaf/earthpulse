@@ -6,7 +6,7 @@ import type { AnalysisResult, Overlay } from "../app/types";
 import type { Progress } from "./common";
 import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
 
-export const SOFTWARE_VERSION = "0.2.0-alpha.6";
+export const SOFTWARE_VERSION = "0.2.0-alpha.7";
 export type Quality = "fast" | "balanced" | "detailed";
 
 export interface DeviceProfile {
