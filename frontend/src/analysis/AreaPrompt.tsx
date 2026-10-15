@@ -70,6 +70,7 @@ const QUESTIONS: Record<string, string> = {
   change: "Where do you want to look for change?",
   floods: "Where do you want to map flooding?",
   water: "Which water body or region do you want to track?",
+  cities: "Which city or district do you want to follow?",
 };
 
 export function AreaPrompt() {

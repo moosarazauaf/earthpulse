@@ -55,6 +55,7 @@ export function SharedRunCard() {
     const request = shared.request as never;
     if (shared.kind === "change") void store.runChange(request, device, quality);
     else if (shared.kind === "flood") void store.runFlood(request, device, quality);
+    else if (shared.kind === "urban") void store.runUrban({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
     else void store.runWater({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
   }
 

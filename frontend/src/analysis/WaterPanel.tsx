@@ -114,11 +114,11 @@ export function WaterForm() {
   );
 }
 
-function YearPlayer({ result }: { result: WaterResult }) {
+/** Steps through the y<year> overlays of a result on the globe. */
+export function YearPlayer({ years }: { years: number[] }) {
   const key = useStore((s) => s.overlay.key);
   const setOverlay = useStore((s) => s.setOverlay);
   const [playing, setPlaying] = useState(false);
-  const years = result.series.filter((e) => e.status === "OBSERVED").map((e) => e.year);
   const index = years.findIndex((y) => `y${y}` === key);
 
   useEffect(() => {
@@ -185,7 +185,7 @@ export function WaterResults({ result }: { result: WaterResult }) {
 
       <section>
         <h3>See it on the globe</h3>
-        <YearPlayer result={result} />
+        <YearPlayer years={result.series.filter((e) => e.status === "OBSERVED").map((e) => e.year)} />
         <div className="seg" role="radiogroup" aria-label="Summary maps">
           <button role="radio" aria-checked={key === "persistence"} className={key === "persistence" ? "on" : ""} onClick={() => setOverlay({ key: "persistence" })}>Persistence</button>
           <button role="radio" aria-checked={key === "change"} className={key === "change" ? "on" : ""} onClick={() => setOverlay({ key: "change" })}>Lost and gained</button>

@@ -39,6 +39,19 @@ are striped); 7 for 2012, with a warning; 8 and 9 from 2013.
 | Scaling | reflectance = (DN + offset) / 10000; offset is −1000 from processing baseline 04.00 (2022-01-25), 0 before |
 | Pixel mask | `SCL` classes 0, 1, 3, 8, 9, 10, 11 rejected |
 
+## Land-cover maps
+
+| | |
+|---|---|
+| Product | Impact Observatory 10 m Annual Land Use Land Cover (9-class) v2 |
+| Producer | Impact Observatory, Microsoft and Esri, from ESA Sentinel-2 |
+| Years | 2017 to 2023 |
+| Licence | CC BY 4.0 |
+| Used by | UrbanEye (counted, never reclassified) |
+
+ESA WorldCover 2021 v200 (10 m, CC BY 4.0) is used by FloodLens for the land
+under floodwater.
+
 ## Access
 
 **Microsoft Planetary Computer** (https://planetarycomputer.microsoft.com/).

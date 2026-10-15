@@ -5,17 +5,20 @@
 import { type BrowserChangeRequest, runChange } from "./change";
 import type { EngineHooks, Progress } from "./common";
 import { type BrowserFloodRequest, runFlood } from "./flood";
+import { type UrbanRequest, runUrban } from "./urban";
 import { type WaterRequest, runWater } from "./water";
 
 export type WorkerRequest =
   | { kind: "water"; request: WaterRequest }
   | { kind: "change"; request: BrowserChangeRequest }
-  | { kind: "flood"; request: BrowserFloodRequest };
+  | { kind: "flood"; request: BrowserFloodRequest }
+  | { kind: "urban"; request: UrbanRequest };
 
 export type EngineResult =
   | Awaited<ReturnType<typeof runWater>>
   | Awaited<ReturnType<typeof runChange>>
-  | Awaited<ReturnType<typeof runFlood>>;
+  | Awaited<ReturnType<typeof runFlood>>
+  | Awaited<ReturnType<typeof runUrban>>;
 
 export type WorkerMessage =
   | { type: "progress"; progress: Progress }
@@ -41,6 +44,7 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     const result =
       job.kind === "water" ? await runWater(job.request, hooks)
       : job.kind === "change" ? await runChange(job.request, hooks)
+      : job.kind === "urban" ? await runUrban(job.request, hooks)
       : await runFlood(job.request, hooks);
     post({ type: "done", result });
   } catch (error) {

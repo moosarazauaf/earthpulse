@@ -5,6 +5,7 @@ import { ApiError, api, pollAnalysis } from "./api";
 import { type DeviceProfile, PIXEL_BUDGET, type Quality, type RunHandle, runInBrowser } from "../engine/client";
 import type { WorkerRequest } from "../engine/worker";
 import type { Progress } from "../engine/common";
+import type { UrbanRequest } from "../engine/urban";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import { clampYear, currentYear, datasetForYear } from "./logic";
@@ -64,7 +65,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "live" | "explore" | "change" | "floods" | "water" | "research";
+  mode: "live" | "explore" | "change" | "floods" | "water" | "cities" | "research";
   // live hazards
   alerts: Alert[] | null;
   alertsError: string | null;
@@ -95,6 +96,7 @@ interface State {
   runTimeSeries: (request: TimeSeriesRequest) => Promise<void>;
   runFlood: (request: FloodRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runWater: (request: WaterRequest, device: DeviceProfile) => Promise<void>;
+  runUrban: (request: UrbanRequest, device: DeviceProfile) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
 }
@@ -240,6 +242,7 @@ export const useStore = create<State>((set, get) => {
     runFlood: (request, device, quality) =>
       runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
     runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),
+    runUrban: (request, device) => runLocal({ kind: "urban", request }, device, "growth", "cities", "none"),
     loadAnalysis: async (id) => {
       try {
         const record = await api.analysis(id);

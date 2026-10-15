@@ -2,7 +2,7 @@
 import { HOSTED, absolute, api } from "../app/api";
 import { formatArea, formatIndex, formatSigned } from "../app/logic";
 import { useStore } from "../app/store";
-import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesResult, isMapped } from "../app/types";
+import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesResult, hasLayers, isMapped } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 import { shareUrl } from "../ui/TopBar";
 import { downloadText } from "./download";
@@ -56,7 +56,7 @@ export function ResultHeader({ result }: { result: AnalysisResult }) {
 /** Results computed in this tab are saved from the browser; there is no server copy to link to. */
 function BrowserExports({ result }: { result: AnalysisResult }) {
   const key = useStore((s) => s.overlay.key);
-  const overlays: Record<string, { url: string; title: string; bounds: number[]; legend: unknown }> = isMapped(result) ? result.overlays : {};
+  const overlays: Record<string, { url: string; title: string; bounds: number[]; legend: unknown }> = hasLayers(result) ? result.overlays : {};
   const shown = key ? overlays[key] : undefined;
   const record = () => JSON.stringify({
     ...result,
@@ -78,7 +78,7 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
       </div>
       <p className="muted">
         Computed in {result.provenance.seconds} s on this device. The result exists only in this browser tab; export it to keep it.
-        Regions are saved as bounding boxes with their true areas.
+        {isMapped(result) ? "Regions are saved as bounding boxes with their true areas." : ""}
       </p>
     </section>
   );

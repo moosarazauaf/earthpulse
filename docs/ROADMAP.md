@@ -43,7 +43,8 @@ Carried over to later releases:
 - [ ] Traced region outlines in the browser engine (currently bounding boxes)
 - [ ] Shareable links and GeoTIFF export for browser-run analyses
 - [ ] WaterWatch: AWEI option, Otsu threshold, seasonality within a year
-- [ ] UrbanEye: built-up growth profile, surface temperature where thermal data exists
+- [x] UrbanEye: built-up growth 2017 to 2023 and what it replaced (Impact Observatory maps)
+- [ ] UrbanEye: Landsat-era built-up history before 2017, surface temperature
 - [ ] ForestEye: loss, gain and disturbance with explicit terminology
 - [ ] FireWatch: NASA FIRMS active-fire detections
 

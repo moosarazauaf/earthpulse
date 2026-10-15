@@ -383,3 +383,21 @@ describe("shared analysis links", () => {
     expect((param as string).length).toBeLessThanOrEqual(MAX_PARAM_LENGTH);
   });
 });
+
+describe("UrbanEye rules", () => {
+  it("counts class areas inside the area only, skipping no-data", async () => {
+    const { classAreas } = await import("./urban");
+    const map = new Uint8Array([7, 7, 5, 0, 7]);
+    const mask = new Uint8Array([1, 1, 1, 1, 0]);
+    expect(classAreas(map, mask, 0.01)).toEqual({ 7: 0.02, 5: 0.01 });
+  });
+
+  it("reports what new built-up land was, ignoring land already built and no-data", async () => {
+    const { conversions } = await import("./urban");
+    const first = new Uint8Array([5, 2, 7, 0, 5, 11]);
+    const last = new Uint8Array([7, 7, 7, 7, 5, 7]);
+    const mask = new Uint8Array([1, 1, 1, 1, 1, 0]);
+    // Crops and trees became built-up; the already-built pixel, the no-data pixel and the masked one do not count.
+    expect(conversions(first, last, mask, 1)).toEqual({ 5: 1, 2: 1 });
+  });
+});

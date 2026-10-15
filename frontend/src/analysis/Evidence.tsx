@@ -12,6 +12,10 @@ function claim(result: AnalysisResult): string {
     const years = result.series.filter((e) => e.values).map((e) => e.year);
     return `Mean spectral indices over the area were measured for ${years.length} years between ${years[0]} and ${years[years.length - 1]}.`;
   }
+  if (result.type === "urban") {
+    const m = result.summary;
+    return `Land mapped as built area grew from ${formatArea(m.builtFirstHa)} in ${m.firstYear} to ${formatArea(m.builtLastHa)} in ${m.lastYear} in the Impact Observatory land-cover maps.`;
+  }
   if (result.type === "water") {
     const m = result.summary;
     return `Surface water covered ${formatArea(m.firstHa)} in ${m.firstYear} and ${formatArea(m.lastHa)} in ${m.lastYear}.`;

@@ -6,6 +6,7 @@ import { LivePanel } from "../hazards/LivePanel";
 import { AnalysisForm } from "./AnalysisForm";
 import { Evidence } from "./Evidence";
 import { FloodForm, FloodResults } from "./FloodPanel";
+import { UrbanForm, UrbanResults } from "./UrbanPanel";
 import { WaterForm, WaterResults } from "./WaterPanel";
 import { ChangeResults, SeriesResults } from "./Results";
 
@@ -78,7 +79,7 @@ export function ContextPanel() {
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";
-  const title = mode === "research" ? "Evidence" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : "What changed here?";
+  const title = mode === "research" ? "Evidence" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : "What changed here?";
 
   return (
     <aside className={`panel right${open ? "" : " collapsed"}`} aria-label={title}>
@@ -107,10 +108,11 @@ export function ContextPanel() {
               {!running && result?.type === "timeseries" && <SeriesResults result={result} />}
               {!running && result?.type === "flood" && <FloodResults result={result} />}
               {!running && result?.type === "water" && <WaterResults result={result} />}
+              {!running && result?.type === "urban" && <UrbanResults result={result} />}
               {!running && (
                 <details className="form-wrap" open={!result}>
                   <summary>{result ? "New analysis" : "Set up an analysis"}</summary>
-                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : <AnalysisForm />}
+                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : mode === "cities" ? <UrbanForm /> : <AnalysisForm />}
                 </details>
               )}
             </>

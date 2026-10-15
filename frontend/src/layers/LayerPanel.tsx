@@ -21,6 +21,7 @@ const OVERLAY_LABELS: Record<string, string> = {
   after: "After",
   flood: "Flood extent",
   persistence: "Persistence",
+  growth: "Urban growth",
   vv_before: "Radar before",
   vv_flood: "Radar flood",
   vv_after: "Radar after",
@@ -124,12 +125,12 @@ export function LayerPanel() {
                 </>
               )}
               <label className="check">
-                {mapped.type !== "water" && (
+                {mapped.type !== "water" && mapped.type !== "urban" && (
                   <input type="checkbox" checked={s.overlay.detections}
                     onChange={(e) => s.setOverlay({ detections: e.target.checked })} />
                 )}
-                {mapped.type === "water" ? (
-                  <span className="muted">Yearly maps are chosen in the WaterWatch panel.</span>
+                {mapped.type === "water" || mapped.type === "urban" ? (
+                  <span className="muted">Yearly maps are chosen in the analysis panel.</span>
                 ) : mapped.type === "flood" ? (
                   <span>{mapped.provenance.computedOn === "browser" ? "Boxes around the largest flooded areas" : "Outlines of flooded areas"}</span>
                 ) : (

@@ -13,12 +13,13 @@ const MODES = [
   { id: "change", label: "Change" },
   { id: "floods", label: "Floods" },
   { id: "water", label: "Water" },
+  { id: "cities", label: "Cities" },
   { id: "research", label: "Research" },
 ] as const;
 /** Modules on the roadmap. Listed so the plan is visible, disabled so nothing is faked. */
 /** Camera height after flying to typed coordinates: a district-sized view. */
 const COORDINATE_VIEW_HEIGHT_M = 120_000;
-const PLANNED = ["Cities", "Forests", "Carbon"];
+const PLANNED = ["Forests", "Carbon"];
 
 export function shareUrl(): string {
   const s = useStore.getState();

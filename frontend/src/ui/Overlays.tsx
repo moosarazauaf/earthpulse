@@ -45,6 +45,10 @@ export function Intro() {
               : "Flood extent from Sentinel-1 radar, which sees through cloud, with the land it covered."}
           </span>
         </button>
+        <button onClick={() => set({ introOpen: false, mode: "cities" })}>
+          <strong>Follow a city&apos;s growth</strong>
+          <span>Where built-up land spread from 2017, and whether it replaced crops, trees or open land.</span>
+        </button>
         <button onClick={() => set({ introOpen: false, mode: "water" })}>
           <strong>Track surface water</strong>
           <span>Choose a lake, reservoir or river reach and map its water year by year. Runs on your own computer.</span>

@@ -72,6 +72,12 @@ threshold, with the largest regions listed and the distribution plotted.
 
 <img src="docs/media/change.jpg" alt="NDVI change across Lahore District between 1993 and 2025, with decrease in orange and increase in green, and a histogram of change" width="100%">
 
+### 🏙️ Follow a city's growth
+**UrbanEye** counts built-up land in each annual 10 m land-cover map from 2017
+to 2023, maps where it spread, and says what it replaced: crops, trees,
+rangeland or bare ground. The maps are machine-learning classifications, and
+the result is labelled that way.
+
 ### 💧 Track surface water year by year
 **WaterWatch** maps water for up to nine years, plots the area through time
 (missing years stay empty, never interpolated), and shows how persistent each
@@ -102,6 +108,7 @@ the optional Python backend.
 | Sentinel-2 L2A | 10 m | 2016 | Year layers, change, water |
 | Sentinel-1 RTC (radar) | 10 m | 2014 | FloodLens |
 | ESA WorldCover 2021 | 10 m | 2021 | Land under floodwater |
+| Impact Observatory annual land cover | 10 m | 2017 | UrbanEye |
 | GDACS, NASA FIRMS, GloFAS, GWIS, USGS | varies | live | Live view |
 
 All of it is open and keyless. Licences and attribution are in
@@ -136,7 +143,7 @@ install icon in the address bar).
 
 ## Roadmap
 
-UrbanEye (built-up growth and heat), ForestEye (loss, gain and disturbance),
+Surface temperature and pre-2017 history for UrbanEye, ForestEye (loss, gain and disturbance),
 land-cover classification with accuracy assessment, carbon accounting with
 exposed equations, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
 [CHANGELOG.md](CHANGELOG.md).

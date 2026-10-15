@@ -6,6 +6,10 @@ All notable changes are recorded here. Versions follow
 ## [Unreleased]
 
 ### Added
+- **UrbanEye** (Cities mode): built area per year from 2017 to 2023, where it
+  grew, and what land it replaced, counted from the Impact Observatory annual
+  land-cover maps in the browser. Labelled MODELED, since the maps are
+  machine-learning classifications.
 - Shareable links for browser analyses: the link carries the recipe and
   re-runs the analysis on the recipient's device after they confirm.
 - README rebuilt around real screenshots and an animation of the live app,

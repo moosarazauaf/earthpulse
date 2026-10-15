@@ -10,7 +10,7 @@
 import { areaFromGeoJson } from "../analysis/areaFile";
 import type { AnalysisResult, AoiGeometry } from "./types";
 
-export type RunKind = "change" | "flood" | "water";
+export type RunKind = "change" | "flood" | "water" | "urban";
 export interface SharedRun {
   kind: RunKind;
   /** The request as the engine needs it, minus the device-specific download parallelism. */
@@ -23,7 +23,7 @@ const VERSION = 1;
 export const MAX_PARAM_LENGTH = 6000;
 /** Decimal places kept in shared coordinates: 4 is about 11 m, finer than any pixel used. */
 const COORDINATE_DECIMALS = 4;
-const KINDS: RunKind[] = ["change", "flood", "water"];
+const KINDS: RunKind[] = ["change", "flood", "water", "urban"];
 
 function toBase64Url(text: string): string {
   const bytes = new TextEncoder().encode(text);
@@ -94,6 +94,7 @@ export function describeRun(run: SharedRun): string {
   };
   if (run.kind === "change") return `${String(r.index ?? "ndvi").toUpperCase()} change, ${span(r.before)} against ${span(r.after)}`;
   if (run.kind === "flood") return `Flood mapping, ${span(r.before)} against ${span(r.flood)}`;
+  if (run.kind === "urban") return `Built area from ${String(r.firstYear)} to ${String(r.lastYear)}`;
   const years = Array.isArray(r.years) ? (r.years as number[]) : [];
   return `Surface water in ${years.join(", ")}`;
 }

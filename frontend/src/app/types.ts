@@ -280,9 +280,29 @@ export interface WaterResult extends ResultBase {
   overlays: Record<string, Overlay>;
 }
 
-export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult;
+export interface UrbanResult extends ResultBase {
+  type: "urban";
+  request: { aoi: AoiGeometry; label?: string | null; firstYear: number; lastYear: number; maxPixels: number };
+  summary: {
+    aoiAreaHa: number;
+    firstYear: number;
+    lastYear: number;
+    builtFirstHa: number;
+    builtLastHa: number;
+    growthHa: number;
+    growthPercent: number | null;
+    newBuiltHa: number;
+    lostBuiltHa: number;
+    trendHaPerYear: number | null;
+    replaced: { class: string; ha: number }[];
+  };
+  series: { year: number; builtHa: number; classes: Record<string, number>; cloudHa: number }[];
+  overlays: Record<string, Overlay>;
+}
+
+export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult | UrbanResult;
 /** Results that put rasters on the globe. */
-export type LayeredResult = ChangeResult | FloodResult | WaterResult;
+export type LayeredResult = ChangeResult | FloodResult | WaterResult | UrbanResult;
 export const hasLayers = (r: AnalysisResult | null): r is LayeredResult =>
   r !== null && r.type !== "timeseries";
 /** Results that put rasters and regions on the globe. */
