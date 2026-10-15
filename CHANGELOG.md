@@ -5,6 +5,15 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+### Added
+- Shareable links for browser analyses: the link carries the recipe and
+  re-runs the analysis on the recipient's device after they confirm.
+- README rebuilt around real screenshots and an animation of the live app,
+  CITATION.cff, a code of conduct, and issue and pull request templates.
+
+### Changed
+- The opening card is lower and shorter, so the globe is visible on arrival.
+
 Phase 2 in progress.
 
 ### Added

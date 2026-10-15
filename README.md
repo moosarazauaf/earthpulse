@@ -1,201 +1,179 @@
-# EarthPulse
+<div align="center">
 
-**See what is changing on Earth.**
+# 🌍 EarthPulse
 
-EarthPulse is an open-source Earth-observation platform. It puts a 3D globe,
-open satellite archives and a reproducible analysis engine in one browser
-application, so that a question like *"what changed here?"* gets an answer
-that comes with its evidence.
+### See what is changing on Earth, with the evidence behind every number.
 
-**Live demo: https://moosarazauaf.github.io/earthpulse/**
+**[Open the live app →](https://moosarazauaf.github.io/earthpulse/)**
 
-Developed by [Muhammad Moosa Raza](https://moosarazauaf.github.io/).
+No account. No API key. No server. Satellite analyses run on your own computer.
 
-> Status: Phase 2 in progress. Exploration, comparison, index change analysis,
-> flood mapping and surface-water tracking work on real data. Forests, cities, fire, carbon, classification, the
-> assistant and story mode are not built yet. [CHANGELOG.md](CHANGELOG.md)
-> lists what works; [docs/ROADMAP.md](docs/ROADMAP.md) lists what does not.
+[![CI](https://github.com/moosarazauaf/earthpulse/actions/workflows/ci.yml/badge.svg)](https://github.com/moosarazauaf/earthpulse/actions/workflows/ci.yml)
+[![Deploy](https://github.com/moosarazauaf/earthpulse/actions/workflows/pages.yml/badge.svg)](https://moosarazauaf.github.io/earthpulse/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-5fd0c5.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/moosarazauaf/earthpulse?include_prereleases&color=7bd88f)](https://github.com/moosarazauaf/earthpulse/releases)
 
-## Who it is for
+<img src="docs/media/live.jpg" alt="EarthPulse Live view: a 3D globe with current disaster alerts, active fire detections, river flood forecasts and earthquakes, with a panel explaining each layer's source and limits" width="100%">
 
-EarthPulse serves two audiences with the same globe.
+</div>
 
-- **Anyone**: the **Live** view shows current disaster alerts, where fire is
-  being detected, and where rivers are forecast to flood, each from the agency
-  that publishes it and each labelled as an observation or a forecast.
-- **Researchers**: the analysis modes (Change, Floods, Water) run documented
-  methods on an area you choose and hand back the evidence, the scenes used
-  and exports.
+EarthPulse puts four decades of open satellite imagery, live hazard feeds and
+a reproducible analysis engine on one 3D globe in the browser. Ask *"what
+changed here?"* about any place on Earth and get an answer that names the
+scenes, the method and the limits behind it.
 
-## What it does today
+## Why it is different
 
-- **Live hazards.** Red and orange alerts from GDACS, active fire detections
-  from NASA VIIRS, river flood forecasts and observed flood extent from
-  Copernicus GloFAS, and fire danger from Copernicus GWIS. EarthPulse shows
-  these; it does not produce them, and it is not a warning service.
+- **It runs on your machine.** Change detection, flood mapping and
+  surface-water tracking happen in a web worker in your browser, which reads
+  Landsat, Sentinel-1 and Sentinel-2 files straight from the public archive.
+  The heavy work happens on visitors' machines, so the site itself is just
+  static files on free hosting.
+- **No claim without evidence.** Every result lists the exact scenes used,
+  the cloud mask, the formula, the threshold, how sensitive the answer is to
+  that threshold, and what the method cannot see. Values are labelled
+  *observed*, *derived*, *modelled* or *estimated*, never mixed up.
+- **Share a link, not a screenshot.** A shared analysis link carries the full
+  recipe. Whoever opens it re-runs the same analysis on their own device.
+  [Try one: surface water at Mangla Reservoir, 2000 and 2025.](https://moosarazauaf.github.io/earthpulse/?lat=33.15&lon=73.7&h=90000&run=eyJ2IjoxLCJrIjoid2F0ZXIiLCJtIjoyNTAwMDAsInIiOnsiYW9pIjp7InR5cGUiOiJQb2x5Z29uIiwiY29vcmRpbmF0ZXMiOltbWzczLjU1LDMzLjAyXSxbNzMuODUsMzMuMDJdLFs3My44NSwzMy4zXSxbNzMuNTUsMzMuM10sWzczLjU1LDMzLjAyXV1dfSwibGFiZWwiOiJNYW5nbGEgUmVzZXJ2b2lyIiwiZGF0YXNldCI6ImxhbmRzYXQiLCJ5ZWFycyI6WzIwMDAsMjAyNV0sInN0YXJ0TW9udGgiOjEwLCJlbmRNb250aCI6MTIsInRocmVzaG9sZCI6MCwibWF4Q2xvdWQiOjIwfX0)
+- **Your area, your file.** Draw a rectangle or polygon, or drop in a zipped
+  shapefile or GeoJSON. It is read in the browser and never uploaded.
 
-- **Explore.** A 3D globe with annual Landsat (1984 on, 30 m) and Sentinel-2
-  (2016 on, 10 m) layers in true colour, false colour, NDVI, NDWI, MNDWI and
-  NDBI. A timeline moves through the years.
-- **Compare.** Put two years under a swipe divider, blink between them, or
-  blend them.
-- **Measure.** Draw an area, pick two years and a season, and run a change
-  analysis. The backend selects the clearest scenes, masks cloud, builds
-  median composites, and reports where the index moved past a threshold.
-- **Map floods.** FloodLens maps flood extent from Sentinel-1 radar for a
-  before and a flood window, separates water that was already there, and
-  reports the cropland and built-up land under water.
-- **Track water.** WaterWatch maps surface water year by year for a lake,
-  reservoir or river reach, and shows its area through time, how persistent
-  each water pixel is, and what was lost or gained. It runs entirely in the
-  visitor's browser, on their own computer, so it works on the live site.
-- **Start from your area.** Every analysis begins by asking for an area: draw
-  a rectangle or polygon, or upload a zipped shapefile or GeoJSON file.
-- **Prove.** Each result has an Analysis ID, the list of scenes used, the
-  method, its limits, exports, and an Earth Engine script that names the same
-  scenes.
+## What you can do
 
-Example: Lahore District, October to December 1993 against the same months of
-2025 (analysis run on 2026-10-06, 9 Landsat 5 and 9 Landsat 8/9 scenes, 60 m
-working resolution, threshold 0.15): NDVI decreased on 179 km² and increased
-on 220 km² of 1,674 km² analysed. That is an index result. It mixes urban
-growth with changes in cropping, and no accuracy assessment has been made.
+### 🔴 See what is happening now
+Current red and orange disaster alerts (GDACS), active fire detections (NASA
+VIIRS), river flood forecasts and observed flood extent (Copernicus GloFAS),
+fire danger (Copernicus GWIS) and the past week's earthquakes (USGS). Each
+layer says who publishes it, whether it is an observation or a forecast, and
+what it is not. EarthPulse shows these products; it is not a warning service.
 
-## The live demo and the full application
+### 🛰️ Compare any two years since 1984
+Annual Landsat and Sentinel-2 layers in true colour, false colour and four
+spectral indices, with a timeline and a swipe, blink or blend comparison.
 
-The live demo is the frontend alone, served by GitHub Pages. It can do
-everything that needs only imagery: the globe, the annual layers, the
-timeline, comparison and the Lahore tour, with tiles requested from Planetary
-Computer by the browser. Analyses come in two kinds:
+<img src="docs/media/timeline.gif" alt="Lahore in Landsat true colour, stepping through 1993, 2003, 2013, 2023 and 2025 as the city grows" width="100%">
 
-- **Change detection, FloodLens and WaterWatch all run on the live site.**
-  They are computed in the visitor's browser, which reads the satellite files
-  directly. No server is involved.
-- **The multi-year index series and the Earth Engine script generator still
-  need the Python service** in `backend/`.
-- The site also ships two analyses the backend computed earlier (Lahore
-  District NDVI, and the Indus flood at Layyah), labelled as stored results.
+<img src="docs/media/swipe.jpg" alt="Lahore under a swipe divider: Landsat 1993 on the left, 2025 on the right, showing the city's growth" width="100%">
 
-The browser and the backend implement the same methods but differ in detail
-(scenes per period, working resolution, how regions are outlined), so their
-numbers for the same area are close, not identical.
+### 🌊 Map a flood from radar
+**FloodLens** maps flood extent from Sentinel-1, which sees through cloud. It
+picks one radar orbit that covers your area in every window, separates water
+that was already there, chooses the water threshold from the data, and reports
+flooded cropland and built-up land, recession, and how much the answer moves if
+the threshold is off by 1 dB.
 
-## Install it as an app
+<img src="docs/media/flood.jpg" alt="FloodLens result for the Indus at Layyah, 2022: newly flooded land in red beside the river channel in blue, with flooded area, land cover and threshold sensitivity in the side panel" width="100%">
 
-EarthPulse can be installed from the browser and then opens in its own window
-like a desktop program: in Chrome or Edge, use the install icon in the address
-bar (or the menu, "Install EarthPulse"). It needs a connection, because the
-imagery and hazard feeds are always fetched fresh.
+### 🌱 Measure change
+Pick two years and a season; EarthPulse builds cloud-free composites for both,
+computes NDVI, NDWI, MNDWI or NDBI, and maps where the index moved past a
+threshold, with the largest regions listed and the distribution plotted.
 
-## Design rule
+<img src="docs/media/change.jpg" alt="NDVI change across Lahore District between 1993 and 2025, with decrease in orange and increase in green, and a histogram of change" width="100%">
 
-**No claim without evidence.** Every number EarthPulse shows is tied to the
-scenes, bands, dates, method and parameters that produced it, and is labelled
-as observed, derived, modelled or estimated. Where data is missing the
-application says so instead of filling the gap.
+### 💧 Track surface water year by year
+**WaterWatch** maps water for up to nine years, plots the area through time
+(missing years stay empty, never interpolated), and shows how persistent each
+water pixel is and what was lost or gained. A year player steps through the
+maps on the globe.
 
-## Repository layout
+## How it works
 
-```
-backend/    FastAPI service: imagery providers, analysis engine, exports
-frontend/   React + TypeScript + CesiumJS client
-docs/       Architecture, data sources, roadmap
+```mermaid
+flowchart LR
+  A[You choose an area<br/>draw or upload] --> B[Web worker<br/>in your browser]
+  B -->|STAC search| C[(Planetary Computer<br/>public archive)]
+  C -->|only the pixels<br/>under your area| B
+  B --> D[Cloud mask,<br/>median composite,<br/>index or radar threshold]
+  D --> E[Maps on the globe<br/>numbers + evidence<br/>exports + share link]
 ```
 
-## Quick start
+The engine reads cloud-optimised GeoTIFFs with HTTP range requests at the
+resolution it needs, so a district-sized analysis downloads a few megabytes
+per scene rather than gigabytes. It picks the working resolution from your
+device's cores and memory, and you can trade detail for speed.
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) has the full design, including
+the optional Python backend.
 
-Backend (Python 3.11+):
+| Data | Resolution | Since | Used for |
+|---|---|---|---|
+| Landsat 4–9 Collection 2 L2 | 30 m | 1984 | Year layers, change, water |
+| Sentinel-2 L2A | 10 m | 2016 | Year layers, change, water |
+| Sentinel-1 RTC (radar) | 10 m | 2014 | FloodLens |
+| ESA WorldCover 2021 | 10 m | 2021 | Land under floodwater |
+| GDACS, NASA FIRMS, GloFAS, GWIS, USGS | varies | live | Live view |
+
+All of it is open and keyless. Licences and attribution are in
+[docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+
+## Run it yourself
+
+The live app needs nothing installed. To develop:
 
 ```bash
-cd backend
-python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements-dev.txt   # Windows
-# source .venv/bin/activate && pip install -r requirements-dev.txt   # macOS/Linux
-.venv/Scripts/python -m uvicorn app.main:app --reload --port 8000
-```
-
-Frontend (Node 20+):
-
-```bash
-cd frontend
+git clone https://github.com/moosarazauaf/earthpulse
+cd earthpulse/frontend
 npm install
 npm run dev
 ```
 
-Open http://localhost:5173. No API key is needed for the default
-configuration: imagery and analysis use the public Microsoft Planetary
-Computer STAC archive. See [.env.example](.env.example) for optional settings.
+Open http://localhost:5173. That is the whole application; analyses run in
+the browser. The optional Python backend (multi-year index series, Earth
+Engine script export) is described in [docs/DEPLOY.md](docs/DEPLOY.md).
 
-## API
+EarthPulse can also be installed as a desktop app from Chrome or Edge (the
+install icon in the address bar).
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/api/health` | Service status and version |
-| GET | `/api/datasets` | Datasets, indices and their provenance |
-| GET | `/api/geocode?q=` | Place search |
-| GET | `/api/imagery/layer?dataset=&year=&render=` | Metadata, legend and tile template for a year layer |
-| GET | `/api/imagery/tiles/{dataset}/{year}/{render}/{z}/{x}/{y}.png` | Map tiles |
-| POST | `/api/analysis/change` | Start a change analysis; returns an Analysis ID |
-| POST | `/api/analysis/timeseries` | Start a multi-year index series |
-| POST | `/api/analysis/flood` | Start a Sentinel-1 flood analysis |
-| GET | `/api/analysis/{id}` | Status, current stage, and the result when complete |
-| GET | `/api/analysis/{id}/export?format=geojson\|csv\|json\|gee` | Exports |
-| GET | `/api/analysis/{id}/files/{change\|before\|after}.{png\|tif}` | Result rasters |
-| POST | `/api/gee/generate` | Earth Engine script for a stored analysis |
+## Honest limits
 
-Interactive documentation is served at http://localhost:8000/docs.
+- Analyses download imagery, so speed depends on your connection. A
+  district-sized Sentinel-1 flood analysis is about 10 MB per radar pass.
+- No result has been validated against ground data. Every result says so and
+  shows how sensitive it is to its own threshold.
+- An index change is not a land-cover class and does not show a cause.
+- Live layers are other agencies' products, shown as published.
 
-## Method in brief
+## Roadmap
 
-For each of the two periods the engine takes the three clearest scenes per
-path/row (or Sentinel-2 tile), converts them to surface reflectance, rejects
-pixels flagged by the QA layer, and takes the per-pixel median. The chosen
-index is computed on both composites and differenced. Pixels whose change
-reaches the threshold are counted, and contiguous regions are vectorised.
-Raster work is done in the UTM zone of the area; the area of the AOI itself is
-geodesic. Details and limits are in
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+UrbanEye (built-up growth and heat), ForestEye (loss, gain and disturbance),
+land-cover classification with accuracy assessment, carbon accounting with
+exposed equations, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
+[CHANGELOG.md](CHANGELOG.md).
 
-## Tests
+## Contributing
 
-```bash
-cd backend && .venv/Scripts/python -m pytest
-cd frontend && npm test
-```
+Contributions are welcome, especially new open data sources, analyses and
+translations. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it sets the
+scientific rules every change must follow. Issues labelled
+[good first issue](https://github.com/moosarazauaf/earthpulse/labels/good%20first%20issue)
+are a good place to start.
 
-## Documentation
+## Citing EarthPulse
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
-- [docs/ROADMAP.md](docs/ROADMAP.md)
-- [docs/DEPLOY.md](docs/DEPLOY.md): hosting the frontend and the backend
-- [CONTRIBUTING.md](CONTRIBUTING.md)
-- [SECURITY.md](SECURITY.md)
+If EarthPulse helps your research, cite it with the metadata in
+[CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button), and
+cite the data providers listed in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
 
 ## Acknowledgements
 
-The Live view and several interface ideas (grouped layers that each state
-their source and limits, click-to-inspect markers, one-click reset of the
-globe, typing coordinates into search) were informed by studying
+Imagery and catalogue access: Microsoft Planetary Computer, USGS, ESA and the
+Copernicus programme. Hazard feeds: GDACS, NASA FIRMS and GIBS, Copernicus
+Emergency Management Service, USGS. Globe: CesiumJS. Several interface ideas
+(grouped layers that state their source and limits, click-to-inspect markers,
+one-click reset, coordinate search) came from studying
 [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view) by Bilawal
-Sidhu and Sameh Khamis, which is MIT licensed. No code, assets or data from
-that project are included here; EarthPulse covers environmental change and
-hazards and does not track aircraft, vessels, cameras or people.
+Sidhu and Sameh Khamis (MIT). No code, assets or data from that project are
+included; EarthPulse covers environmental change and hazards and does not
+track aircraft, vessels, cameras or people.
 
 ## Author
 
-EarthPulse is developed by Muhammad Moosa Raza
-([portfolio](https://moosarazauaf.github.io/),
-[GitHub](https://github.com/moosarazauaf)). The project is under active
-development; see the roadmap for what comes next.
+Built by **Muhammad Moosa Raza**, remote sensing and GIS
+([portfolio](https://moosarazauaf.github.io/), [GitHub](https://github.com/moosarazauaf)).
 
-## Responsible use
+## Responsible use and licence
 
-EarthPulse is an environmental science tool. It works at landscape scale on
-public satellite data. It does not identify, track or profile people, and
-contributions that move it in that direction will not be accepted.
-
-## License
-
-MIT. See [LICENSE](LICENSE). Satellite data keeps the license of its provider;
-see [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+EarthPulse works at landscape scale on public data and does not identify,
+track or profile people. Code: MIT ([LICENSE](LICENSE)). Data keeps its
+providers' licences.

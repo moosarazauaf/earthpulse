@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use EarthPulse in research, please cite it as below, and cite the satellite data providers listed in docs/DATA_SOURCES.md."
+title: "EarthPulse: browser-based, reproducible satellite change analysis"
+type: software
+authors:
+  - family-names: "Raza"
+    given-names: "Muhammad Moosa"
+repository-code: "https://github.com/moosarazauaf/earthpulse"
+url: "https://moosarazauaf.github.io/earthpulse/"
+license: MIT
+version: "0.2.0-alpha.5"
+date-released: "2026-10-15"
+keywords:
+  - remote sensing
+  - change detection
+  - flood mapping
+  - Sentinel-1
+  - Sentinel-2
+  - Landsat
+  - surface water
+  - CesiumJS

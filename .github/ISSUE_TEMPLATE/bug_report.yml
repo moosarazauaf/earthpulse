@@ -1,0 +1,27 @@
+name: Bug report
+description: Something does not work or gives a wrong result
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link
+      description: Use "Share" or "Share as a link" in the app and paste the link, so the exact view or analysis can be reproduced.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: "Chrome 141 on Windows 11, 16 GB RAM"
+  - type: textarea
+    id: console
+    attributes:
+      label: Console errors
+      description: Optional. Press F12, open the Console tab, and paste any red lines.
+      render: text

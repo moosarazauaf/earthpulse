@@ -1,0 +1,16 @@
+name: Feature or data source
+description: Suggest an analysis, layer or open dataset
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What question should EarthPulse answer
+      description: Describe the question first, then the feature, if you have one in mind.
+    validations:
+      required: true
+  - type: input
+    id: data
+    attributes:
+      label: Data source
+      description: For a new layer or analysis, the dataset and where it is published. It must be openly accessible without a paid key.

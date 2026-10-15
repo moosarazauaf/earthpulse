@@ -1,0 +1,18 @@
+name: Scientific concern
+description: A method, threshold, label or number that looks wrong or overstated
+labels: ["science"]
+body:
+  - type: textarea
+    id: claim
+    attributes:
+      label: Which result or wording
+      description: Paste the text or number from the app, and the link to the analysis if you have one.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it looks wrong
+      description: References to the literature or product documentation help a lot.
+    validations:
+      required: true
