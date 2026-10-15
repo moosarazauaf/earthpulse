@@ -16,6 +16,8 @@ export interface SharedRun {
   /** The request as the engine needs it, minus the device-specific download parallelism. */
   request: Record<string, unknown> & { aoi: AoiGeometry; label?: string | null };
   maxPixels: number;
+  /** Set when the run was proposed from a news story rather than opened from a link; never encoded. */
+  fromNews?: string;
 }
 
 const VERSION = 1;

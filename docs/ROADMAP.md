@@ -71,6 +71,10 @@ Carried over to later releases:
 ## Phase 6 — Global scale (`v0.6.0`)
 
 - [x] Live hazards: GDACS alerts, active fires, fire danger, flood forecast, observed floods
+- [x] Hazard news: hourly scan of news feeds, placed on the globe, checked against USGS and GDACS
+- [x] "How did it happen?": rain, heat or drought before the event against 1991–2020; earthquake depth and energy
+- [ ] Hazard news: translated feeds (Spanish, French, Bahasa, Urdu), a keyword evaluation set with measured precision
+- [ ] Hazard news: river level and soil moisture context, Sentinel-1 flood check run automatically for large stories
 - [ ] Landslide hazard layer (needs an open, reachable source)
 - [ ] Alerts filtered to the visitor's own region; alert polygons instead of points
 - [ ] Regional scan, hotspot clustering

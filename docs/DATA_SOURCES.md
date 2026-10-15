@@ -105,6 +105,41 @@ GloFAS covers large rivers and not flash or urban floods; GDACS levels are
 automatic estimates and not official warnings. No landslide product is
 included because no open service answered when this was built.
 
+## Hazard news
+
+Every hour a GitHub Actions job (`frontend/scripts/scan-news.ts`, run by
+`.github/workflows/pages.yml`) reads the public RSS feeds of about 40 news
+outlets and two UN services, listed in `frontend/src/news/feeds.ts`. It keeps
+only the headline, link, outlet and time of items whose headline matches a
+hazard keyword rule (`frontend/src/news/classify.ts`); article text is never
+stored or shown. Each kept headline is placed from the place names in it,
+using the GeoNames gazetteer, and headlines about the same kind of hazard
+within 400 km and 72 hours are grouped into one story.
+
+| | |
+|---|---|
+| Gazetteer | GeoNames `cities15000`, `admin1CodesASCII`, `countryInfo`, `shapes_simplified_low` (CC BY 4.0), https://www.geonames.org/ |
+| Precision | town, first-level region (centre of its towns, weighted by population), or country (centre of its largest land area) |
+| Value kind | Not a measurement: a keyword match and an automatic placement |
+| Checks | Earthquake stories are matched to the USGS feed (within 300 km for a town, 72 h before to 6 h after); other stories to GDACS alerts of a related type |
+
+Known failure modes, stated in the interface: figurative uses that slip past
+the rules, a story placed at the city that felt an earthquake rather than the
+epicentre (corrected when a USGS match exists), homonymous town names, and
+regions with no town of 15,000 people, which cannot be placed.
+
+## Weather context for news stories
+
+"How did it happen?" reads daily rain and maximum temperature at the story's
+place from **Open-Meteo** (https://open-meteo.com/, CC BY 4.0, free for
+non-commercial use, no key): the 92 days before now from its forecast
+service, and 1991 to 2020 from its ERA5 reanalysis archive (Copernicus Climate
+Change Service). Each window (3, 7, 30 or 90 days ending on the day the story
+was first reported) is ranked against the same calendar window in each
+baseline year. Labelled MODELED: these are grid-cell model estimates, not
+gauge measurements, and the recent and baseline values come from different
+models.
+
 ## Synthetic data
 
 The `demo` provider generates a uniform vegetated scene in which a central

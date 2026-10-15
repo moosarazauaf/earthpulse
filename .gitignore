@@ -32,3 +32,6 @@ backend/var/
 .DS_Store
 Thumbs.db
 *.log
+
+# Written hourly by the news scan in the Pages workflow; generate locally with `npm run news`.
+frontend/public/data/news.json

@@ -445,6 +445,41 @@ export class Globe {
     this.render();
   }
 
+  private newsEntities: Entity[] = [];
+
+  /**
+   * News story markers: filled when the story names a town or region, a ring
+   * when it is placed only to the country. Size grows with the number of outlets.
+   */
+  setNews(markers: { id: string; lat: number; lon: number; colour: string; outlets: number; exact: boolean; label: string }[], selectedId: string | null) {
+    for (const entity of this.newsEntities) this.viewer.entities.remove(entity);
+    this.newsEntities = markers.map((m) => {
+      const selected = m.id === selectedId;
+      const colour = Color.fromCssColorString(m.colour);
+      return this.viewer.entities.add({
+        id: `news:${m.id}`,
+        position: Cartesian3.fromDegrees(m.lon, m.lat),
+        point: {
+          pixelSize: (m.exact ? 9 : 16) + Math.min(m.outlets, 5) * 2 + (selected ? 6 : 0),
+          color: m.exact ? colour.withAlpha(0.95) : colour.withAlpha(0.15),
+          outlineColor: m.exact ? Color.fromCssColorString("#0b1416") : colour,
+          outlineWidth: selected ? 3 : 2,
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        },
+        label: selected ? {
+          text: m.label,
+          font: "13px sans-serif",
+          fillColor: Color.WHITE,
+          showBackground: true,
+          backgroundColor: Color.fromCssColorString("#0b1416").withAlpha(0.85),
+          pixelOffset: new Cartesian2(0, -24),
+          disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        } : undefined,
+      });
+    });
+    this.render();
+  }
+
   /** Back to the whole Earth. */
   resetView(): Promise<void> {
     return this.flyTo(HOME.lon, HOME.lat, HOME.height, 2);

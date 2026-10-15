@@ -48,6 +48,17 @@ fire danger (Copernicus GWIS) and the past week's earthquakes (USGS). Each
 layer says who publishes it, whether it is an observation or a forecast, and
 what it is not. EarthPulse shows these products; it is not a warning service.
 
+### 📰 Hazards in the news, and how they happened
+Every hour EarthPulse scans about 40 news outlets (BBC, The Guardian, NYT,
+Dawn, Rappler, ABC Australia, ReliefWeb and more) for earthquakes, floods,
+landslides, storms and wildfires, and puts each story on the globe with links
+to every outlet that reported it. Stories are checked against the USGS
+earthquake catalogue and GDACS alerts. Open one and EarthPulse shows what led
+up to it, for example *"54 mm of rain in the 3 days before: wetter than in
+any year from 1991 to 2020"*. One click then proposes the satellite analysis
+that can test the story: flood water from radar, a burn scar, or landslide
+scars.
+
 ### 🛰️ Compare any two years since 1984
 Annual Landsat and Sentinel-2 layers in true colour, false colour and four
 spectral indices, with a timeline and a swipe, blink or blend comparison.
@@ -115,6 +126,8 @@ the optional Python backend.
 | ESA WorldCover 2021 | 10 m | 2021 | Land under floodwater |
 | Impact Observatory annual land cover | 10 m | 2017 | UrbanEye |
 | GDACS, NASA FIRMS, GloFAS, GWIS, USGS | varies | live | Live view |
+| News RSS feeds + GeoNames gazetteer | headline | hourly | Hazard news |
+| Open-Meteo (forecast models, ERA5) | ~10–25 km | 1991 | "How did it happen?" |
 
 All of it is open and keyless. Licences and attribution are in
 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
@@ -145,6 +158,8 @@ install icon in the address bar).
   shows how sensitive it is to its own threshold.
 - An index change is not a land-cover class and does not show a cause.
 - Live layers are other agencies' products, shown as published.
+- News stories are found by keyword and placed by place name, automatically.
+  Some will be off-topic or misplaced; every story links to its sources.
 
 ## Roadmap
 

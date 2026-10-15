@@ -63,12 +63,15 @@ export function SharedRunCard() {
 
   return (
     <div className="area-prompt" role="dialog" aria-modal="false" aria-labelledby="shared-run-title">
-      <p className="eyebrow">Shared analysis</p>
+      <p className="eyebrow">{run.fromNews !== undefined ? "Check the news from space" : "Shared analysis"}</p>
       <h2 id="shared-run-title">{run.request.label ?? "Shared area"}</h2>
       <p>{describeRun(run)}.</p>
       <p className="muted">
-        Someone shared the recipe for this analysis. Running it downloads the satellite scenes to this device
-        and computes the result here, at the {qualityFor(run.maxPixels)} setting. Nothing is sent to EarthPulse.
+        {run.fromNews !== undefined
+          ? `Proposed from the story "${run.fromNews}". The area outlined on the globe is a box around the place the story names; draw your own in the panel if the event was elsewhere. `
+          : "Someone shared the recipe for this analysis. "}
+        Running it downloads the satellite scenes to this device and computes the result here, at the{" "}
+        {qualityFor(run.maxPixels)} setting. Nothing is sent to EarthPulse.
       </p>
       <div className="actions">
         <button className="primary" onClick={() => start(run)}>Run it on this device</button>

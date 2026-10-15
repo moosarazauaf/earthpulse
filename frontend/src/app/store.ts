@@ -8,6 +8,7 @@ import type { Progress } from "../engine/common";
 import type { UrbanRequest } from "../engine/urban";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
+import type { NewsFile, NewsStory } from "../news/types";
 import { clampYear, currentYear, datasetForYear } from "./logic";
 import type { SharedRun } from "./shareRun";
 import type {
@@ -81,6 +82,13 @@ interface State {
   /** When the live feeds were last read, so a stale view is visible as stale. */
   feedsAt: string | null;
   loadQuakes: () => Promise<void>;
+  /** Hazard stories from the hourly news scan; null until loaded. */
+  news: NewsFile | null;
+  newsError: string | null;
+  selectedStory: NewsStory | null;
+  loadNews: () => Promise<void>;
+  /** Which part of the Live panel is open. */
+  liveTab: "news" | "alerts" | "layers";
   sourcesOpen: boolean;
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
@@ -210,6 +218,21 @@ export const useStore = create<State>((set, get) => {
     quakesOn: false,
     pendingRun: null,
     feedsAt: null,
+    news: null,
+    newsError: null,
+    selectedStory: null,
+    liveTab: "news",
+    loadNews: async () => {
+      set({ newsError: null });
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}data/news.json`, { cache: "no-cache" });
+        if (!response.ok) throw new Error();
+        const file = (await response.json()) as NewsFile;
+        set({ news: { ...file, stories: Array.isArray(file.stories) ? file.stories : [] } });
+      } catch {
+        set({ newsError: "The news scan could not be loaded." });
+      }
+    },
     loadQuakes: async () => {
       try {
         set({ quakes: await fetchQuakes() });

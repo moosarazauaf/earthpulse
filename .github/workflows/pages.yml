@@ -6,6 +6,11 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/pages.yml"
+  # Every hour: scan the news feeds for hazard stories and redeploy with the
+  # fresh news.json. GitHub may delay scheduled runs at busy times, and it
+  # pauses schedules in repositories with no activity for 60 days.
+  schedule:
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -16,6 +21,9 @@ permissions:
 concurrency:
   group: pages
   cancel-in-progress: true
+
+env:
+  SITE: https://moosarazauaf.github.io/earthpulse
 
 jobs:
   build:
@@ -32,6 +40,31 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm test
+
+      # GeoNames gazetteer (CC BY 4.0) for placing headlines; refreshed weekly.
+      - id: week
+        run: echo "week=$(date -u +%G-%V)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: geonames
+        with:
+          path: ${{ runner.temp }}/geonames
+          key: geonames-${{ steps.week.outputs.week }}
+      - if: steps.geonames.outputs.cache-hit != 'true'
+        working-directory: ${{ runner.temp }}
+        run: |
+          mkdir -p geonames && cd geonames
+          for f in cities15000.zip admin1CodesASCII.txt countryInfo.txt shapes_simplified_low.json.zip; do
+            curl -sSfL --retry 3 -O "https://download.geonames.org/export/dump/$f"
+          done
+          unzip -o -q cities15000.zip && unzip -o -q shapes_simplified_low.json.zip
+      - name: Scan news for hazard stories
+        env:
+          GAZETTEER_DIR: ${{ runner.temp }}/geonames
+          NEWS_PREVIOUS_URL: ${{ env.SITE }}/data/news.json
+        run: |
+          # If the scan fails, keep the file that is live now rather than deploy without news.
+          npm run news || curl -sSfL "$NEWS_PREVIOUS_URL" -o public/data/news.json || true
+
       # With the repository variable EARTHPULSE_API_BASE unset, the build runs
       # in hosted mode (no analysis service). See docs/DEPLOY.md.
       - run: npm run build

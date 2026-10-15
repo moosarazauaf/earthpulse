@@ -1,12 +1,13 @@
 /** Mounts the globe and keeps it in step with application state. */
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { ApiError, api } from "../app/api";
 import { datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
 import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedResult, type Overlay, hasLayers, isMapped } from "../app/types";
+import { newsMarkers } from "../news/corroborate";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -45,7 +46,11 @@ export function GlobeViewer() {
       (id) => {
         const state = useStore.getState();
         if (id?.startsWith("alert:")) {
-          state.set({ selectedAlert: state.alerts?.find((a) => `alert:${a.id}` === id) ?? null, mode: "live" });
+          state.set({ selectedAlert: state.alerts?.find((a) => `alert:${a.id}` === id) ?? null, mode: "live", liveTab: "alerts" });
+          return;
+        }
+        if (id?.startsWith("news:")) {
+          state.set({ selectedStory: state.news?.stories.find((n) => `news:${n.id}` === id) ?? null, mode: "live", liveTab: "news" });
           return;
         }
         const features = isMapped(state.result) ? state.result.detections.features : [];
@@ -142,6 +147,17 @@ export function GlobeViewer() {
     // Far enough out to see the region the event affects.
     if (s.selectedAlert) void instance?.flyTo(s.selectedAlert.lon, s.selectedAlert.lat, 2_500_000, 2);
   }, [s.selectedAlert]);
+  const markers = useMemo(() => newsMarkers(s.news?.stories ?? [], s.quakes, s.alerts), [s.news, s.quakes, s.alerts]);
+  useEffect(() => instance?.setNews(live ? markers : [], s.selectedStory?.id ?? null), [live, markers, s.selectedStory]);
+  const flownTo = useRef<string | null>(null);
+  useEffect(() => {
+    // Fly once per selection, not again when late-arriving feeds move the marker.
+    const marker = markers.find((m) => m.id === s.selectedStory?.id);
+    if (!marker || flownTo.current === marker.id) return;
+    flownTo.current = marker.id;
+    void instance?.flyTo(marker.lon, marker.lat, marker.exact ? 900_000 : 3_000_000, 2);
+  }, [s.selectedStory, markers]);
+  useEffect(() => { if (!s.selectedStory) flownTo.current = null; }, [s.selectedStory]);
 
   // Analysis outputs.
   const mapped: MappedResult | null = isMapped(s.result) ? s.result : null;

@@ -6,6 +6,26 @@ All notable changes are recorded here. Versions follow
 ## [Unreleased]
 
 ### Added
+- **Hazard news on the globe** (Live → In the news). Every hour a GitHub
+  Actions job scans the RSS feeds of about 40 news outlets and UN services
+  for earthquakes, floods, landslides, storms, wildfires, heavy rain and
+  other natural hazards, places each headline from the place names in it
+  (GeoNames), groups headlines about the same event, and republishes the
+  site. Each story links to its sources, says how exactly it was placed, and
+  is checked against the USGS earthquake catalogue and GDACS alerts.
+- **"How did it happen?"** for each story: rain in the 3, 7 and 30 days
+  before the event (or heat, or 90-day drought) ranked against the same days
+  in every year from 1991 to 2020 (Open-Meteo, ERA5), and for earthquakes
+  the depth and energy explained from the USGS record.
+- **"See it from space"**: one click proposes FloodLens, FireWatch or a
+  landslide-scar search with dates and an area worked out from the story,
+  confirmed before anything downloads.
+- The Live panel is split into three tabs (news, agency alerts, map layers)
+  so it opens on one short list instead of everything at once.
+
+## [0.2.0-alpha.7] - 2026-10-15
+
+### Added
 - **FireWatch** (Fires mode): burn severity from dNBR with the Key and Benson
   (2006) classes, area per class and a severity map, from Landsat or
   Sentinel-2, in the browser. SWIR-2 is downloaded only for this analysis.

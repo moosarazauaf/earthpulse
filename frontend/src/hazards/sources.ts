@@ -194,6 +194,10 @@ export interface Quake {
   lat: number;
   depthKm: number;
   url: string;
+  /** USGS PAGER estimate of losses: green, yellow, orange or red; null when none was issued. */
+  pager: "green" | "yellow" | "orange" | "red" | null;
+  /** True when the USGS flags the event for possible tsunami. */
+  tsunami: boolean;
 }
 
 /** Earthquakes from the USGS feed, strongest first; malformed entries are dropped. */
@@ -215,6 +219,8 @@ export function parseQuakes(body: unknown): Quake[] {
       lat,
       depthKm: typeof depth === "number" ? depth : 0,
       url: url.startsWith("https://earthquake.usgs.gov/") ? url : "https://earthquake.usgs.gov/",
+      pager: ["green", "yellow", "orange", "red"].includes(String(p.alert)) ? (p.alert as Quake["pager"]) : null,
+      tsunami: p.tsunami === 1,
     });
   }
   return quakes.sort((a, b) => b.magnitude - a.magnitude);
