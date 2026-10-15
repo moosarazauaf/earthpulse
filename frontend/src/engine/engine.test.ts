@@ -339,3 +339,47 @@ describe("ideas adapted from God's Eye View", () => {
     expect(parseQuakes({})).toEqual([]);
   });
 });
+
+describe("shared analysis links", () => {
+  const result = {
+    id: "EP-2026-TEST-L0001", type: "change", label: "Lahore", aoi: rectangleAoi(74.123456, 31.4, 74.5, 31.7),
+    provenance: { computedOn: "browser", maxPixels: 700_000 },
+    request: { dataset: "landsat", index: "ndvi", before: { start: "1993-10-01", end: "1993-12-31" },
+      after: { start: "2025-10-01", end: "2025-12-31" }, maxCloud: 20, minAreaHa: 0.5, threshold: 0.15, label: "Lahore" },
+  };
+
+  it("round-trips the recipe, rounding coordinates to about 11 m", async () => {
+    const { decodeRun, encodeRun } = await import("../app/shareRun");
+    const param = encodeRun(result as never);
+    expect(param).toMatch(/^[A-Za-z0-9_-]+$/); // safe in a URL without escaping
+    const run = decodeRun(param);
+    expect(run?.kind).toBe("change");
+    expect(run?.maxPixels).toBe(700_000);
+    expect(run?.request.index).toBe("ndvi");
+    expect(run?.request.aoi.type === "Polygon" && run.request.aoi.coordinates[0]?.[0]).toEqual([74.1235, 31.4]);
+  });
+
+  it("refuses server results, tampered links and impossible budgets", async () => {
+    const { decodeRun, encodeRun } = await import("../app/shareRun");
+    expect(encodeRun({ ...result, provenance: { maxPixels: 700_000 } } as never)).toBeNull();
+    expect(decodeRun("not!valid")).toBeNull();
+    expect(decodeRun(null)).toBeNull();
+    const param = encodeRun(result as never) as string;
+    const tampered = JSON.parse(atob(param.replace(/-/g, "+").replace(/_/g, "/")));
+    tampered.m = 99_000_000;
+    const reencoded = btoa(JSON.stringify(tampered)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    expect(decodeRun(reencoded)).toBeNull();
+  });
+
+  it("thins a detailed outline until it fits in a link", async () => {
+    const { MAX_PARAM_LENGTH, encodeRun } = await import("../app/shareRun");
+    const ring = Array.from({ length: 900 }, (_, i) => {
+      const a = (i / 900) * 2 * Math.PI;
+      return [74.3 + 0.2 * Math.cos(a), 31.5 + 0.2 * Math.sin(a)];
+    });
+    ring.push(ring[0] as number[]);
+    const param = encodeRun({ ...result, aoi: { type: "Polygon", coordinates: [ring] } } as never);
+    expect(param).not.toBeNull();
+    expect((param as string).length).toBeLessThanOrEqual(MAX_PARAM_LENGTH);
+  });
+});

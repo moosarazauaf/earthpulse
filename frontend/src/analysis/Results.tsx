@@ -6,6 +6,7 @@ import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesRe
 import { KindBadge } from "../ui/KindBadge";
 import { shareUrl } from "../ui/TopBar";
 import { downloadText } from "./download";
+import { ShareRunButton } from "./SharedRun";
 import { ChangeHistogram, SeriesChart } from "./charts";
 
 const MAX_LISTED_REGIONS = 8;
@@ -73,6 +74,7 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
         {isMapped(result) && <button className="link" onClick={() => downloadText(`${result.id}.geojson`, "application/geo+json", regions())}>Regions (GeoJSON)</button>}
         <button className="link" onClick={() => downloadText(`${result.id}.json`, "application/json", record())}>Full record (JSON)</button>
         {shown && key && <a href={shown.url} download={`${result.id}-${key}.png`}>Map shown (PNG)</a>}
+        <ShareRunButton result={result} />
       </div>
       <p className="muted">
         Computed in {result.provenance.seconds} s on this device. The result exists only in this browser tab; export it to keep it.

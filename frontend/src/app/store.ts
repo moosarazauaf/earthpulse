@@ -8,6 +8,7 @@ import type { Progress } from "../engine/common";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import { clampYear, currentYear, datasetForYear } from "./logic";
+import type { SharedRun } from "./shareRun";
 import type {
   AnalysisRecord,
   AnalysisResult,
@@ -74,6 +75,8 @@ interface State {
   /** Earthquakes of the past week; null until loaded, shown when `quakesOn`. */
   quakes: Quake[] | null;
   quakesOn: boolean;
+  /** A shared analysis link waiting for the visitor to confirm before it downloads anything. */
+  pendingRun: SharedRun | null;
   /** When the live feeds were last read, so a stale view is visible as stale. */
   feedsAt: string | null;
   loadQuakes: () => Promise<void>;
@@ -142,6 +145,7 @@ export const useStore = create<State>((set, get) => {
       if (localRun !== run) return;
       const dataset = get().catalog?.datasets.find((d) => d.id === datasetId);
       if (dataset) result.provenance.dataset = dataset;
+      result.provenance.maxPixels = (job.request as { maxPixels: number }).maxPixels;
       // Browser results mark regions with bounding boxes, which crowd the map; they start hidden.
       set({ job: { status: "complete", record: null, error: null }, result, overlay: { ...get().overlay, key: layer, detections: false }, mode });
     } catch (error) {
@@ -201,6 +205,7 @@ export const useStore = create<State>((set, get) => {
     hazardLayers: ["fires"],
     quakes: null,
     quakesOn: false,
+    pendingRun: null,
     feedsAt: null,
     loadQuakes: async () => {
       try {

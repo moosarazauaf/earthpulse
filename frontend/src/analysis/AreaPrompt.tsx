@@ -80,8 +80,9 @@ export function AreaPrompt() {
   const drawing = useStore((s) => s.drawTool !== "none");
   const intro = useStore((s) => s.introOpen);
   const story = useStore((s) => s.story);
+  const pending = useStore((s) => s.pendingRun);
   const question = QUESTIONS[mode];
-  if (!question || aoi || result || !idle || intro || story) return null;
+  if (!question || aoi || result || !idle || intro || story || pending) return null;
   // While the visitor is drawing, step aside so the globe is clear.
   if (drawing) {
     return <div className="notice" role="status">Drawing on the globe. Press Esc to cancel.</div>;

@@ -155,6 +155,8 @@ export interface Provenance {
   landCover?: { name: string; provider: string; license: string; attribution: string } | null;
   // Analyses computed in the visitor's browser
   computedOn?: "browser";
+  /** Pixel budget a browser run used, so a shared link can ask for the same. */
+  maxPixels?: number;
   device?: { cores: number; memoryGb: number | null };
   seconds?: number;
 }

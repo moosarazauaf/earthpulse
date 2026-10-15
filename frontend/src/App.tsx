@@ -1,8 +1,10 @@
 import { useEffect } from "react";
 
 import { AreaPrompt } from "./analysis/AreaPrompt";
+import { SharedRunCard } from "./analysis/SharedRun";
 import { ContextPanel } from "./analysis/ContextPanel";
 import { decodeView } from "./app/logic";
+import { decodeRun } from "./app/shareRun";
 import { useStore } from "./app/store";
 import { SwipeHandle } from "./compare/SwipeHandle";
 import { GlobeViewer, getGlobe } from "./globe/GlobeViewer";
@@ -15,7 +17,8 @@ import { TopBar } from "./ui/TopBar";
 function restoreFromUrl() {
   const view = decodeView(window.location.search);
   const store = useStore.getState();
-  if (Object.keys(view).length === 0) return;
+  const hasRun = new URLSearchParams(window.location.search).has("run");
+  if (Object.keys(view).length === 0 && !hasRun) return;
   store.set({
     introOpen: false,
     ...(view.render ? { render: view.render } : {}),
@@ -29,6 +32,9 @@ function restoreFromUrl() {
     void getGlobe()?.flyTo(view.lon, view.lat, view.height ?? 150_000, 0);
   }
   if (view.analysis) void store.loadAnalysis(view.analysis);
+  // A shared browser analysis is shown for confirmation; it never starts on its own.
+  const run = decodeRun(new URLSearchParams(window.location.search).get("run"));
+  if (run) store.set({ pendingRun: run, introOpen: false, mode: run.kind === "flood" ? "floods" : run.kind });
 }
 
 export function App() {
@@ -48,6 +54,7 @@ export function App() {
       <SwipeHandle />
       <Intro />
       <AreaPrompt />
+      <SharedRunCard />
       <StoryCaption />
       <Notice />
       <div id="timeline"><Timeline /></div>
