@@ -213,7 +213,8 @@ export const useStore = create<State>((set, get) => {
     alerts: null,
     alertsError: null,
     selectedAlert: null,
-    hazardLayers: ["fires"],
+    // Fire detections cover the globe in crop-burning dots; they are one click away, not the default.
+    hazardLayers: [],
     quakes: null,
     quakesOn: false,
     pendingRun: null,

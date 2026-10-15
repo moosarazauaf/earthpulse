@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { classify } from "./classify";
 import { buildGazetteer, locate, outlineCentre } from "./locate";
 import { mergeStories, previousStories, toLocated } from "./stories";
+import { compare, describe as describeWindow } from "./weather";
 
 describe("classify", () => {
   it("finds the hazard a headline is about", () => {
@@ -119,5 +120,42 @@ describe("stories", () => {
   it("reads a previous file defensively", () => {
     expect(previousStories(null)).toEqual([]);
     expect(previousStories({ stories: [{ id: 1 }] })).toEqual([]);
+  });
+});
+
+describe("weather before an event", () => {
+  // A baseline where every year has the same rain: 1 mm a day in October.
+  const baseline = (() => {
+    const time: string[] = [], rain: number[] = [], tmax: number[] = [];
+    for (let y = 1991; y <= 2020; y++) {
+      for (let d = 1; d <= 31; d++) { time.push(`${y}-10-${String(d).padStart(2, "0")}`); rain.push(1 + (y - 1991) * 0.1); tmax.push(30); }
+    }
+    return { time, rain, tmax };
+  })();
+  const recent = (mmPerDay: number) => ({
+    time: Array.from({ length: 31 }, (_, i) => `2026-10-${String(i + 1).padStart(2, "0")}`),
+    rain: Array.from({ length: 31 }, () => mmPerDay),
+    tmax: Array.from({ length: 31 }, () => 35),
+  });
+
+  it("ranks a window against the same days in each baseline year", () => {
+    const wet = compare(recent(20), baseline, "2026-10-15", 7, "rain")!;
+    expect(wet.value).toBe(140);
+    expect(wet.below).toBe(30);
+    expect(describeWindow(wet, "rain")).toContain("wetter than in every year of 1991 to 2020");
+    const hot = compare(recent(0), baseline, "2026-10-15", 7, "tmax")!;
+    expect(describeWindow(hot, "tmax")).toContain("+5.0 °C");
+  });
+
+  it("does not call a tie a record", () => {
+    const dryBaseline = { ...baseline, rain: baseline.rain.map(() => 0) };
+    const dry = compare(recent(0), dryBaseline, "2026-10-15", 3, "rain")!;
+    expect(describeWindow(dry, "rain")).toContain("little or no rain");
+    expect(describeWindow(dry, "rain")).not.toContain("every year");
+  });
+
+  it("gives no comparison when too many days are missing", () => {
+    const gappy = { ...recent(5), rain: recent(5).rain.map((v, i) => (i % 2 ? null : v)) };
+    expect(compare(gappy, baseline, "2026-10-15", 7, "rain")).toBeNull();
   });
 });

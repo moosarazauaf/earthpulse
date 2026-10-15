@@ -275,6 +275,9 @@ function WeatherBefore({ story }: { story: NewsStory }) {
   return (
     <div className="why">
       <header className="row"><strong>Weather at {story.place.name} before {eventDay}</strong><KindBadge kind="MODELED" /></header>
+      {story.place.precision === "region" && (
+        <p className="muted">Read at the population centre of {story.place.name}, which may be far from where the event happened. Large regions can have very different weather in different parts.</p>
+      )}
       <RainChart context={context} />
       <ul className="facts-list">
         {windows.map((w) => <li key={w.days}>{describe(w, "rain")}</li>)}

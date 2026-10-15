@@ -28,6 +28,8 @@ export interface WindowComparison {
   mean: number;
   /** Baseline years with a lower value than now. */
   below: number;
+  /** Baseline years with a higher value than now; the rest are equal. */
+  above: number;
 }
 
 export interface WeatherContext {
@@ -86,20 +88,31 @@ export function compare(recent: Daily, baseline: Daily, eventDay: string, days: 
     baseline: years,
     mean: years.reduce((a, b) => a + b, 0) / years.length,
     below: years.filter((v) => v < value).length,
+    above: years.filter((v) => v > value).length,
   };
 }
 
-/** One sentence comparing a window with its baseline. */
+/** Rain totals this close count as equal: model output is not precise to the millimetre. */
+const RAIN_TIE_MM = 1;
+
+/** One sentence comparing a window with its baseline. Equal years are never counted as beaten. */
 export function describe(c: WindowComparison, field: "rain" | "tmax"): string {
   const n = c.baseline.length;
   const span = `${BASELINE.first} to ${BASELINE.last}`;
   if (field === "rain") {
-    const ratio = c.mean > 0.5 ? ` (${(c.value / c.mean).toFixed(1)} times the ${span} average of ${Math.round(c.mean)} mm)` : ` (the ${span} average is ${c.mean.toFixed(1)} mm)`;
-    const rank = c.below === n ? `wetter than in every year of ${span}` : c.below === 0 ? `drier than in every year of ${span}` : `wetter than in ${c.below} of ${n} years`;
-    return `${Math.round(c.value)} mm of rain in the ${c.days} days to the event: ${rank}${ratio}.`;
+    const below = c.baseline.filter((v) => v < c.value - RAIN_TIE_MM).length;
+    const above = c.baseline.filter((v) => v > c.value + RAIN_TIE_MM).length;
+    const total = `${Math.round(c.value)} mm of rain in the ${c.days} days to the event`;
+    if (c.value < RAIN_TIE_MM && above < n / 2) return `${total}: little or no rain, as in most years of ${span} at this time of year.`;
+    const rank = below === n ? `wetter than in every year of ${span}`
+      : above === n ? `drier than in every year of ${span}`
+      : below >= above ? `wetter than in ${below} of ${n} years of ${span}`
+      : `drier than in ${above} of ${n} years of ${span}`;
+    const ratio = c.mean > 0.5 ? ` (${(c.value / c.mean).toFixed(1)} times the average of ${Math.round(c.mean)} mm)` : ` (the average is ${c.mean.toFixed(1)} mm)`;
+    return `${total}: ${rank}${ratio}.`;
   }
   const diff = c.value - c.mean;
-  const rank = c.below === n ? `hotter than in every year of ${span}` : `hotter than in ${c.below} of ${n} years`;
+  const rank = c.below === n ? `hotter than in every year of ${span}` : c.above === n ? `cooler than in every year of ${span}` : `hotter than in ${c.below} of ${n} years`;
   return `Daily highs averaged ${c.value.toFixed(1)} °C in the ${c.days} days to the event, ${diff >= 0 ? "+" : "−"}${Math.abs(diff).toFixed(1)} °C against the ${span} average: ${rank}.`;
 }
 
