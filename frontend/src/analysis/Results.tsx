@@ -9,6 +9,8 @@ import { downloadText } from "./download";
 import { SeverityTable } from "./FirePanel";
 import { ShareRunButton } from "./SharedRun";
 import { ChangeHistogram, SeriesChart } from "./charts";
+import { resultCsv } from "./csv";
+import { NotReproducible, changeScript } from "./geeScript";
 
 const MAX_LISTED_REGIONS = 8;
 const INDEX_ROWS: { id: IndexId; label: string }[] = [
@@ -68,12 +70,21 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
     ...(isMapped(result) ? result.detections : {}),
     earthpulse: { id: result.id, softwareVersion: result.softwareVersion, valueKind: result.valueKind, provenance: result.provenance, warnings: result.warnings },
   });
+  const table = resultCsv(result);
+  let script: string | null = null;
+  try {
+    if (result.type === "change") script = changeScript(result);
+  } catch (error) {
+    if (!(error instanceof NotReproducible)) throw error;
+  }
   return (
     <section>
       <h3>Export</h3>
       <div className="exports">
         {isMapped(result) && <button className="link" onClick={() => downloadText(`${result.id}.geojson`, "application/geo+json", regions())}>Regions (GeoJSON)</button>}
+        {table && <button className="link" onClick={() => downloadText(`${result.id}.csv`, "text/csv", table)}>Table (CSV)</button>}
         <button className="link" onClick={() => downloadText(`${result.id}.json`, "application/json", record())}>Full record (JSON)</button>
+        {script && <button className="link" onClick={() => downloadText(`${result.id}.js`, "text/javascript", script)} title="Repeats this analysis in Google Earth Engine with the same scenes">Earth Engine script</button>}
         {shown && key && <a href={shown.url} download={`${result.id}-${key}.png`}>Map shown (PNG)</a>}
         <ShareRunButton result={result} />
       </div>
