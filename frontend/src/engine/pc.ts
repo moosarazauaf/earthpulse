@@ -32,7 +32,8 @@ export const COLLECTION: Record<OpticalDataset, string> = {
 };
 /** Common band name -> asset key, plus the per-pixel quality layer. */
 export const BANDS: Record<OpticalDataset, Record<string, string>> = {
-  landsat: { green: "green", red: "red", nir: "nir08", swir1: "swir16", swir2: "swir22", qa: "qa_pixel" },
+  // "lst" is the surface temperature band: lwir11 on Landsat 8 and 9, lwir on 4 to 7 (see thermalAsset).
+  landsat: { green: "green", red: "red", nir: "nir08", swir1: "swir16", swir2: "swir22", lst: "lwir11", qa: "qa_pixel" },
   sentinel2: { green: "B03", red: "B04", nir: "B08", swir1: "B11", swir2: "B12", qa: "SCL" },
 };
 export const NATIVE_RES: Record<OpticalDataset, number> = { landsat: 30, sentinel2: 10 };
@@ -82,7 +83,7 @@ export async function searchScenes(
   });
   if (!response.ok) throw new Error("Satellite imagery is temporarily unavailable.");
   const body = (await response.json()) as { features: { id: string; properties: Record<string, unknown>; assets: Record<string, { href: string }> }[] };
-  const wanted = Object.values(BANDS[dataset]);
+  const wanted = [...Object.values(BANDS[dataset]), ...(dataset === "landsat" ? ["lwir"] : [])];
   return body.features.map((feature) => {
     const p = feature.properties;
     const assets: Record<string, string> = {};
@@ -140,4 +141,9 @@ export async function readToken(collection: string): Promise<string> {
     tokens.delete(collection);
     throw error;
   }
+}
+
+/** The scene's surface temperature asset: Landsat 8 and 9 call it lwir11, Landsat 4 to 7 lwir. */
+export function thermalAsset(scene: Scene): string {
+  return scene.assets.lwir11 ? "lwir11" : "lwir";
 }

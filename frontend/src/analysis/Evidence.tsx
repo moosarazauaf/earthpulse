@@ -23,6 +23,10 @@ function claim(result: AnalysisResult): string {
   if (result.type === "flood") {
     return `${formatArea(result.summary.floodedAreaHa)} that was not water before ${result.request.before.end} was mapped as water between ${result.request.flood.start} and ${result.request.flood.end}.`;
   }
+  if (result.type === "heat") {
+    const m = result.summary;
+    return `The median land surface temperature from ${m.period[0]} to ${m.period[1]} averaged ${m.meanC.toFixed(1)} °C over the observed area.`;
+  }
   const name = result.provenance.index?.name ?? "The index";
   return `${name} decreased by at least ${result.summary.threshold.toFixed(2)} on ${formatArea(result.summary.lossAreaHa)} and increased by at least that much on ${formatArea(result.summary.gainAreaHa)}.`;
 }

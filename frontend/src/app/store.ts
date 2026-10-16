@@ -6,6 +6,7 @@ import { type DeviceProfile, PIXEL_BUDGET, type Quality, type RunHandle, runInBr
 import type { WorkerRequest } from "../engine/worker";
 import type { Progress } from "../engine/common";
 import type { UrbanRequest } from "../engine/urban";
+import type { HeatRequest } from "../engine/heat";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import type { NewsFile, NewsStory } from "../news/types";
@@ -70,7 +71,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "research" | "area";
+  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "heat" | "research" | "area";
   // live hazards
   alerts: Alert[] | null;
   alertsError: string | null;
@@ -131,6 +132,7 @@ interface State {
   runWater: (request: WaterRequest, device: DeviceProfile) => Promise<void>;
   runUrban: (request: UrbanRequest, device: DeviceProfile) => Promise<void>;
   runFire: (request: ChangeRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
+  runHeat: (request: Omit<HeatRequest, "maxPixels" | "concurrency">, device: DeviceProfile, quality: Quality) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
 }
@@ -318,6 +320,7 @@ export const useStore = create<State>((set, get) => {
       else if (a.kind === "fire") void s.runFire(a.request, device, quality);
       else if (a.kind === "flood") void s.runFlood(a.request, device, quality);
       else if (a.kind === "series") void s.runTimeSeries(a.request, device, quality);
+      else if (a.kind === "heat") void s.runHeat(a.request, device, quality);
       else if (a.kind === "water") void s.runWater({ ...a.request, maxPixels, concurrency: device.concurrency }, device);
       else void s.runUrban({ ...a.request, maxPixels, concurrency: device.concurrency }, device);
     },
@@ -337,6 +340,8 @@ export const useStore = create<State>((set, get) => {
       runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
     runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),
     runUrban: (request, device) => runLocal({ kind: "urban", request }, device, "growth", request.focus === 2 ? "forests" : "cities", "none"),
+    runHeat: (request, device, quality) =>
+      runLocal({ kind: "heat", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "lst", "heat", "landsat"),
     runFire: (request, device, quality) =>
       runLocal({ kind: "change", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "severity", "fires", request.dataset),
     loadAnalysis: async (id) => {

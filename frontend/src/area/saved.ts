@@ -81,6 +81,8 @@ export function headline(result: AnalysisResult): string {
       return `Water ${formatArea(result.summary.firstHa)} in ${result.summary.firstYear}, ${formatArea(result.summary.lastHa)} in ${result.summary.lastYear}`;
     case "urban":
       return `${result.summary.focusName} ${formatArea(result.summary.firstHa)} to ${formatArea(result.summary.lastHa)}, ${result.summary.firstYear}–${result.summary.lastYear}`;
+    case "heat":
+      return `Surface ${result.summary.meanC.toFixed(1)} °C on average, ${result.summary.year}${result.summary.comparison ? ` (${result.summary.comparison.change >= 0 ? "+" : "−"}${Math.abs(result.summary.comparison.change).toFixed(1)} °C since ${result.summary.comparison.year})` : ""}`;
     case "timeseries":
       return `Index series, ${result.series.filter((e) => e.values).length} years`;
   }

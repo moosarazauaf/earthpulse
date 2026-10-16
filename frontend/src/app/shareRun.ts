@@ -10,7 +10,7 @@
 import { areaFromGeoJson } from "../analysis/areaFile";
 import type { AnalysisResult, AoiGeometry } from "./types";
 
-export type RunKind = "change" | "flood" | "water" | "urban" | "timeseries";
+export type RunKind = "change" | "flood" | "water" | "urban" | "timeseries" | "heat";
 export interface SharedRun {
   kind: RunKind;
   /** The request as the engine needs it, minus the device-specific download parallelism. */
@@ -27,7 +27,7 @@ const VERSION = 1;
 export const MAX_PARAM_LENGTH = 6000;
 /** Decimal places kept in shared coordinates: 4 is about 11 m, finer than any pixel used. */
 const COORDINATE_DECIMALS = 4;
-const KINDS: RunKind[] = ["change", "flood", "water", "urban", "timeseries"];
+const KINDS: RunKind[] = ["change", "flood", "water", "urban", "timeseries", "heat"];
 
 function toBase64Url(text: string): string {
   const bytes = new TextEncoder().encode(text);
@@ -99,17 +99,19 @@ export function describeRun(run: SharedRun): string {
   if (run.kind === "change") return `${String(r.index ?? "ndvi").toUpperCase()} change, ${span(r.before)} against ${span(r.after)}`;
   if (run.kind === "flood") return `Flood mapping, ${span(r.before)} against ${span(r.flood)}`;
   if (run.kind === "urban") return `${r.focus === 2 ? "Tree cover" : "Built area"} from ${String(r.firstYear)} to ${String(r.lastYear)}`;
+  if (run.kind === "heat") return `Surface temperature, ${String(r.year)}${r.compareYear ? ` against ${String(r.compareYear)}` : ""}`;
   if (run.kind === "timeseries") return `Index series for ${Array.isArray(r.years) ? (r.years as number[]).join(", ") : "several years"}`;
   const years = Array.isArray(r.years) ? (r.years as number[]) : [];
   return `Surface water in ${years.join(", ")}`;
 }
 
 /** The mode whose panel shows a run's progress and result. */
-export function modeForRun(run: SharedRun): "floods" | "forests" | "cities" | "fires" | "change" | "water" | "research" {
+export function modeForRun(run: SharedRun): "floods" | "forests" | "cities" | "fires" | "change" | "water" | "research" | "heat" {
   const r = run.request as { focus?: number; index?: string };
   if (run.kind === "flood") return "floods";
   if (run.kind === "urban") return r.focus === 2 ? "forests" : "cities";
   if (run.kind === "timeseries") return "research";
+  if (run.kind === "heat") return "heat";
   if (run.kind === "change") return r.index === "nbr" ? "fires" : "change";
   return "water";
 }

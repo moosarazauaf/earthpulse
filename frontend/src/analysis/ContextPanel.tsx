@@ -7,6 +7,7 @@ import { LivePanel } from "../hazards/LivePanel";
 import { AnalysisForm } from "./AnalysisForm";
 import { Evidence } from "./Evidence";
 import { FireForm } from "./FirePanel";
+import { HeatForm, HeatResults } from "./HeatPanel";
 import { FloodForm, FloodResults } from "./FloodPanel";
 import { UrbanForm, UrbanResults } from "./UrbanPanel";
 import { TREES } from "../engine/urban";
@@ -84,7 +85,7 @@ export function ContextPanel() {
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";
-  const title = mode === "area" ? "This area" : mode === "research" ? "Research" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : mode === "forests" ? "ForestEye" : mode === "fires" ? "FireWatch" : "What changed here?";
+  const title = mode === "area" ? "This area" : mode === "research" ? "Research" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : mode === "forests" ? "ForestEye" : mode === "heat" ? "HeatWatch" : mode === "fires" ? "FireWatch" : "What changed here?";
 
   return (
     <aside className={`panel right${open ? "" : " collapsed"}`} aria-label={title}>
@@ -127,10 +128,11 @@ export function ContextPanel() {
               {!running && result?.type === "flood" && <FloodResults result={result} />}
               {!running && result?.type === "water" && <WaterResults result={result} />}
               {!running && result?.type === "urban" && <UrbanResults result={result} />}
+              {!running && result?.type === "heat" && <HeatResults result={result} />}
               {!running && (
                 <details className="form-wrap" open={!result}>
                   <summary>{result ? "New analysis" : "Set up an analysis"}</summary>
-                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : mode === "cities" ? <UrbanForm /> : mode === "forests" ? <UrbanForm focus={TREES} /> : mode === "fires" ? <FireForm /> : <AnalysisForm />}
+                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : mode === "cities" ? <UrbanForm /> : mode === "forests" ? <UrbanForm focus={TREES} /> : mode === "heat" ? <HeatForm /> : mode === "fires" ? <FireForm /> : <AnalysisForm />}
                 </details>
               )}
             </>

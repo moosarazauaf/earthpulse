@@ -23,7 +23,9 @@ describe("Analyse here", () => {
     expect(burn.kind === "fire" && burn.request.before.end < burn.request.after.start).toBe(true);
     const water = actions.find((a) => a.action.id === "water")!.action;
     expect(water.kind === "water" && water.request.years.at(-1)).toBe(2025);
-    expect(actions).toHaveLength(7);
+    expect(actions).toHaveLength(8);
+    const heat = actions.find((a) => a.action.id === "heat")!.action;
+    expect(heat.kind === "heat" && [heat.request.startMonth, heat.request.endMonth]).toEqual([5, 8]);
   });
 
   it("spreads years evenly and keeps both ends", () => {

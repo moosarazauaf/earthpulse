@@ -5,7 +5,7 @@
 import { fromUrl } from "geotiff";
 
 import { type Grid, gridBounds, gridBoundsIn, transformer } from "./geo";
-import { type OpticalDataset, type Scene, readToken } from "./pc";
+import { type OpticalDataset, type Scene, readToken, thermalAsset } from "./pc";
 
 /** Spacing, in pixels, of the lattice on which coordinates are reprojected exactly. */
 const LATTICE = 32;
@@ -175,6 +175,22 @@ export function toReflectance(dataset: OpticalDataset, dn: Numeric, qa: Numeric,
   return out;
 }
 
+/** Landsat Collection 2 surface temperature: kelvin = DN * 0.00341802 + 149. */
+const ST_SCALE = 0.00341802;
+const ST_OFFSET_K = 149;
+const KELVIN = 273.15;
+
+/** Land surface temperature in °C from stored digital numbers; fill and QA-rejected pixels become NaN. */
+export function toTemperature(dn: Numeric, qa: Numeric): Float32Array {
+  const out = new Float32Array(dn.length);
+  for (let i = 0; i < dn.length; i += 1) {
+    const value = dn[i] as number;
+    const clear = ((qa[i] as number) & LANDSAT_QA_REJECT) === 0;
+    out[i] = value === 0 || !clear ? NaN : value * ST_SCALE + ST_OFFSET_K - KELVIN;
+  }
+  return out;
+}
+
 /** Per-pixel median of several layers, ignoring NaN. Also returns how many layers were valid. */
 export function medianComposite(layers: Float32Array[]): { median: Float32Array; count: Uint8Array } {
   const length = layers[0]?.length ?? 0;
@@ -224,7 +240,8 @@ export async function compositeBands(
 ): Promise<{ bands: Record<string, Float32Array>; clearCount: Uint8Array }> {
   const qaKey = bands.qa as string;
   const tasks: { scene: Scene; asset: string }[] = [];
-  for (const scene of scenes) for (const name of ["qa", ...bandNames]) tasks.push({ scene, asset: bands[name] as string });
+  const assetOf = (scene: Scene, name: string) => (name === "lst" ? thermalAsset(scene) : (bands[name] as string));
+  for (const scene of scenes) for (const name of ["qa", ...bandNames]) tasks.push({ scene, asset: assetOf(scene, name) });
   const raw = new Map<string, Numeric>();
   let next = 0;
   async function worker() {
@@ -242,8 +259,9 @@ export async function compositeBands(
   const perBand: Record<string, Float32Array[]> = Object.fromEntries(bandNames.map((n) => [n, []]));
   for (const scene of scenes) {
     const qa = raw.get(`${scene.id}/${qaKey}`) as Numeric;
-    const layers = bandNames.map((name) =>
-      toReflectance(dataset, raw.get(`${scene.id}/${bands[name]}`) as Numeric, qa, scene.baseline));
+    const layers = bandNames.map((name) => name === "lst"
+      ? toTemperature(raw.get(`${scene.id}/${assetOf(scene, name)}`) as Numeric, qa)
+      : toReflectance(dataset, raw.get(`${scene.id}/${bands[name]}`) as Numeric, qa, scene.baseline));
     // A pixel is used only where every requested band is valid in that scene.
     for (let i = 0; i < qa.length; i += 1) {
       if (layers.some((layer) => Number.isNaN(layer[i] as number))) for (const layer of layers) layer[i] = NaN;

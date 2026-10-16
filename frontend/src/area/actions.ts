@@ -5,6 +5,7 @@
  */
 import type { AoiGeometry, ChangeRequest, FloodRequest, TimeSeriesRequest } from "../app/types";
 import type { AnalysisMode } from "../ui/modes";
+import { hotSeason } from "../engine/heat";
 
 const DAY_MS = 86_400_000;
 const MAX_CLOUD = 20;
@@ -15,6 +16,7 @@ export type QuickAction =
   | { id: "flood"; kind: "flood"; request: FloodRequest }
   | { id: "water"; kind: "water"; request: { aoi: AoiGeometry; label: string; dataset: "landsat"; years: number[]; startMonth: number; endMonth: number; threshold: number; maxCloud: number } }
   | { id: "series"; kind: "series"; request: TimeSeriesRequest }
+  | { id: "heat"; kind: "heat"; request: { aoi: AoiGeometry; label: string; year: number; compareYear: number | null; startMonth: number; endMonth: number; maxCloud: number } }
   | { id: "urban" | "trees"; kind: "urban"; request: { aoi: AoiGeometry; label: string; firstYear: number; lastYear: number; focus: 2 | 7 } };
 
 export interface QuickActionInfo {
@@ -28,7 +30,8 @@ export interface QuickActionInfo {
 
 const day = (t: number) => new Date(t).toISOString().slice(0, 10);
 
-export function quickActions(aoi: AoiGeometry, label: string, now = new Date()): QuickActionInfo[] {
+export function quickActions(aoi: AoiGeometry, label: string, now = new Date(), lat = centreLat(aoi)): QuickActionInfo[] {
+  const season = hotSeason(lat);
   const today = Date.parse(`${now.toISOString().slice(0, 10)}T00:00:00Z`);
   const lastYear = now.getUTCFullYear() - 1;
   const whole = { startMonth: 1, endMonth: 12 };
@@ -72,6 +75,13 @@ export function quickActions(aoi: AoiGeometry, label: string, now = new Date()):
       action: { id: "trees", kind: "urban", request: { aoi, label, firstYear: 2017, lastYear: 2023, focus: 2 } },
     },
     {
+      label: "How hot does the ground get?",
+      explain: `Landsat surface temperature, ${season.label} ${lastYear}, against 2015, and how much cooler green ground is.`,
+      mode: "heat",
+      weight: "medium",
+      action: { id: "heat", kind: "heat", request: { aoi, label, year: lastYear, compareYear: 2015, startMonth: season.startMonth, endMonth: season.endMonth, maxCloud: MAX_CLOUD } },
+    },
+    {
       label: "Is it flooded now?",
       explain: "Sentinel-1 radar from the last 14 days against 20 to 50 days ago. Radar sees through cloud.",
       mode: "floods",
@@ -92,4 +102,10 @@ export function quickActions(aoi: AoiGeometry, label: string, now = new Date()):
 export function spread(first: number, last: number, count: number): number[] {
   if (count <= 1 || last <= first) return [first];
   return [...new Set(Array.from({ length: count }, (_, i) => Math.round(first + ((last - first) * i) / (count - 1))))];
+}
+
+function centreLat(aoi: AoiGeometry): number {
+  const ring = aoi.type === "Polygon" ? aoi.coordinates[0]! : aoi.coordinates[0]![0]!;
+  const lats = ring.map((p) => p[1]!);
+  return (Math.min(...lats) + Math.max(...lats)) / 2;
 }

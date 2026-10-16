@@ -14,7 +14,7 @@ import { shareUrl } from "./TopBar";
 export const SHORTCUTS: { group: string; keys: [string, string][] }[] = [
   {
     group: "Go to",
-    keys: [["L", "Live: hazards in the news, alerts, map layers"], ["N", "The news list"], ["E", "Explore imagery"], ["O", "Overview of the current area"], ["Shift 1–8", "An analysis, in the order of the Analyse menu"]],
+    keys: [["L", "Live: hazards in the news, alerts, map layers"], ["N", "The news list"], ["E", "Explore imagery"], ["O", "Overview of the current area"], ["Shift 1–9", "An analysis, in the order of the Analyse menu"]],
   },
   {
     group: "Choose an area",
@@ -22,7 +22,7 @@ export const SHORTCUTS: { group: string; keys: [string, string][] }[] = [
   },
   {
     group: "In the area overview",
-    keys: [["1–7", "Run one of the one-click analyses"]],
+    keys: [["1–8", "Run one of the one-click analyses"]],
   },
   {
     group: "Globe and time",
