@@ -5,6 +5,36 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.9] - 2026-10-16
+
+### Added
+- **Analyse here.** One click on the globe (or A) makes a square area of
+  2, 5, 10 or 25 km around the spot, named from OpenStreetMap, and opens an
+  overview: ESA WorldCover land-cover shares and map, the 1991-2020 climate
+  with the last twelve months ranked against it (ERA5 via Open-Meteo), and
+  hazard news, earthquakes and alerts nearby.
+- **One-click analyses** in the overview, each with its defaults stated:
+  vegetation change since 2000, an 8-year index series since 1990, surface
+  water through time, built-up growth, tree cover, a flood check on the last
+  14 days and a burn check on the last 30. Keys 1 to 7 start them.
+- **ForestEye** (Forests): tree cover per year from the Impact Observatory
+  maps, gains and losses, and what lost tree cover became.
+- **Index series in the browser**, so Research works on the live site: up to
+  12 years, per-decade trends from years with a clear view of most of the area.
+- **Keyboard shortcuts** for navigation, area tools, the timeline and sharing;
+  ? lists them.
+- CSV export of browser results, and an Earth Engine script for change and
+  burn analyses run in the browser.
+
+### Changed
+- Change and flood regions are drawn as traced outlines instead of bounding
+  boxes, and are shown with the result.
+- Drawing or uploading an area outside an analysis opens its overview; every
+  analysis panel links back to the overview of its area.
+
+### Fixed
+- Clicking a news marker on the globe did nothing.
+
 ## [0.2.0-alpha.8] - 2026-10-15
 
 ### Added

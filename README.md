@@ -41,6 +41,17 @@ scenes, the method and the limits behind it.
 
 ## What you can do
 
+### 🎯 Click a place, get an analysis
+Press **Analyse here** (or <kbd>A</kbd>) and click anywhere on the globe. EarthPulse
+makes a square area of 2 to 25 km around the spot, names it, and in a few
+seconds shows its land cover (ESA WorldCover), its 1991 to 2020 climate and
+how the last twelve months compare, and any hazard news, earthquakes or
+alerts nearby. Below that are seven analyses that start with one click or
+one key (<kbd>1</kbd> to <kbd>7</kbd>), each with its defaults written next to it: what
+changed since 2000, an index series since 1990, surface water through time,
+built-up growth, tree cover, whether it is flooded now, and whether it has
+burned recently. Drawing or uploading an area opens the same overview.
+
 ### 🔴 See what is happening now
 Current red and orange disaster alerts (GDACS), active fire detections (NASA
 VIIRS), river flood forecasts and observed flood extent (Copernicus GloFAS),
@@ -95,6 +106,24 @@ threshold, with the largest regions listed and the distribution plotted.
 to 2023, maps where it spread, and says what it replaced: crops, trees,
 rangeland or bare ground. The maps are machine-learning classifications, and
 the result is labelled that way.
+
+### 🌳 Check tree cover
+**ForestEye** follows the Trees class of the same annual maps: where tree
+cover was lost and gained from 2017 to 2023, and what the lost tree cover
+became (crops, pasture, buildings). It says plainly that leaving the Trees
+class is a change of map class, not deforestation as FAO defines it.
+
+### 📈 Follow an index for decades
+**Research** computes mean NDVI, NDWI, MNDWI and NDBI over your area for up
+to 12 years since 1984, with per-decade trends that leave out years with too
+little clear view. Every result exports as CSV and JSON, and change and burn
+analyses also as a Google Earth Engine script that repeats them with the
+same scenes.
+
+### ⌨️ Keyboard first
+<kbd>L</kbd> Live, <kbd>E</kbd> Explore, <kbd>A</kbd> Analyse here, <kbd>R</kbd>/<kbd>P</kbd> draw, <kbd>U</kbd> upload,
+<kbd>←</kbd>/<kbd>→</kbd> years, <kbd>Space</kbd> play, <kbd>C</kbd> compare, <kbd>/</kbd> search,
+<kbd>Shift</kbd>+<kbd>1</kbd>–<kbd>8</kbd> analyses. Press <kbd>?</kbd> in the app for the full list.
 
 ### 💧 Track surface water year by year
 **WaterWatch** maps water for up to nine years, plots the area through time
@@ -165,9 +194,9 @@ install icon in the address bar).
 
 ## Roadmap
 
-Surface temperature and pre-2017 history for UrbanEye, ForestEye (loss, gain and disturbance),
-land-cover classification with accuracy assessment, carbon accounting with
-exposed equations, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
+Surface temperature and pre-2017 history for UrbanEye, forest disturbance
+from Landsat, land-cover classification with accuracy assessment, carbon
+accounting with exposed equations, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
 [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
