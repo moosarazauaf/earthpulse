@@ -34,6 +34,7 @@ export class Drawing {
     private globe: Globe,
     private onComplete: (geometry: AoiGeometry) => void,
     private onPick: (detectionId: string | null) => void,
+    private onPoint: (lon: number, lat: number) => void,
   ) {
     const { viewer } = globe;
     this.handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -82,13 +83,17 @@ export class Drawing {
     if (this.tool === "none") {
       const picked = this.globe.viewer.scene.pick(position);
       const entity = picked?.id instanceof Entity ? picked.id : null;
-      // Alert markers carry an "alert:" id; detection outlines carry a direction.
+      // Alert and news markers carry an "alert:" or "news:" id; detection outlines carry a direction.
       const id = entity ? String(entity.id) : null;
-      this.onPick(id && (id.startsWith("alert:") || entity?.properties?.direction) ? id : null);
+      this.onPick(id && (id.startsWith("alert:") || id.startsWith("news:") || entity?.properties?.direction) ? id : null);
       return;
     }
     const point = this.locate(position);
     if (!point) return;
+    if (this.tool === "point") {
+      this.onPoint(point[0], point[1]);
+      return;
+    }
     this.points.push(point);
     if (this.tool === "rectangle" && this.points.length === 2) {
       const [a, b] = this.points as [LonLat, LonLat];

@@ -42,7 +42,12 @@ export function GlobeViewer() {
     if (import.meta.env.DEV) (window as unknown as { __earthpulse?: Globe }).__earthpulse = globe;
     drawing.current = new Drawing(
       globe,
-      (geometry) => useStore.getState().setAoi({ geometry, label: "Drawn area" }),
+      (geometry) => {
+        const state = useStore.getState();
+        state.setAoi({ geometry, label: "Drawn area" });
+        // Outside an analysis, a drawn area opens its overview.
+        if (state.mode === "explore" || state.mode === "live" || state.mode === "area") state.set({ mode: "area", result: null });
+      },
       (id) => {
         const state = useStore.getState();
         if (id?.startsWith("alert:")) {
@@ -57,6 +62,7 @@ export function GlobeViewer() {
         const found = id === null ? null : features.find((f) => String(f.id) === id) ?? null;
         state.set({ selectedDetection: found as Detection | null });
       },
+      (lon, lat) => useStore.getState().analyseAt(lon, lat),
     );
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -164,9 +170,10 @@ export function GlobeViewer() {
   const layered: LayeredResult | null = hasLayers(s.result) ? s.result : null;
   useEffect(() => {
     const overlays: Record<string, Overlay> | null = layered?.overlays ?? null;
-    const overlay = overlays && s.overlay.key ? overlays[s.overlay.key] ?? null : null;
+    const coverShown = s.mode === "area" && s.showCover && s.areaCover ? s.areaCover.overlay : null;
+    const overlay = coverShown ?? (overlays && s.overlay.key ? overlays[s.overlay.key] ?? null : null);
     void instance?.setOverlay(overlay, s.overlay.opacity);
-  }, [layered, s.overlay.key, s.overlay.opacity]);
+  }, [layered, s.overlay.key, s.overlay.opacity, s.mode, s.showCover, s.areaCover]);
   useEffect(() => {
     void instance?.setDetections(mapped, s.overlay.detections);
   }, [mapped, s.overlay.detections]);

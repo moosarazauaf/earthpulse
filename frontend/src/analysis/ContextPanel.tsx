@@ -2,6 +2,7 @@
 import { useState } from "react";
 
 import { useStore } from "../app/store";
+import { AreaOverview } from "../area/AreaOverview";
 import { LivePanel } from "../hazards/LivePanel";
 import { AnalysisForm } from "./AnalysisForm";
 import { Evidence } from "./Evidence";
@@ -67,6 +68,8 @@ export function ContextPanel() {
   const mode = useStore((s) => s.mode);
   const job = useStore((s) => s.job);
   const result = useStore((s) => s.result);
+  const aoi = useStore((s) => s.aoi);
+  const set = useStore((s) => s.set);
   const [open, setOpen] = useState(true);
   if (mode === "live") {
     return (
@@ -81,7 +84,7 @@ export function ContextPanel() {
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";
-  const title = mode === "research" ? "Research" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : mode === "forests" ? "ForestEye" : mode === "fires" ? "FireWatch" : "What changed here?";
+  const title = mode === "area" ? "This area" : mode === "research" ? "Research" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : mode === "forests" ? "ForestEye" : mode === "fires" ? "FireWatch" : "What changed here?";
 
   return (
     <aside className={`panel right${open ? "" : " collapsed"}`} aria-label={title}>
@@ -90,7 +93,10 @@ export function ContextPanel() {
       </button>
       {open && (
         <div className="panel-body">
-          {mode === "research" ? (
+          {mode !== "area" && aoi && !running && (
+            <button className="link back" onClick={() => set({ mode: "area" })}>← Overview of {aoi.label}</button>
+          )}
+          {mode === "area" ? <AreaOverview /> : mode === "research" ? (
             <>
               {running && <Progress />}
               {job.status === "failed" && job.error && (

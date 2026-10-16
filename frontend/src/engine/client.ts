@@ -5,6 +5,7 @@
 import type { AnalysisResult, Overlay } from "../app/types";
 import type { Progress } from "./common";
 import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
+import type { CoverRequest, CoverResult } from "./cover";
 
 export const SOFTWARE_VERSION = "0.2.0-alpha.8";
 export type Quality = "fast" | "balanced" | "detailed";
@@ -75,7 +76,7 @@ function finish(raw: EngineResult, job: WorkerRequest, device: DeviceProfile, se
         uncertainty: WATER_UNCERTAINTY,
         ...ran,
       };
-  return { ...rest, id: localId(raw.label), softwareVersion: SOFTWARE_VERSION, overlays, provenance } as unknown as AnalysisResult;
+  return { ...rest, id: localId("label" in raw ? raw.label : null), softwareVersion: SOFTWARE_VERSION, overlays, provenance } as unknown as AnalysisResult;
 }
 
 export interface RunHandle {
@@ -103,5 +104,24 @@ export function runInBrowser(job: WorkerRequest, device: DeviceProfile, onProgre
     };
   });
   worker.postMessage(job);
+  return { promise, cancel: () => worker.terminate() };
+}
+
+/** Land cover for the area overview: a quick worker job outside the analysis queue, so it never replaces a result. */
+export function landCoverInBrowser(request: CoverRequest): { promise: Promise<{ shares: CoverResult["shares"]; resolution: number; overlay: Overlay }>; cancel: () => void } {
+  const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+  const promise = new Promise<{ shares: CoverResult["shares"]; resolution: number; overlay: Overlay }>((resolve, reject) => {
+    worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
+      const message = event.data;
+      if (message.type === "progress") return;
+      worker.terminate();
+      if (message.type === "error") { reject(new Error(message.message)); return; }
+      const raw = message.result as CoverResult;
+      const o = raw.overlays.cover;
+      resolve({ shares: raw.shares, resolution: raw.resolution, overlay: { title: o.title, url: URL.createObjectURL(o.blob), geotiff: "", bounds: o.bounds, legend: o.legend } });
+    };
+    worker.onerror = () => { worker.terminate(); reject(new Error("The land-cover map could not be read.")); };
+  });
+  worker.postMessage({ kind: "cover", request } satisfies WorkerRequest);
   return { promise, cancel: () => worker.terminate() };
 }

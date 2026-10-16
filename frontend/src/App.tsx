@@ -10,7 +10,8 @@ import { SwipeHandle } from "./compare/SwipeHandle";
 import { GlobeViewer, getGlobe } from "./globe/GlobeViewer";
 import { LayerPanel } from "./layers/LayerPanel";
 import { Timeline } from "./timeline/Timeline";
-import { DataSources, Intro, Notice, StoryCaption } from "./ui/Overlays";
+import { DataSources, Intro, Notice, StoryCaption, ToolHint } from "./ui/Overlays";
+import { ShortcutsCard, useShortcuts } from "./ui/Shortcuts";
 import { TopBar } from "./ui/TopBar";
 
 /** Restore a shared view or analysis from the address bar. */
@@ -38,6 +39,7 @@ function restoreFromUrl() {
 }
 
 export function App() {
+  useShortcuts();
   useEffect(() => {
     void useStore.getState().loadCatalog();
     restoreFromUrl();
@@ -57,8 +59,10 @@ export function App() {
       <SharedRunCard />
       <StoryCaption />
       <Notice />
+      <ToolHint />
       <div id="timeline"><Timeline /></div>
       <DataSources />
+      <ShortcutsCard />
     </div>
   );
 }

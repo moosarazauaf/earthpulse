@@ -238,5 +238,6 @@ export async function runUrban(request: UrbanRequest, hooks: EngineHooks) {
 function byClass(areas: Record<number, number>): { class: string; ha: number }[] {
   return Object.entries(areas)
     .map(([c, ha]) => ({ class: CLASSES[Number(c)]?.name ?? `Class ${c}`, ha }))
+    .filter((r) => r.ha >= 0.05)
     .sort((a, b) => b.ha - a.ha);
 }

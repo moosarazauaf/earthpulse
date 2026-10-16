@@ -9,7 +9,8 @@ import type { UrbanRequest } from "../engine/urban";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import type { NewsFile, NewsStory } from "../news/types";
-import { clampYear, currentYear, datasetForYear } from "./logic";
+import { clampYear, currentYear, datasetForYear, formatLatLon, squareAround } from "./logic";
+import type { QuickActionInfo } from "../area/actions";
 import type { SharedRun } from "./shareRun";
 import type {
   AnalysisRecord,
@@ -22,12 +23,14 @@ import type {
   Detection,
   FloodRequest,
   ImageryLayerInfo,
+  Overlay,
   RenderId,
   TimeSeriesRequest,
 } from "./types";
 
 export type CompareMode = "swipe" | "blink" | "opacity";
-export type DrawTool = "none" | "rectangle" | "polygon";
+/** "point" is Analyse here: one click makes a square area around the spot. */
+export type DrawTool = "none" | "rectangle" | "polygon" | "point";
 /** Name of a result raster, as keyed in the result's `overlays`. */
 export type OverlayKey = string;
 
@@ -66,7 +69,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "research";
+  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "research" | "area";
   // live hazards
   alerts: Alert[] | null;
   alertsError: string | null;
@@ -90,6 +93,8 @@ interface State {
   /** Which part of the Live panel is open. */
   liveTab: "news" | "alerts" | "layers";
   sourcesOpen: boolean;
+  /** The keyboard shortcuts card. */
+  shortcutsOpen: boolean;
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
   notice: string | null;
@@ -99,6 +104,16 @@ interface State {
   setCompare: (partial: Partial<State["compare"]>) => void;
   setOverlay: (partial: Partial<State["overlay"]>) => void;
   setAoi: (aoi: Aoi | null) => void;
+  /** Side of the square made by Analyse here, in km, and the point it is centred on. */
+  pickSizeKm: number;
+  pickCentre: [number, number] | null;
+  /** Make a square area around a point and open its overview. */
+  analyseAt: (lon: number, lat: number, sizeKm?: number) => void;
+  /** Land cover read for the area overview, shown on the globe while `showCover` is on. */
+  areaCover: { overlay: Overlay; shares: { code: number; name: string; ha: number; share: number }[]; resolution: number } | null;
+  showCover: boolean;
+  /** Start a one-click analysis of the current area. */
+  runQuick: (info: QuickActionInfo, device: DeviceProfile) => void;
   loadCatalog: () => Promise<void>;
   runChange: (request: ChangeRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runTimeSeries: (request: TimeSeriesRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
@@ -205,6 +220,7 @@ export const useStore = create<State>((set, get) => {
     selectedDetection: null,
     mode: "explore",
     sourcesOpen: false,
+    shortcutsOpen: false,
     introOpen: true,
     story: null,
     notice: null,
@@ -252,7 +268,37 @@ export const useStore = create<State>((set, get) => {
     setYear: (year) => set({ year: clampYear(year) }),
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
-    setAoi: (aoi) => set({ aoi, drawTool: "none" }),
+    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, ...(aoi ? {} : { pickCentre: null }) }),
+    pickSizeKm: 5,
+    pickCentre: null,
+    areaCover: null,
+    showCover: false,
+    analyseAt: (lon, lat, sizeKm) => {
+      const km = sizeKm ?? get().pickSizeKm;
+      const label = `${km} km around ${formatLatLon(lat, lon)}`;
+      set({
+        aoi: { geometry: squareAround(lon, lat, km), label }, pickCentre: [lon, lat], pickSizeKm: km,
+        drawTool: "none", mode: "area", areaCover: null, introOpen: false, result: null, job: IDLE,
+      });
+      // Name the place when OpenStreetMap knows it; the coordinates stay if it does not answer.
+      void reverseGeocode(lat, lon).then((name) => {
+        const aoi = get().aoi;
+        if (name && aoi && aoi.label === label) set({ aoi: { ...aoi, label: `${km} km around ${name}` } });
+      });
+    },
+    runQuick: (info, device) => {
+      const s = get();
+      const quality = device.recommended;
+      const maxPixels = PIXEL_BUDGET[quality];
+      const a = info.action;
+      set({ mode: info.mode });
+      if (a.kind === "change") void s.runChange(a.request, device, quality);
+      else if (a.kind === "fire") void s.runFire(a.request, device, quality);
+      else if (a.kind === "flood") void s.runFlood(a.request, device, quality);
+      else if (a.kind === "series") void s.runTimeSeries(a.request, device, quality);
+      else if (a.kind === "water") void s.runWater({ ...a.request, maxPixels, concurrency: device.concurrency }, device);
+      else void s.runUrban({ ...a.request, maxPixels, concurrency: device.concurrency }, device);
+    },
 
     loadCatalog: async () => {
       try {
@@ -288,6 +334,22 @@ export const useStore = create<State>((set, get) => {
     },
   };
 });
+
+const NOMINATIM_REVERSE = "https://nominatim.openstreetmap.org/reverse";
+
+/** The nearest named place to a point, from OpenStreetMap; null if none or the service is busy. */
+async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+  try {
+    const response = await fetch(`${NOMINATIM_REVERSE}?format=jsonv2&zoom=10&lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`);
+    if (!response.ok) return null;
+    const body = (await response.json()) as { address?: Record<string, string>; name?: string };
+    const a = body.address ?? {};
+    const place = a.city ?? a.town ?? a.village ?? a.county ?? a.state_district ?? a.state ?? body.name;
+    return place ? [place, a.country].filter(Boolean).join(", ") : null;
+  } catch {
+    return null;
+  }
+}
 
 /** The dataset actually used for a year, after the Sentinel-2 coverage rule. */
 export const activeDataset = (preferred: DatasetId, year: number) => datasetForYear(preferred, year);

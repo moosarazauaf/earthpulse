@@ -137,3 +137,11 @@ export function DataSources() {
     </dialog>
   );
 }
+
+/** What to do while a globe tool is active, wherever the visitor is in the app. */
+export function ToolHint() {
+  const tool = useStore((s) => s.drawTool);
+  const size = useStore((s) => s.pickSizeKm);
+  if (tool !== "point") return null;
+  return <div className="notice tool-hint" role="status">Click a spot on the globe to analyse the {size} km around it. Esc cancels.</div>;
+}

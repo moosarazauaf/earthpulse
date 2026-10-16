@@ -41,7 +41,7 @@ export interface WeatherContext {
   heat: WindowComparison | null;
 }
 
-function parseDaily(body: unknown): Daily {
+export function parseDaily(body: unknown): Daily {
   const daily = (body as { daily?: { time?: unknown; precipitation_sum?: unknown; temperature_2m_max?: unknown } } | null)?.daily;
   const time = Array.isArray(daily?.time) ? (daily!.time as unknown[]).map(String) : [];
   const nums = (v: unknown) => (Array.isArray(v) ? v.map((x) => (typeof x === "number" && Number.isFinite(x) ? x : null)) : time.map(() => null));
@@ -116,7 +116,17 @@ export function describe(c: WindowComparison, field: "rain" | "tmax"): string {
   return `Daily highs averaged ${c.value.toFixed(1)} °C in the ${c.days} days to the event, ${diff >= 0 ? "+" : "−"}${Math.abs(diff).toFixed(1)} °C against the ${span} average: ${rank}.`;
 }
 
-async function getJson(url: string, signal?: AbortSignal): Promise<unknown> {
+/** The 1991-2020 daily ERA5 series for a point. Built the same way everywhere so the browser can reuse a cached copy. */
+export function baselineUrl(lat: number, lon: number): string {
+  return `${ARCHIVE}?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&daily=precipitation_sum,temperature_2m_max&timezone=UTC&models=era5&start_date=${BASELINE.first}-01-01&end_date=${BASELINE.last}-12-31`;
+}
+
+/** ERA5 daily values for a recent period, for comparisons on the same model as the baseline. */
+export function recentEra5Url(lat: number, lon: number, start: string, end: string): string {
+  return `${ARCHIVE}?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&daily=precipitation_sum,temperature_2m_max&timezone=UTC&models=era5&start_date=${start}&end_date=${end}`;
+}
+
+export async function getJson(url: string, signal?: AbortSignal): Promise<unknown> {
   const response = await fetch(url, { signal });
   if (!response.ok) throw new Error("The weather service did not respond.");
   return response.json();
@@ -126,7 +136,7 @@ export async function fetchWeatherContext(lat: number, lon: number, eventDay: st
   const where = `latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&daily=precipitation_sum,temperature_2m_max&timezone=UTC`;
   const [recentBody, baselineBody] = await Promise.all([
     getJson(`${FORECAST}?${where}&past_days=${PAST_DAYS}&forecast_days=1`, signal),
-    getJson(`${ARCHIVE}?${where}&models=era5&start_date=${BASELINE.first}-01-01&end_date=${BASELINE.last}-12-31`, signal),
+    getJson(baselineUrl(lat, lon), signal),
   ]);
   const recent = parseDaily(recentBody);
   const baseline = parseDaily(baselineBody);

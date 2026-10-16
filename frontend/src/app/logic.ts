@@ -126,3 +126,16 @@ export function formatSigned(value: number | null | undefined, digits = 2): stri
   if (Number(text) === 0) return text;
   return `${value > 0 ? "+" : "−"}${text}`;
 }
+
+/** A square of about `km` a side, centred on a point; the east-west span widens with latitude so the ground stays square. */
+export function squareAround(lon: number, lat: number, km: number): AoiGeometry {
+  const halfLat = km / 2 / 111.32;
+  const halfLon = halfLat / Math.max(Math.cos((lat * Math.PI) / 180), 0.05);
+  const round = (v: number) => Math.round(v * 1e5) / 1e5;
+  return rectangleAoi(round(lon - halfLon), round(Math.max(lat - halfLat, -89.9)), round(lon + halfLon), round(Math.min(lat + halfLat, 89.9)));
+}
+
+/** "31.52° N, 74.35° E" */
+export function formatLatLon(lat: number, lon: number): string {
+  return `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lon).toFixed(2)}° ${lon >= 0 ? "E" : "W"}`;
+}

@@ -22,11 +22,11 @@ export function AnalysisList({ onPick }: { onPick: (id: AnalysisMode) => void })
   const mode = useStore((s) => s.mode);
   return (
     <ul className="analysis-list" role="menu">
-      {ANALYSES.map((a) => (
+      {ANALYSES.map((a, i) => (
         <li key={a.id} role="none">
           <button role="menuitem" className={mode === a.id ? "on" : ""} onClick={() => onPick(a.id)}>
             <strong>{a.question}</strong>
-            <span>{a.label} · {a.detail}</span>
+            <span>{a.label} · {a.detail} <kbd>Shift {i + 1}</kbd></span>
           </button>
         </li>
       ))}
@@ -62,6 +62,10 @@ function AnalyseMenu() {
       {open && createPortal(
         <div ref={menu} className="analyse-menu" style={{ left }}>
           <p className="eyebrow">What do you want to measure?</p>
+          <button className="overview-item" onClick={() => { set({ mode: "area" }); setOpen(false); }}>
+            <strong>What is this place like?</strong>
+            <span>Area overview · land cover, climate, nearby hazards and one-click analyses <kbd>O</kbd></span>
+          </button>
           <AnalysisList onPick={(id) => { set({ mode: id }); setOpen(false); }} />
           <p className="muted">Each analysis asks for an area, then runs on your own computer.</p>
         </div>,
@@ -87,6 +91,7 @@ export function shareUrl(): string {
 
 export function TopBar() {
   const mode = useStore((s) => s.mode);
+  const drawTool = useStore((s) => s.drawTool);
   const set = useStore((s) => s.set);
   const [query, setQuery] = useState("");
   const [places, setPlaces] = useState<Place[] | null>(null);
@@ -173,10 +178,16 @@ export function TopBar() {
         )}
       </form>
 
+      <button className={drawTool === "point" ? "ghost pick on" : "ghost pick"} aria-pressed={drawTool === "point"}
+        onClick={() => set({ drawTool: drawTool === "point" ? "none" : "point", introOpen: false })}
+        title="Click a spot on the globe to analyse the area around it (A)">
+        <span aria-hidden="true">◎</span><span className="label"> Analyse here</span>
+      </button>
       <button className="ghost reset" onClick={() => void getGlobe()?.resetView()} title="Back to the whole Earth" aria-label="Reset view">
         <span aria-hidden="true">⟲</span><span className="label"> Reset view</span>
       </button>
-      <button className="ghost" onClick={share}>Share</button>
+      <button className="ghost" onClick={share} title="Copy a link to this view (S)">Share</button>
+      <button className="ghost keys" onClick={() => set({ shortcutsOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
     </header>
   );
 }
