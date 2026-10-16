@@ -186,6 +186,9 @@ export function TopBar() {
       <button className="ghost reset" onClick={() => void getGlobe()?.resetView()} title="Back to the whole Earth" aria-label="Reset view">
         <span aria-hidden="true">⟲</span><span className="label"> Reset view</span>
       </button>
+      <button className="ghost places-btn" onClick={() => set({ placesOpen: true })} title="My places: saved areas and recent analyses (M)" aria-label="My places">
+        <span aria-hidden="true">★</span><span className="label"> My places</span>
+      </button>
       <button className="ghost" onClick={share} title="Copy a link to this view (S)">Share</button>
       <button className="ghost keys" onClick={() => set({ shortcutsOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
     </header>

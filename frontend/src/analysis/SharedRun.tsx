@@ -57,19 +57,20 @@ export function SharedRunCard() {
     if (shared.kind === "change" && burn) void store.runFire(request, device, quality);
     else if (shared.kind === "change") void store.runChange(request, device, quality);
     else if (shared.kind === "flood") void store.runFlood(request, device, quality);
+    else if (shared.kind === "timeseries") void store.runTimeSeries(request, device, quality);
     else if (shared.kind === "urban") void store.runUrban({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
     else void store.runWater({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
   }
 
   return (
     <div className="area-prompt" role="dialog" aria-modal="false" aria-labelledby="shared-run-title">
-      <p className="eyebrow">{run.fromNews !== undefined ? "Check the news from space" : "Shared analysis"}</p>
+      <p className="eyebrow">{run.fromNews !== undefined ? "Check the news from space" : run.fromRecent ? "Run again" : "Shared analysis"}</p>
       <h2 id="shared-run-title">{run.request.label ?? "Shared area"}</h2>
       <p>{describeRun(run)}.</p>
       <p className="muted">
         {run.fromNews !== undefined
           ? `Proposed from the story "${run.fromNews}". The area outlined on the globe is a box around the place the story names; draw your own in the panel if the event was elsewhere. `
-          : "Someone shared the recipe for this analysis. "}
+          : run.fromRecent ? "From your recent analyses, with the same area, dates and settings. " : "Someone shared the recipe for this analysis. "}
         Running it downloads the satellite scenes to this device and computes the result here, at the{" "}
         {qualityFor(run.maxPixels)} setting. Nothing is sent to EarthPulse.
       </p>

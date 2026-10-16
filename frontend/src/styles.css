@@ -429,3 +429,27 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 @media (max-width: 800px) {
   .topbar .pick .label, .topbar .keys { display: none; }
 }
+
+/* My places, overview actions */
+.row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.place-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.place-list li { display: flex; gap: 6px; align-items: center; }
+.place-open { flex: 1; text-align: left; display: grid; gap: 1px; padding: 6px 8px; border: 1px solid var(--line-strong); border-radius: 4px; min-width: 0; }
+.place-open strong { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.place-open em { font-style: normal; font-size: 11px; color: var(--muted); }
+.print-header { display: none; }
+@media (max-width: 1100px) { .topbar .places-btn .label { display: none; } }
+
+/* Print report: the side panel alone, on white paper. */
+@media print {
+  :root { --text: #111; --muted: #444; --line: #ccc; --line-strong: #999; --panel: #fff; --panel-solid: #fff; }
+  html, body, #root { height: auto; overflow: visible; background: #fff; color: #111; }
+  .app { height: auto; }
+  .globe, .grid-overlay, .topbar, .panel.left, #timeline, .notice, .intro, .area-prompt, .panel-toggle, .row-actions,
+  .quick-runs, .quick-runs + .muted, .seg, .exports, .skip, dialog, .back, .check { display: none !important; }
+  .panel.right { position: static; width: auto; max-height: none; background: #fff; border: 0; box-shadow: none; backdrop-filter: none; }
+  .panel-body { overflow: visible; max-height: none; padding: 0; }
+  .panel-body section { break-inside: avoid; }
+  .print-header { display: block; font-size: 11px; color: #444; border-bottom: 1px solid #999; padding-bottom: 6px; margin-bottom: 8px; }
+  a { color: #111; }
+}

@@ -17,6 +17,7 @@ import { describe } from "../news/weather";
 import { KindBadge } from "../ui/KindBadge";
 import { type QuickActionInfo, quickActions } from "./actions";
 import { type ClimateProfile, describeNormals, fetchClimate } from "./climate";
+import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
 
 const SIZES = [2, 5, 10, 25] as const;
@@ -43,6 +44,8 @@ function Overview() {
   const size = useStore((s) => s.pickSizeKm);
   const analyseAt = useStore((s) => s.analyseAt);
   const setAoi = useStore((s) => s.setAoi);
+  const saveCurrentPlace = useStore((s) => s.saveCurrentPlace);
+  const saved = useStore((s) => s.places.some((p) => p.label === aoi.label));
   const projected = useMemo(() => projectAoi(aoi.geometry), [aoi.geometry]);
   const [lon, lat] = centre ?? [
     (projected.lonLatBounds[0] + projected.lonLatBounds[2]) / 2,
@@ -54,6 +57,10 @@ function Overview() {
       <section>
         <p className="eyebrow">Area overview</p>
         <h2 className="story-title">{aoi.label}</h2>
+        <div className="row-actions">
+          <button onClick={saveCurrentPlace} disabled={saved} title="Keep this area in My places, in this browser (Shift+S)">{saved ? "★ Saved" : "☆ Save"}</button>
+          <button onClick={() => window.print()} title="Print this overview, or save it as a PDF">Print report</button>
+        </div>
         <p className="muted">
           {formatArea(projected.areaM2 / 10_000)} · centre {formatLatLon(lat, lon)} ·{" "}
           <button className="link" onClick={() => setAoi(null)}>Choose another area</button>
@@ -70,6 +77,7 @@ function Overview() {
       </section>
       <QuickRuns />
       <LandCover />
+      <TerrainSection />
       <Climate lat={lat} lon={lon} />
       <Nearby lat={lat} lon={lon} />
     </>
@@ -158,6 +166,58 @@ function LandCover() {
     </section>
   );
 }
+
+// ---- terrain ---------------------------------------------------------------------------------
+
+function TerrainSection() {
+  const aoi = useStore((s) => s.aoi)!;
+  const [terrain, setTerrain] = useState<Terrain | null | undefined>(undefined);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    setTerrain(undefined);
+    setError(null);
+    fetchTerrain(aoi.geometry, controller.signal).then(setTerrain, (e: unknown) => {
+      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Elevation could not be read.");
+    });
+    return () => controller.abort();
+  }, [aoi]);
+  const at = (p: [number, number]) => formatLatLon(p[1], p[0]);
+  return (
+    <section>
+      <header className="row"><h3>Terrain</h3><KindBadge kind="DERIVED" /></header>
+      {error && <p className="note">{error}</p>}
+      {terrain === undefined && !error && <p className="muted" role="status">Reading elevation…</p>}
+      {terrain === null && <p className="muted">No elevation inside this area.</p>}
+      {terrain && (
+        <>
+          <p>
+            From <strong>{metres(terrain.min)}</strong> to <strong>{metres(terrain.max)}</strong> above sea level
+            (mean {metres(terrain.mean)}, relief {metres(terrain.max - terrain.min)}). Average slope {terrain.meanSlope.toFixed(1)}°.
+          </p>
+          <ul className="cover-bars">
+            {SLOPE_CLASSES.map((c, i) => (
+              <li key={c.label}>
+                <span className="swatch" style={{ background: SLOPE_COLOURS[i] }} aria-hidden="true" />
+                <span className="name">{c.label} {i === 0 ? `(under ${c.max}°)` : i === SLOPE_CLASSES.length - 1 ? `(over ${SLOPE_CLASSES[i - 1]!.max}°)` : `(${SLOPE_CLASSES[i - 1]!.max}–${c.max}°)`}</span>
+                <span className="bar"><i style={{ width: `${Math.max(terrain.slopeShares[i]! > 0 ? 1 : 0, terrain.slopeShares[i]! * 100)}%` }} /></span>
+                <span className="pct">{Math.round(terrain.slopeShares[i]! * 100)}%</span>
+              </li>
+            ))}
+          </ul>
+          <p className="muted">
+            Lowest point {at(terrain.lowest)}, highest {at(terrain.highest)}.
+            {terrain.slopeShares[3]! + terrain.slopeShares[4]! > 0.1 ? " Over a tenth of the area is steeper than 15°, where heavy rain can set off landslides." : ""}
+            {" "}AWS Terrain Tiles (SRTM, GMTED2010 and national models), read at {Math.round(terrain.resolutionM)} m; the data beneath is about 30 m in most places, so slopes over short distances are smoothed. Heights in cities and forests include buildings and trees, and are good to a few metres.
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
+
+const metres = (m: number) => `${Math.round(m).toLocaleString("en")} m`;
+const SLOPE_COLOURS = ["#2e7d32", "#9ccc65", "#fdd835", "#fb8c00", "#c62828"];
 
 // ---- climate ------------------------------------------------------------------------------------
 

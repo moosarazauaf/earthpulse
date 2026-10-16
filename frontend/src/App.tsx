@@ -4,13 +4,14 @@ import { AreaPrompt } from "./analysis/AreaPrompt";
 import { SharedRunCard } from "./analysis/SharedRun";
 import { ContextPanel } from "./analysis/ContextPanel";
 import { decodeView } from "./app/logic";
-import { decodeRun } from "./app/shareRun";
+import { decodeRun, modeForRun } from "./app/shareRun";
 import { useStore } from "./app/store";
 import { SwipeHandle } from "./compare/SwipeHandle";
 import { GlobeViewer, getGlobe } from "./globe/GlobeViewer";
 import { LayerPanel } from "./layers/LayerPanel";
 import { Timeline } from "./timeline/Timeline";
 import { DataSources, Intro, Notice, StoryCaption, ToolHint } from "./ui/Overlays";
+import { MyPlaces } from "./ui/MyPlaces";
 import { ShortcutsCard, useShortcuts } from "./ui/Shortcuts";
 import { TopBar } from "./ui/TopBar";
 
@@ -35,7 +36,7 @@ function restoreFromUrl() {
   if (view.analysis) void store.loadAnalysis(view.analysis);
   // A shared browser analysis is shown for confirmation; it never starts on its own.
   const run = decodeRun(new URLSearchParams(window.location.search).get("run"));
-  if (run) store.set({ pendingRun: run, introOpen: false, mode: run.kind === "flood" ? "floods" : run.kind === "urban" ? ((run.request as { focus?: number }).focus === 2 ? "forests" : "cities") : (run.request as { index?: string }).index === "nbr" ? "fires" : run.kind });
+  if (run) store.set({ pendingRun: run, introOpen: false, mode: modeForRun(run) });
 }
 
 export function App() {
@@ -47,6 +48,7 @@ export function App() {
 
   return (
     <div className="app">
+      <p className="print-header">EarthPulse · {window.location.origin}{window.location.pathname} · printed {new Date().toISOString().slice(0, 10)} · values carry their kind: observed, derived, modelled or estimated</p>
       <a className="skip" href="#timeline">Skip to timeline</a>
       <GlobeViewer />
       <div className="grid-overlay" aria-hidden="true" />
@@ -63,6 +65,7 @@ export function App() {
       <div id="timeline"><Timeline /></div>
       <DataSources />
       <ShortcutsCard />
+      <MyPlaces />
     </div>
   );
 }

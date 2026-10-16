@@ -11,6 +11,7 @@ import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sou
 import type { NewsFile, NewsStory } from "../news/types";
 import { clampYear, currentYear, datasetForYear, formatLatLon, squareAround } from "./logic";
 import type { QuickActionInfo } from "../area/actions";
+import { type RecentRun, type SavedPlace, addRecent, loadPlaces, loadRecent, removePlace, savePlace } from "../area/saved";
 import type { SharedRun } from "./shareRun";
 import type {
   AnalysisRecord,
@@ -112,6 +113,13 @@ interface State {
   /** Land cover read for the area overview, shown on the globe while `showCover` is on. */
   areaCover: { overlay: Overlay; shares: { code: number; name: string; ha: number; share: number }[]; resolution: number } | null;
   showCover: boolean;
+  /** Areas saved in this browser, and the last analyses run here (as recipes). */
+  places: SavedPlace[];
+  recent: RecentRun[];
+  saveCurrentPlace: () => void;
+  forgetPlace: (id: string) => void;
+  openPlace: (place: SavedPlace) => void;
+  placesOpen: boolean;
   /** Start a one-click analysis of the current area. */
   runQuick: (info: QuickActionInfo, device: DeviceProfile) => void;
   loadCatalog: () => Promise<void>;
@@ -173,7 +181,7 @@ export const useStore = create<State>((set, get) => {
       if (dataset) result.provenance.dataset = dataset;
       result.provenance.maxPixels = (job.request as { maxPixels: number }).maxPixels;
       // Regions are traced outlines, so they are shown with the result.
-      set({ job: { status: "complete", record: null, error: null }, result, overlay: { ...get().overlay, key: layer, detections: true }, mode });
+      set({ job: { status: "complete", record: null, error: null }, result, overlay: { ...get().overlay, key: layer, detections: true }, mode, recent: remember(get().recent, result) });
     } catch (error) {
       if (localRun !== run) return;
       set({
@@ -269,6 +277,17 @@ export const useStore = create<State>((set, get) => {
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
     setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, ...(aoi ? {} : { pickCentre: null }) }),
+    places: loadPlaces(),
+    recent: loadRecent(),
+    placesOpen: false,
+    saveCurrentPlace: () => {
+      const aoi = get().aoi;
+      if (!aoi) return;
+      const next = savePlace(get().places, aoi.label, aoi.geometry);
+      set(next ? { places: next, notice: `Saved "${aoi.label}" in My places, in this browser.` } : { notice: "This area could not be saved: the outline is too detailed, or the browser is not allowing storage." });
+    },
+    forgetPlace: (id) => set({ places: removePlace(get().places, id) }),
+    openPlace: (place) => set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, result: null, job: IDLE, placesOpen: false, introOpen: false, drawTool: "none" }),
     pickSizeKm: 5,
     pickCentre: null,
     areaCover: null,
@@ -334,6 +353,15 @@ export const useStore = create<State>((set, get) => {
     },
   };
 });
+
+/** Add a result to the recent list; recording history must never fail the analysis itself. */
+function remember(recent: RecentRun[], result: AnalysisResult): RecentRun[] {
+  try {
+    return addRecent(recent, result);
+  } catch {
+    return recent;
+  }
+}
 
 const NOMINATIM_REVERSE = "https://nominatim.openstreetmap.org/reverse";
 

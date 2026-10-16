@@ -18,7 +18,7 @@ export const SHORTCUTS: { group: string; keys: [string, string][] }[] = [
   },
   {
     group: "Choose an area",
-    keys: [["A", "Analyse here: click a spot on the globe"], ["R", "Draw a rectangle"], ["P", "Draw a polygon (Enter closes it)"], ["U", "Upload a shapefile or GeoJSON"], ["X", "Clear the area"], ["Esc", "Cancel drawing, close a card"]],
+    keys: [["A", "Analyse here: click a spot on the globe"], ["M", "My places: saved areas and recent analyses"], ["Shift S", "Save the current area"], ["R", "Draw a rectangle"], ["P", "Draw a polygon (Enter closes it)"], ["U", "Upload a shapefile or GeoJSON"], ["X", "Clear the area"], ["Esc", "Cancel drawing, close a card"]],
   },
   {
     group: "In the area overview",
@@ -69,11 +69,13 @@ export function useShortcuts() {
         const input = document.querySelector<HTMLInputElement>('input[type="file"]');
         if (input) input.click(); else s.set({ mode: s.mode === "explore" || s.mode === "live" ? "area" : s.mode, introOpen: false, notice: "Press U again to choose the file." });
       } else if (key === "x") s.setAoi(null);
+      else if (key === "m") s.set({ placesOpen: !s.placesOpen });
       else if (key === "h") void getGlobe()?.resetView();
       else if (key === "ArrowLeft") s.setYear(s.year - 1);
       else if (key === "ArrowRight") s.setYear(s.year + 1);
       else if (key === " ") document.querySelector<HTMLButtonElement>(".timeline .icon-btn")?.click();
       else if (key === "c") s.setCompare({ enabled: !s.compare.enabled });
+      else if (key === "s" && event.shiftKey) s.saveCurrentPlace();
       else if (key === "s") {
         const url = shareUrl();
         window.history.replaceState(null, "", url);

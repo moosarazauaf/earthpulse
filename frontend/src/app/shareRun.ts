@@ -10,7 +10,7 @@
 import { areaFromGeoJson } from "../analysis/areaFile";
 import type { AnalysisResult, AoiGeometry } from "./types";
 
-export type RunKind = "change" | "flood" | "water" | "urban";
+export type RunKind = "change" | "flood" | "water" | "urban" | "timeseries";
 export interface SharedRun {
   kind: RunKind;
   /** The request as the engine needs it, minus the device-specific download parallelism. */
@@ -18,6 +18,8 @@ export interface SharedRun {
   maxPixels: number;
   /** Set when the run was proposed from a news story rather than opened from a link; never encoded. */
   fromNews?: string;
+  /** Set when the run is repeated from My places. */
+  fromRecent?: boolean;
 }
 
 const VERSION = 1;
@@ -25,7 +27,7 @@ const VERSION = 1;
 export const MAX_PARAM_LENGTH = 6000;
 /** Decimal places kept in shared coordinates: 4 is about 11 m, finer than any pixel used. */
 const COORDINATE_DECIMALS = 4;
-const KINDS: RunKind[] = ["change", "flood", "water", "urban"];
+const KINDS: RunKind[] = ["change", "flood", "water", "urban", "timeseries"];
 
 function toBase64Url(text: string): string {
   const bytes = new TextEncoder().encode(text);
@@ -96,7 +98,18 @@ export function describeRun(run: SharedRun): string {
   };
   if (run.kind === "change") return `${String(r.index ?? "ndvi").toUpperCase()} change, ${span(r.before)} against ${span(r.after)}`;
   if (run.kind === "flood") return `Flood mapping, ${span(r.before)} against ${span(r.flood)}`;
-  if (run.kind === "urban") return `Built area from ${String(r.firstYear)} to ${String(r.lastYear)}`;
+  if (run.kind === "urban") return `${r.focus === 2 ? "Tree cover" : "Built area"} from ${String(r.firstYear)} to ${String(r.lastYear)}`;
+  if (run.kind === "timeseries") return `Index series for ${Array.isArray(r.years) ? (r.years as number[]).join(", ") : "several years"}`;
   const years = Array.isArray(r.years) ? (r.years as number[]) : [];
   return `Surface water in ${years.join(", ")}`;
+}
+
+/** The mode whose panel shows a run's progress and result. */
+export function modeForRun(run: SharedRun): "floods" | "forests" | "cities" | "fires" | "change" | "water" | "research" {
+  const r = run.request as { focus?: number; index?: string };
+  if (run.kind === "flood") return "floods";
+  if (run.kind === "urban") return r.focus === 2 ? "forests" : "cities";
+  if (run.kind === "timeseries") return "research";
+  if (run.kind === "change") return r.index === "nbr" ? "fires" : "change";
+  return "water";
 }
