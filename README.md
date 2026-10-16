@@ -52,6 +52,8 @@ changed since 2000, an index series since 1990, surface water through time,
 built-up growth, tree cover, whether it is flooded now, and whether it has
 burned recently. Drawing or uploading an area opens the same overview.
 
+<img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
+
 ### 🔴 See what is happening now
 Current red and orange disaster alerts (GDACS), active fire detections (NASA
 VIIRS), river flood forecasts and observed flood extent (Copernicus GloFAS),
