@@ -66,7 +66,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "research";
+  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "research";
   // live hazards
   alerts: Alert[] | null;
   alertsError: string | null;
@@ -268,7 +268,7 @@ export const useStore = create<State>((set, get) => {
     runFlood: (request, device, quality) =>
       runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
     runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),
-    runUrban: (request, device) => runLocal({ kind: "urban", request }, device, "growth", "cities", "none"),
+    runUrban: (request, device) => runLocal({ kind: "urban", request }, device, "growth", request.focus === 2 ? "forests" : "cities", "none"),
     runFire: (request, device, quality) =>
       runLocal({ kind: "change", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "severity", "fires", request.dataset),
     loadAnalysis: async (id) => {

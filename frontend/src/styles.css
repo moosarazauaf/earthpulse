@@ -154,6 +154,7 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .stat.flood { border-top-color: #ff503c; }
 .stat.water { border-top-color: var(--blue); }
 .stat.urban { border-top-color: #ff5a3c; }
+.stat.forest { border-top-color: #4caf6a; }
 .stat.fire { border-top-color: #e1462a; }
 .bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 4px 0; border-bottom: 1px solid var(--line-strong); }
 .bar-col { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }

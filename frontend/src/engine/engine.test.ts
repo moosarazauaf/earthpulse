@@ -400,6 +400,15 @@ describe("UrbanEye rules", () => {
     // Crops and trees became built-up; the already-built pixel, the no-data pixel and the masked one do not count.
     expect(conversions(first, last, mask, 1)).toEqual({ 5: 1, 2: 1 });
   });
+
+  it("reports what lost tree cover became, for ForestEye", async () => {
+    const { losses, TREES } = await import("./urban");
+    const first = new Uint8Array([2, 2, 2, 5, 2]);
+    const last = new Uint8Array([5, 7, 2, 2, 0]);
+    const mask = new Uint8Array([1, 1, 1, 1, 1]);
+    // Trees became crops and built area; trees that stayed, new trees and a no-data pixel do not count.
+    expect(losses(first, last, mask, 1, TREES)).toEqual({ 5: 1, 7: 1 });
+  });
 });
 
 describe("FireWatch severity classes", () => {

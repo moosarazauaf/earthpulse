@@ -286,21 +286,25 @@ export interface WaterResult extends ResultBase {
 
 export interface UrbanResult extends ResultBase {
   type: "urban";
-  request: { aoi: AoiGeometry; label?: string | null; firstYear: number; lastYear: number; maxPixels: number };
+  request: { aoi: AoiGeometry; label?: string | null; firstYear: number; lastYear: number; focus?: number; maxPixels: number };
   summary: {
     aoiAreaHa: number;
     firstYear: number;
     lastYear: number;
-    builtFirstHa: number;
-    builtLastHa: number;
-    growthHa: number;
-    growthPercent: number | null;
-    newBuiltHa: number;
-    lostBuiltHa: number;
+    /** The land-cover class followed: 7 built area (UrbanEye), 2 trees (ForestEye). */
+    focus: number;
+    focusName: string;
+    firstHa: number;
+    lastHa: number;
+    changeHa: number;
+    changePercent: number | null;
+    gainedHa: number;
+    lostHa: number;
     trendHaPerYear: number | null;
-    replaced: { class: string; ha: number }[];
+    gainedFrom: { class: string; ha: number }[];
+    lostTo: { class: string; ha: number }[];
   };
-  series: { year: number; builtHa: number; classes: Record<string, number>; cloudHa: number }[];
+  series: { year: number; focusHa: number; classes: Record<string, number>; cloudHa: number }[];
   overlays: Record<string, Overlay>;
 }
 

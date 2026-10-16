@@ -8,8 +8,9 @@ export const ANALYSES = [
   { id: "fires", label: "Fires", question: "How badly did the land burn?", detail: "Burn severity from Sentinel-2 or Landsat" },
   { id: "water", label: "Water", question: "How have lakes and rivers changed?", detail: "Yearly water maps, back to 1984" },
   { id: "cities", label: "Cities", question: "Where did a city grow, and onto what?", detail: "Built-up land from 2017 to 2023" },
+  { id: "forests", label: "Forests", question: "Where was tree cover lost or gained?", detail: "Tree cover from 2017 to 2023, and what replaced it" },
   { id: "change", label: "Change", question: "Where did vegetation, water or building change?", detail: "Spectral indices between two years" },
-  { id: "research", label: "Research", question: "Index time series and Earth Engine export", detail: "For researchers" },
+  { id: "research", label: "Research", question: "How have vegetation and water indices moved over the years?", detail: "Index series over up to 12 years, and the evidence behind any result" },
 ] as const;
 
 export type AnalysisMode = (typeof ANALYSES)[number]["id"];

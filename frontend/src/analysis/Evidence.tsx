@@ -14,7 +14,7 @@ function claim(result: AnalysisResult): string {
   }
   if (result.type === "urban") {
     const m = result.summary;
-    return `Land mapped as built area grew from ${formatArea(m.builtFirstHa)} in ${m.firstYear} to ${formatArea(m.builtLastHa)} in ${m.lastYear} in the Impact Observatory land-cover maps.`;
+    return `Land mapped as ${m.focusName.toLowerCase()} went from ${formatArea(m.firstHa)} in ${m.firstYear} to ${formatArea(m.lastHa)} in ${m.lastYear} in the Impact Observatory land-cover maps.`;
   }
   if (result.type === "water") {
     const m = result.summary;

@@ -34,7 +34,7 @@ function restoreFromUrl() {
   if (view.analysis) void store.loadAnalysis(view.analysis);
   // A shared browser analysis is shown for confirmation; it never starts on its own.
   const run = decodeRun(new URLSearchParams(window.location.search).get("run"));
-  if (run) store.set({ pendingRun: run, introOpen: false, mode: run.kind === "flood" ? "floods" : run.kind === "urban" ? "cities" : (run.request as { index?: string }).index === "nbr" ? "fires" : run.kind });
+  if (run) store.set({ pendingRun: run, introOpen: false, mode: run.kind === "flood" ? "floods" : run.kind === "urban" ? ((run.request as { focus?: number }).focus === 2 ? "forests" : "cities") : (run.request as { index?: string }).index === "nbr" ? "fires" : run.kind });
 }
 
 export function App() {
