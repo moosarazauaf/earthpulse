@@ -21,7 +21,8 @@ runs against real data and has tests.
 
 Carried over to later releases:
 
-- [ ] Camera bookmarks, measurement tools, circle and line drawing
+- [x] Measurement tool (distance and area); saved areas serve as bookmarks
+- [ ] Circle and line drawing
 - [ ] 2D map mode and a side-by-side dual view
 - [ ] Day and month resolution on the timeline, event markers
 - [ ] Terrain without a Cesium ion token
@@ -43,12 +44,15 @@ Carried over to later releases:
 - [x] Earth Engine script and CSV export for browser results
 - [x] Traced region outlines in the browser engine
 - [x] Shareable links for browser-run analyses
-- [ ] GeoTIFF export for browser-run analyses
+- [x] GeoTIFF export for browser-run analyses
+- [x] My places: saved areas and recent analyses
+- [x] Terrain (elevation and slope) in the area overview
 - [x] Analyse here: area overview (land cover, climate, nearby hazards) and one-click analyses
 - [x] Keyboard shortcuts
 - [ ] WaterWatch: AWEI option, Otsu threshold, seasonality within a year
 - [x] UrbanEye: built-up growth 2017 to 2023 and what it replaced (Impact Observatory maps)
-- [ ] UrbanEye: Landsat-era built-up history before 2017, surface temperature
+- [ ] UrbanEye: Landsat-era built-up history before 2017
+- [x] HeatWatch: land surface temperature, green versus built contrast, change
 - [x] ForestEye: tree cover loss and gain 2017-2023 and what replaced it (Impact Observatory maps)
 - [ ] ForestEye: disturbance from the Landsat record before 2017
 - [x] FireWatch: active-fire detections in Live, and dNBR burn severity (Key and Benson 2006)
@@ -62,7 +66,7 @@ Carried over to later releases:
 ## Phase 4 — Research Lab (`v0.4.0`)
 
 - [ ] Guided workflow from AOI to export
-- [ ] PDF reports
+- [x] Printable area report (browser print to PDF)
 - [ ] PostGIS store in place of the SQLite MVP store
 - [ ] Optional Earth Engine processing backend
 

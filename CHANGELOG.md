@@ -5,6 +5,28 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.10] - 2026-10-16
+
+### Added
+- **HeatWatch** (Heat, and one-click analysis 6): hot-season land surface
+  temperature from Landsat Collection 2, its spread, how much cooler
+  vegetated ground is than bare or built ground, and change since an
+  earlier year.
+- **My places** (M, or the star button): saved areas and the last 15
+  analyses, kept in this browser; Run again repeats an analysis after a
+  reload. Shift+S saves the current area.
+- **Terrain** in the area overview, from the AWS Terrain Tiles: elevation
+  range, lowest and highest points, average slope and slope classes.
+- **Measuring tool** (D): distance along the ground and enclosed area.
+- **GeoTIFF export** for change, burn, flood and heat results run in the
+  browser, georeferenced in their UTM zone, with a note on what the values mean.
+- **Print report**: the area overview on white paper or as a PDF.
+- Index series and heat results can be shared as links and re-run.
+
+### Verified
+- Traced region outlines on a real NDVI change in Lahore: 30 regions drawn
+  as their shapes (up to 141 vertices) instead of boxes.
+
 ## [0.2.0-alpha.9] - 2026-10-16
 
 ### Added

@@ -7,7 +7,7 @@ import type { Progress } from "./common";
 import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
 import type { CoverRequest, CoverResult } from "./cover";
 
-export const SOFTWARE_VERSION = "0.2.0-alpha.9";
+export const SOFTWARE_VERSION = "0.2.0-alpha.10";
 export type Quality = "fast" | "balanced" | "detailed";
 
 export interface DeviceProfile {

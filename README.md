@@ -44,13 +44,16 @@ scenes, the method and the limits behind it.
 ### 🎯 Click a place, get an analysis
 Press **Analyse here** (or <kbd>A</kbd>) and click anywhere on the globe. EarthPulse
 makes a square area of 2 to 25 km around the spot, names it, and in a few
-seconds shows its land cover (ESA WorldCover), its 1991 to 2020 climate and
-how the last twelve months compare, and any hazard news, earthquakes or
-alerts nearby. Below that are seven analyses that start with one click or
-one key (<kbd>1</kbd> to <kbd>7</kbd>), each with its defaults written next to it: what
-changed since 2000, an index series since 1990, surface water through time,
-built-up growth, tree cover, whether it is flooded now, and whether it has
-burned recently. Drawing or uploading an area opens the same overview.
+seconds shows its land cover (ESA WorldCover), its terrain (elevation range,
+slopes, where landslides are possible), its 1991 to 2020 climate and how the
+last twelve months compare, and any hazard news, earthquakes or alerts
+nearby. Below that are eight analyses that start with one click or one key
+(<kbd>1</kbd> to <kbd>8</kbd>), each with its defaults written next to it: what changed
+since 2000, an index series since 1990, surface water through time,
+built-up growth, tree cover, how hot the ground gets, whether it is flooded
+now, and whether it has burned recently. Drawing or uploading an area opens
+the same overview; **☆ Save** keeps it in My places (<kbd>M</kbd>) together with
+your recent analyses, and **Print report** saves the overview as a PDF.
 
 <img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
 
@@ -109,6 +112,13 @@ to 2023, maps where it spread, and says what it replaced: crops, trees,
 rangeland or bare ground. The maps are machine-learning classifications, and
 the result is labelled that way.
 
+### 🌡️ Find the hottest ground
+**HeatWatch** maps land surface temperature in the hot season from Landsat's
+thermal band, with the average, the hottest tenth, how much cooler green
+ground is than bare or built ground (about 4 °C in central Lahore in summer
+2025), and the change since an earlier year. It says plainly that this is
+late-morning ground temperature, not air temperature.
+
 ### 🌳 Check tree cover
 **ForestEye** follows the Trees class of the same annual maps: where tree
 cover was lost and gained from 2017 to 2023, and what the lost tree cover
@@ -118,14 +128,15 @@ class is a change of map class, not deforestation as FAO defines it.
 ### 📈 Follow an index for decades
 **Research** computes mean NDVI, NDWI, MNDWI and NDBI over your area for up
 to 12 years since 1984, with per-decade trends that leave out years with too
-little clear view. Every result exports as CSV and JSON, and change and burn
-analyses also as a Google Earth Engine script that repeats them with the
-same scenes.
+little clear view. Every result exports as CSV and JSON; change, burn, flood and
+heat maps as GeoTIFF for QGIS or ArcGIS; and change and burn analyses also as
+a Google Earth Engine script that repeats them with the same scenes. The
+measuring tool (<kbd>D</kbd>) gives distances and areas on the ground.
 
 ### ⌨️ Keyboard first
-<kbd>L</kbd> Live, <kbd>E</kbd> Explore, <kbd>A</kbd> Analyse here, <kbd>R</kbd>/<kbd>P</kbd> draw, <kbd>U</kbd> upload,
+<kbd>L</kbd> Live, <kbd>E</kbd> Explore, <kbd>A</kbd> Analyse here, <kbd>M</kbd> My places, <kbd>D</kbd> measure, <kbd>R</kbd>/<kbd>P</kbd> draw, <kbd>U</kbd> upload,
 <kbd>←</kbd>/<kbd>→</kbd> years, <kbd>Space</kbd> play, <kbd>C</kbd> compare, <kbd>/</kbd> search,
-<kbd>Shift</kbd>+<kbd>1</kbd>–<kbd>8</kbd> analyses. Press <kbd>?</kbd> in the app for the full list.
+<kbd>Shift</kbd>+<kbd>1</kbd>–<kbd>9</kbd> analyses. Press <kbd>?</kbd> in the app for the full list.
 
 ### 💧 Track surface water year by year
 **WaterWatch** maps water for up to nine years, plots the area through time
@@ -160,7 +171,9 @@ the optional Python backend.
 | Impact Observatory annual land cover | 10 m | 2017 | UrbanEye |
 | GDACS, NASA FIRMS, GloFAS, GWIS, USGS | varies | live | Live view |
 | News RSS feeds + GeoNames gazetteer | headline | hourly | Hazard news |
-| Open-Meteo (forecast models, ERA5) | ~10–25 km | 1991 | "How did it happen?" |
+| Open-Meteo (forecast models, ERA5) | ~10–25 km | 1991 | Weather and climate context |
+| Landsat Collection 2 surface temperature | 100 m (as 30 m) | 1984 | HeatWatch |
+| AWS Terrain Tiles (SRTM, GMTED2010) | ~30 m | static | Terrain in the area overview |
 
 All of it is open and keyless. Licences and attribution are in
 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
@@ -196,8 +209,7 @@ install icon in the address bar).
 
 ## Roadmap
 
-Surface temperature and pre-2017 history for UrbanEye, forest disturbance
-from Landsat, land-cover classification with accuracy assessment, carbon
+Pre-2017 built-up history, forest disturbance from Landsat, land-cover classification with accuracy assessment, carbon
 accounting with exposed equations, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
 [CHANGELOG.md](CHANGELOG.md).
 
