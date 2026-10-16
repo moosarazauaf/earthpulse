@@ -5,7 +5,8 @@ import { useStore } from "../app/store";
 import { type AnalysisResult, type ChangeResult, type IndexId, type TimeSeriesResult, hasLayers, isMapped } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 import { shareUrl } from "../ui/TopBar";
-import { downloadText } from "./download";
+import { downloadBlob, downloadText } from "./download";
+import { rasterReadme, rasterToGeoTiff } from "./geotiffExport";
 import { SeverityTable } from "./FirePanel";
 import { ShareRunButton } from "./SharedRun";
 import { ChangeHistogram, SeriesChart } from "./charts";
@@ -61,8 +62,9 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
   const key = useStore((s) => s.overlay.key);
   const overlays: Record<string, { url: string; title: string; bounds: number[]; legend: unknown }> = hasLayers(result) ? result.overlays : {};
   const shown = key ? overlays[key] : undefined;
+  const { raster, ...plain } = result;
   const record = () => JSON.stringify({
-    ...result,
+    ...plain,
     // Image data stays in the tab; the record keeps where each image belongs.
     overlays: Object.fromEntries(Object.entries(overlays).map(([k, o]) => [k, { title: o.title, bounds: o.bounds, legend: o.legend }])),
   }, null, 1);
@@ -83,6 +85,12 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
       <div className="exports">
         {isMapped(result) && <button className="link" onClick={() => downloadText(`${result.id}.geojson`, "application/geo+json", regions())}>Regions (GeoJSON)</button>}
         {table && <button className="link" onClick={() => downloadText(`${result.id}.csv`, "text/csv", table)}>Table (CSV)</button>}
+        {raster && (
+          <button className="link" title={`${raster.description} Opens in QGIS, ArcGIS or GDAL.`} onClick={() => {
+            downloadBlob(`${result.id}-${raster.name}.tif`, new Blob([rasterToGeoTiff(raster)], { type: "image/tiff" }));
+            downloadText(`${result.id}-${raster.name}.txt`, "text/plain", rasterReadme(raster, result.id));
+          }}>Raster (GeoTIFF)</button>
+        )}
         <button className="link" onClick={() => downloadText(`${result.id}.json`, "application/json", record())}>Full record (JSON)</button>
         {script && <button className="link" onClick={() => downloadText(`${result.id}.js`, "text/javascript", script)} title="Repeats this analysis in Google Earth Engine with the same scenes">Earth Engine script</button>}
         {shown && key && <a href={shown.url} download={`${result.id}-${key}.png`}>Map shown (PNG)</a>}

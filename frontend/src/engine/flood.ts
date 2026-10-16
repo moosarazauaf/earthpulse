@@ -458,8 +458,24 @@ export async function runFlood(request: BrowserFloodRequest, hooks: EngineHooks)
     landCover: landCoverResult,
     histogram: histogram(during, valid, HISTOGRAM_BINS, -30, 0),
     detections: regionsToGeoJson(regions, grid, () => "decrease", labels),
+    raster: floodRaster(extent, mask, during, grid, request),
     overlays,
     warnings: notes,
     grid: { epsg: grid.epsg, res: grid.res, width: grid.width, height: grid.height },
+  };
+}
+
+/** Flood extent as a coded grid for GeoTIFF export: 0 not observed or outside, 1 dry, 2 water before, 3 flooded. */
+function floodRaster(extent: Uint8Array, mask: Uint8Array, during: Float32Array, grid: Grid, request: BrowserFloodRequest) {
+  const data = new Uint8Array(extent.length);
+  for (let i = 0; i < data.length; i += 1) {
+    if (!mask[i] || Number.isNaN(during[i] as number)) continue;
+    data[i] = extent[i] === 2 ? 3 : extent[i] === 1 ? 2 : 1;
+  }
+  return {
+    name: "flood-extent",
+    description: `Flood extent from Sentinel-1 VV, flood window ${request.flood.start} to ${request.flood.end} against ${request.before.start} to ${request.before.end}.`,
+    data, epsg: grid.epsg, west: grid.west, north: grid.north, res: grid.res, width: grid.width, height: grid.height, noData: "0",
+    codes: { 0: "Not observed or outside the area", 1: "Dry", 2: "Water before the flood", 3: "Flooded" },
   };
 }

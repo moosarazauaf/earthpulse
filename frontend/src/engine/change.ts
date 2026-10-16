@@ -250,6 +250,11 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
     indices,
     histogram: histogram(delta, valid, HISTOGRAM_BINS, -1, 1),
     detections: regionsToGeoJson(regions, grid, (value) => (value === 1 ? "decrease" : "increase"), labels),
+    raster: {
+      name: `${request.index}-change`,
+      description: `${index.name} after minus before (${request.before.start} to ${request.before.end} against ${request.after.start} to ${request.after.end}); NaN outside the area or where either period had no clear view.`,
+      data: delta, epsg: grid.epsg, west: grid.west, north: grid.north, res: grid.res, width: grid.width, height: grid.height, noData: "nan",
+    },
     overlays,
     warnings,
     grid: { epsg: grid.epsg, res: grid.res, width: grid.width, height: grid.height },

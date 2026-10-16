@@ -163,8 +163,27 @@ export interface Provenance {
   seconds?: number;
 }
 
+/** The result's main grid, kept in the tab so it can be saved as a GeoTIFF. */
+export interface ResultRaster {
+  name: string;
+  description: string;
+  data: Float32Array | Uint8Array;
+  epsg: number;
+  /** Upper-left corner of the grid in the grid's CRS, metres. */
+  west: number;
+  north: number;
+  res: number;
+  width: number;
+  height: number;
+  /** GDAL nodata value as text: "nan" or a number. */
+  noData: string;
+  /** Meaning of each value, for coded rasters. */
+  codes?: Record<number, string>;
+}
+
 interface ResultBase {
   id: string;
+  raster?: ResultRaster;
   label: string | null;
   softwareVersion: string;
   aoi: AoiGeometry;
