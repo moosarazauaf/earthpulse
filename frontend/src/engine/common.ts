@@ -1,5 +1,6 @@
 /** Pieces shared by the browser analyses: regions, histograms, colour ramps, result images. */
 import { type Grid, transformer } from "./geo";
+import { traceOutline } from "./outline";
 import { toGeographicRgba } from "./raster";
 
 export const M2_PER_HA = 10_000;
@@ -83,6 +84,8 @@ export interface Region {
   centreRow: number;
   countBefore: number | null;
   countAfter: number | null;
+  /** This region's number in the label raster, when one was requested. */
+  label: number;
 }
 
 /**
@@ -92,13 +95,17 @@ export interface Region {
 export function findRegions(
   classes: Uint8Array, width: number, height: number, minPixels: number,
   before: Float32Array, after: Float32Array, countBefore?: Uint8Array, countAfter?: Uint8Array,
+  /** Filled with each pixel's region number, for tracing outlines afterwards. */
+  labels?: Int32Array,
 ): Region[] {
   const seen = new Uint8Array(classes.length);
   const stack: number[] = [];
   const regions: Region[] = [];
+  let discarded = 0;
   for (let start = 0; start < classes.length; start += 1) {
     const value = classes[start] as number;
     if (!value || seen[start]) continue;
+    const label = regions.length + 1 + (labels ? discarded : 0);
     let pixels = 0, sumB = 0, sumA = 0, nB = 0, nA = 0, sumCol = 0, sumRow = 0, cB = 0, cA = 0;
     let minCol = width, maxCol = 0, minRow = height, maxRow = 0;
     stack.push(start);
@@ -108,6 +115,7 @@ export function findRegions(
       const row = Math.floor(i / width);
       const col = i - row * width;
       pixels += 1;
+      if (labels) labels[i] = label;
       sumCol += col;
       sumRow += row;
       if (col < minCol) minCol = col;
@@ -137,26 +145,29 @@ export function findRegions(
       regions.push({
         value, pixels, before: nB ? sumB / nB : null, after: nA ? sumA / nA : null,
         minCol, maxCol, minRow, maxRow, centreCol: sumCol / pixels, centreRow: sumRow / pixels,
-        countBefore: countBefore ? cB / pixels : null, countAfter: countAfter ? cA / pixels : null,
+        countBefore: countBefore ? cB / pixels : null, countAfter: countAfter ? cA / pixels : null, label,
       });
-    }
+    } else discarded += 1;
   }
   return regions.sort((x, y) => y.pixels - x.pixels);
 }
 
 /**
- * Regions as GeoJSON. The browser engine does not trace outlines, so each
- * region's geometry is its bounding box; the area is the true pixel area.
+ * Regions as GeoJSON. With a label raster each region is drawn as its traced
+ * outer outline; without one, as its bounding box. Either way the area is the
+ * true pixel area.
  */
-export function regionsToGeoJson(regions: Region[], grid: Grid, directionOf: (value: number) => "decrease" | "increase") {
+export function regionsToGeoJson(regions: Region[], grid: Grid, directionOf: (value: number) => "decrease" | "increase", labels?: Int32Array) {
   const toLonLat = transformer(grid.epsg, 4326);
   const pixelHa = grid.res ** 2 / M2_PER_HA;
   const corner = (col: number, row: number) => toLonLat(grid.west + col * grid.res, grid.north - row * grid.res);
   const features = regions.slice(0, MAX_REGIONS).map((region, index) => {
-    const ring = [
+    const traced = labels ? traceOutline(labels, grid.width, grid.height, region.label, region) : null;
+    const box = [
       corner(region.minCol, region.maxRow + 1), corner(region.maxCol + 1, region.maxRow + 1),
       corner(region.maxCol + 1, region.minRow), corner(region.minCol, region.minRow),
     ];
+    const ring = traced ? traced.slice(0, -1).map(([c, r]) => corner(c, r)) : box;
     return {
       type: "Feature" as const,
       id: index + 1,
@@ -170,7 +181,7 @@ export function regionsToGeoJson(regions: Region[], grid: Grid, directionOf: (va
         clearObservationsBefore: region.countBefore,
         clearObservationsAfter: region.countAfter,
         centroid: corner(region.centreCol + 0.5, region.centreRow + 0.5),
-        outline: "bounding-box" as const,
+        outline: traced ? ("traced" as const) : ("bounding-box" as const),
       },
     };
   });

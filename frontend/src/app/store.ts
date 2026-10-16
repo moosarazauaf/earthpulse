@@ -157,8 +157,8 @@ export const useStore = create<State>((set, get) => {
       const dataset = get().catalog?.datasets.find((d) => d.id === datasetId);
       if (dataset) result.provenance.dataset = dataset;
       result.provenance.maxPixels = (job.request as { maxPixels: number }).maxPixels;
-      // Browser results mark regions with bounding boxes, which crowd the map; they start hidden.
-      set({ job: { status: "complete", record: null, error: null }, result, overlay: { ...get().overlay, key: layer, detections: false }, mode });
+      // Regions are traced outlines, so they are shown with the result.
+      set({ job: { status: "complete", record: null, error: null }, result, overlay: { ...get().overlay, key: layer, detections: true }, mode });
     } catch (error) {
       if (localRun !== run) return;
       set({

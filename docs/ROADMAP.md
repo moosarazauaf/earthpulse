@@ -39,8 +39,9 @@ Carried over to later releases:
 - [x] Browser analysis engine sized to the visitor's device
 - [x] Area prompt with drawing and shapefile / GeoJSON upload
 - [x] Change detection and FloodLens in the browser engine
-- [ ] Index series and Earth Engine script in the browser engine
-- [ ] Traced region outlines in the browser engine (currently bounding boxes)
+- [x] Index series in the browser engine
+- [ ] Earth Engine script in the browser engine
+- [x] Traced region outlines in the browser engine
 - [ ] Shareable links and GeoTIFF export for browser-run analyses
 - [ ] WaterWatch: AWEI option, Otsu threshold, seasonality within a year
 - [x] UrbanEye: built-up growth 2017 to 2023 and what it replaced (Impact Observatory maps)

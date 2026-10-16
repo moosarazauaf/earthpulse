@@ -79,7 +79,7 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
       </div>
       <p className="muted">
         Computed in {result.provenance.seconds} s on this device. The result exists only in this browser tab; export it to keep it.
-        {isMapped(result) ? "Regions are saved as bounding boxes with their true areas." : ""}
+        {isMapped(result) ? "Regions are saved as traced outlines with their true areas." : ""}
       </p>
     </section>
   );

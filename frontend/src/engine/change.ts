@@ -156,7 +156,8 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
   }
   if (!validCount) throw new Error("No part of the area had clear observations in both periods. Try a wider season.");
   const minPixels = Math.max(1, Math.ceil((request.minAreaHa * M2_PER_HA) / grid.res ** 2));
-  const regions = findRegions(classes, grid.width, grid.height, minPixels, indexBefore, indexAfter, before.clearCount, after.clearCount);
+  const labels = new Int32Array(classes.length);
+  const regions = findRegions(classes, grid.width, grid.height, minPixels, indexBefore, indexAfter, before.clearCount, after.clearCount, labels);
 
   const clear = (count: Uint8Array) => {
     const values: number[] = [];
@@ -228,7 +229,7 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
       uncertainty:
         "No formal accuracy assessment has been made for this result. The threshold is a user-set parameter, not a " +
         "validated one; the sensitivity figures show how the areas move when it changes by 25%. Areas are pixel " +
-        "counts in a UTM grid. Regions are drawn as bounding boxes; their areas are true pixel areas.",
+        "counts in a UTM grid. Regions are drawn as their traced outer outlines (holes inside them are not cut out); their areas are true pixel areas.",
     },
     summary: {
       aoiAreaHa: aoi.areaM2 / M2_PER_HA,
@@ -248,7 +249,7 @@ export async function runChange(request: BrowserChangeRequest, hooks: EngineHook
     },
     indices,
     histogram: histogram(delta, valid, HISTOGRAM_BINS, -1, 1),
-    detections: regionsToGeoJson(regions, grid, (value) => (value === 1 ? "decrease" : "increase")),
+    detections: regionsToGeoJson(regions, grid, (value) => (value === 1 ? "decrease" : "increase"), labels),
     overlays,
     warnings,
     grid: { epsg: grid.epsg, res: grid.res, width: grid.width, height: grid.height },

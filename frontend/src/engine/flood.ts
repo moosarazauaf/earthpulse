@@ -377,7 +377,8 @@ export async function runFlood(request: BrowserFloodRequest, hooks: EngineHooks)
   const floodedOnly = new Uint8Array(size);
   for (let i = 0; i < size; i += 1) if (extent[i] === 2) floodedOnly[i] = 1;
   const minPixels = Math.max(1, Math.ceil((request.minAreaHa * M2_PER_HA) / grid.res ** 2));
-  const regions = findRegions(floodedOnly, grid.width, grid.height, minPixels, before, during, counts.before, counts.flood);
+  const labels = new Int32Array(floodedOnly.length);
+  const regions = findRegions(floodedOnly, grid.width, grid.height, minPixels, before, during, counts.before, counts.flood, labels);
   const greyLegend = { min: -25, max: 0, colors: ["#000000", "#ffffff"], unit: "dB" };
   const titles: Record<string, string> = { before: "VV backscatter before", flood: "VV backscatter during flood", after: "VV backscatter after" };
   const overlays: Record<string, EngineOverlay> = {
@@ -435,7 +436,7 @@ export async function runFlood(request: BrowserFloodRequest, hooks: EngineHooks)
         "wind-roughened water is missed; smooth dry surfaces and radar shadow can be mistaken for water; water under " +
         "vegetation or between buildings is not detected, so flooding in dense crops and built-up areas is " +
         "underestimated. Fields flooded on purpose, such as rice paddies, are open water too and are counted. " +
-        "Regions are drawn as bounding boxes; their areas are true pixel areas.",
+        "Regions are drawn as their traced outer outlines (holes inside them are not cut out); their areas are true pixel areas.",
     },
     summary: {
       aoiAreaHa: aoi.areaM2 / M2_PER_HA,
@@ -456,7 +457,7 @@ export async function runFlood(request: BrowserFloodRequest, hooks: EngineHooks)
     },
     landCover: landCoverResult,
     histogram: histogram(during, valid, HISTOGRAM_BINS, -30, 0),
-    detections: regionsToGeoJson(regions, grid, () => "decrease"),
+    detections: regionsToGeoJson(regions, grid, () => "decrease", labels),
     overlays,
     warnings: notes,
     grid: { epsg: grid.epsg, res: grid.res, width: grid.width, height: grid.height },
