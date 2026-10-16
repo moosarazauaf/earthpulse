@@ -156,8 +156,9 @@ Firefox and Safari do not report memory; 4 GB is assumed there.
 Differences from the Python engine, all stated in the result: two scenes per
 footprint and at most six per period instead of three and twelve; two radar
 passes per window instead of four; a grid that steps through the files'
-overview levels; regions drawn as bounding boxes; results are not stored, so
-they have a local ID and no shareable link. On the same flood the two engines
+overview levels; regions traced along pixel edges with holes left filled;
+results are not stored, so they have a local ID and are shared as a recipe
+link instead. On the same flood the two engines
 therefore agree in pattern and differ in totals.
 
 ## Hosted mode
