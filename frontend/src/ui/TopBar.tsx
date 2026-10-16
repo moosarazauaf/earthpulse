@@ -183,6 +183,11 @@ export function TopBar() {
         title="Click a spot on the globe to analyse the area around it (A)">
         <span aria-hidden="true">◎</span><span className="label"> Analyse here</span>
       </button>
+      <button className={drawTool === "measure" ? "ghost measure-btn on" : "ghost measure-btn"} aria-pressed={drawTool === "measure"}
+        onClick={() => set(drawTool === "measure" ? { drawTool: "none" } : { drawTool: "measure", measure: [], introOpen: false })}
+        title="Measure a distance or an area (D)" aria-label="Measure">
+        <span aria-hidden="true">📏</span>
+      </button>
       <button className="ghost reset" onClick={() => void getGlobe()?.resetView()} title="Back to the whole Earth" aria-label="Reset view">
         <span aria-hidden="true">⟲</span><span className="label"> Reset view</span>
       </button>

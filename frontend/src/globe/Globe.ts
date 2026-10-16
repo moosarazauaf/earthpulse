@@ -445,6 +445,22 @@ export class Globe {
     this.render();
   }
 
+  private measureEntity: Entity | null = null;
+
+  /** The measuring line, with a closing segment drawn faintly when it encloses an area. */
+  setMeasure(points: [number, number][]) {
+    if (this.measureEntity) this.viewer.entities.remove(this.measureEntity);
+    this.measureEntity = null;
+    if (points.length >= 1) {
+      const positions = points.map(([lon, lat]) => Cartesian3.fromDegrees(lon, lat));
+      this.measureEntity = this.viewer.entities.add({
+        polyline: { positions: positions.length > 1 ? positions : [positions[0]!, positions[0]!], width: 3, material: Color.fromCssColorString("#5fd0c5"), clampToGround: true },
+        polygon: points.length >= 3 ? { hierarchy: positions, material: Color.fromCssColorString("#5fd0c5").withAlpha(0.12) } : undefined,
+      });
+    }
+    this.render();
+  }
+
   private newsEntities: Entity[] = [];
 
   /**

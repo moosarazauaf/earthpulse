@@ -31,7 +31,7 @@ import type {
 
 export type CompareMode = "swipe" | "blink" | "opacity";
 /** "point" is Analyse here: one click makes a square area around the spot. */
-export type DrawTool = "none" | "rectangle" | "polygon" | "point";
+export type DrawTool = "none" | "rectangle" | "polygon" | "point" | "measure";
 /** Name of a result raster, as keyed in the result's `overlays`. */
 export type OverlayKey = string;
 
@@ -114,6 +114,8 @@ interface State {
   areaCover: { overlay: Overlay; shares: { code: number; name: string; ha: number; share: number }[]; resolution: number } | null;
   showCover: boolean;
   /** Areas saved in this browser, and the last analyses run here (as recipes). */
+  /** Points of the measuring line (D), longitude and latitude. */
+  measure: [number, number][];
   places: SavedPlace[];
   recent: RecentRun[];
   saveCurrentPlace: () => void;
@@ -277,6 +279,7 @@ export const useStore = create<State>((set, get) => {
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
     setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, ...(aoi ? {} : { pickCentre: null }) }),
+    measure: [],
     places: loadPlaces(),
     recent: loadRecent(),
     placesOpen: false,

@@ -453,3 +453,5 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
   .print-header { display: block; font-size: 11px; color: #444; border-bottom: 1px solid #999; padding-bottom: 6px; margin-bottom: 8px; }
   a { color: #111; }
 }
+.topbar .measure-btn.on { border-color: var(--cyan); }
+.tool-hint.measure strong { color: var(--cyan); font-family: var(--mono); }

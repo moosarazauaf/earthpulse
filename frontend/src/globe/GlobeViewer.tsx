@@ -63,11 +63,12 @@ export function GlobeViewer() {
         state.set({ selectedDetection: found as Detection | null });
       },
       (lon, lat) => useStore.getState().analyseAt(lon, lat),
+      (points, done) => useStore.getState().set(done ? { measure: points, drawTool: "none" } : { measure: points }),
     );
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         drawing.current?.cancel();
-        useStore.getState().set({ drawTool: "none" });
+        useStore.getState().set({ drawTool: "none", measure: [] });
       }
       if (event.key === "Enter") drawing.current?.finishPolygon();
     };
@@ -143,6 +144,7 @@ export function GlobeViewer() {
     if (s.aoi) void instance?.flyToBounds(geometryBounds(s.aoi.geometry));
   }, [s.aoi]);
   useEffect(() => drawing.current?.setTool(s.drawTool), [s.drawTool]);
+  useEffect(() => instance?.setMeasure(s.measure), [s.measure]);
 
   // Live hazards: layers and alert markers are shown only in Live mode.
   const live = s.mode === "live";

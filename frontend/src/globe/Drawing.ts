@@ -35,6 +35,7 @@ export class Drawing {
     private onComplete: (geometry: AoiGeometry) => void,
     private onPick: (detectionId: string | null) => void,
     private onPoint: (lon: number, lat: number) => void,
+    private onMeasure: (points: LonLat[], done: boolean) => void,
   ) {
     const { viewer } = globe;
     this.handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -58,6 +59,11 @@ export class Drawing {
 
   /** Close the polygon from the keyboard (Enter), for users not using a mouse double-click. */
   finishPolygon() {
+    if (this.tool === "measure") {
+      if (this.points.length >= 2) this.onMeasure([...this.points], true);
+      this.points = [];
+      return;
+    }
     if (this.tool !== "polygon") return;
     // A double-click also fires two single clicks on the same spot; drop the repeat.
     const unique = this.points.filter((p, i) => i === 0 || p[0] !== this.points[i - 1]?.[0] || p[1] !== this.points[i - 1]?.[1]);
@@ -92,6 +98,13 @@ export class Drawing {
     if (!point) return;
     if (this.tool === "point") {
       this.onPoint(point[0], point[1]);
+      return;
+    }
+    if (this.tool === "measure") {
+      const last = this.points[this.points.length - 1];
+      // A double-click also fires two single clicks on the same spot; keep one.
+      if (!last || last[0] !== point[0] || last[1] !== point[1]) this.points.push(point);
+      this.onMeasure([...this.points], false);
       return;
     }
     this.points.push(point);

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { HOSTED } from "../app/api";
 import { useStore } from "../app/store";
+import { enclosedKm2, formatKm, formatKm2, pathKm } from "../area/measure";
 import { STORED_ANALYSIS, STORED_FLOOD } from "../demo/stored";
 import { exploreEvidence, startLahoreTour, stopTour } from "../demo/lahore";
 import { AnalysisList } from "./TopBar";
@@ -142,6 +143,20 @@ export function DataSources() {
 export function ToolHint() {
   const tool = useStore((s) => s.drawTool);
   const size = useStore((s) => s.pickSizeKm);
+  const measure = useStore((s) => s.measure);
+  const set = useStore((s) => s.set);
+  if (tool === "measure" || measure.length > 0) {
+    const area = enclosedKm2(measure);
+    return (
+      <div className="notice tool-hint measure" role="status">
+        {measure.length < 2
+          ? "Click points on the globe to measure. Double-click or Enter to finish, Esc to clear."
+          : <>Distance <strong>{formatKm(pathKm(measure))}</strong>{area !== null && <> · enclosed area <strong>{formatKm2(area)}</strong></>}
+            {tool === "measure" ? " · double-click or Enter to finish" : ""}</>}
+        {" "}<button className="link" onClick={() => set({ measure: [], drawTool: "none" })}>Clear</button>
+      </div>
+    );
+  }
   if (tool !== "point") return null;
   return <div className="notice tool-hint" role="status">Click a spot on the globe to analyse the {size} km around it. Esc cancels.</div>;
 }
