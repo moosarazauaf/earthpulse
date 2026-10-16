@@ -216,7 +216,7 @@ export interface SeriesEntry {
 export interface TimeSeriesResult extends ResultBase {
   type: "timeseries";
   request: TimeSeriesRequest;
-  summary: { aoiAreaHa: number };
+  summary: { aoiAreaHa: number; trends?: Record<string, { perDecade: number; n: number } | null> };
   series: SeriesEntry[];
 }
 

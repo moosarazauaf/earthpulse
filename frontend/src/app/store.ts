@@ -101,7 +101,7 @@ interface State {
   setAoi: (aoi: Aoi | null) => void;
   loadCatalog: () => Promise<void>;
   runChange: (request: ChangeRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
-  runTimeSeries: (request: TimeSeriesRequest) => Promise<void>;
+  runTimeSeries: (request: TimeSeriesRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runFlood: (request: FloodRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runWater: (request: WaterRequest, device: DeviceProfile) => Promise<void>;
   runUrban: (request: UrbanRequest, device: DeviceProfile) => Promise<void>;
@@ -263,7 +263,8 @@ export const useStore = create<State>((set, get) => {
     },
     runChange: (request, device, quality) =>
       runLocal({ kind: "change", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "change", "change", request.dataset),
-    runTimeSeries: (request) => follow(() => api.submitTimeSeries(request)),
+    runTimeSeries: (request, device, quality) =>
+      runLocal({ kind: "series", request: { ...request, label: request.label ?? null, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "", "research", request.dataset),
     runFlood: (request, device, quality) =>
       runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
     runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),

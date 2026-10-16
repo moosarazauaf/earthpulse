@@ -10,6 +10,7 @@ import { FloodForm, FloodResults } from "./FloodPanel";
 import { UrbanForm, UrbanResults } from "./UrbanPanel";
 import { WaterForm, WaterResults } from "./WaterPanel";
 import { ChangeResults, SeriesResults } from "./Results";
+import { SeriesForm } from "./SeriesPanel";
 
 const STAGE_LABELS: Record<string, string> = {
   QUEUED: "Queued",
@@ -65,7 +66,6 @@ export function ContextPanel() {
   const mode = useStore((s) => s.mode);
   const job = useStore((s) => s.job);
   const result = useStore((s) => s.result);
-  const set = useStore((s) => s.set);
   const [open, setOpen] = useState(true);
   if (mode === "live") {
     return (
@@ -80,7 +80,7 @@ export function ContextPanel() {
   if (mode === "explore" && !result && job.status === "idle") return null;
 
   const running = job.status === "submitting" || job.status === "running";
-  const title = mode === "research" ? "Evidence" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : mode === "fires" ? "FireWatch" : "What changed here?";
+  const title = mode === "research" ? "Research" : mode === "floods" ? "FloodLens" : mode === "water" ? "WaterWatch" : mode === "cities" ? "UrbanEye" : mode === "fires" ? "FireWatch" : "What changed here?";
 
   return (
     <aside className={`panel right${open ? "" : " collapsed"}`} aria-label={title}>
@@ -90,12 +90,22 @@ export function ContextPanel() {
       {open && (
         <div className="panel-body">
           {mode === "research" ? (
-            result ? <Evidence result={result} /> : (
-              <section>
-                <p>No analysis yet. Every result EarthPulse produces lists its scenes, method and limits here.</p>
-                <button onClick={() => set({ mode: "change" })}>Run an analysis</button>
-              </section>
-            )
+            <>
+              {running && <Progress />}
+              {job.status === "failed" && job.error && (
+                <section className="error" role="alert"><strong>{job.error.message}</strong>{job.error.hint && <p>{job.error.hint}</p>}</section>
+              )}
+              {!running && result?.type === "timeseries" && <SeriesResults result={result} />}
+              {!running && result && result.type !== "timeseries" && (
+                <details className="form-wrap"><summary>Evidence for {result.id}</summary><Evidence result={result} /></details>
+              )}
+              {!running && (
+                <details className="form-wrap" open={!result}>
+                  <summary>{result ? "New index series" : "Index series for an area"}</summary>
+                  <SeriesForm />
+                </details>
+              )}
+            </>
           ) : (
             <>
               {running && <Progress />}

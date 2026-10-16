@@ -200,20 +200,32 @@ export function SeriesResults({ result }: { result: TimeSeriesResult }) {
         <h3>Index series</h3>
         <SeriesChart series={result.series} />
         <table className="table">
-          <thead><tr><th scope="col">Year</th><th scope="col">NDVI</th><th scope="col">MNDWI</th><th scope="col">NDBI</th><th scope="col">Sensor</th></tr></thead>
+          <thead><tr><th scope="col">Year</th><th scope="col">NDVI</th><th scope="col">NDWI</th><th scope="col">MNDWI</th><th scope="col">NDBI</th><th scope="col">Sensor</th></tr></thead>
           <tbody>
             {result.series.map((e) => (
               <tr key={e.year}>
                 <th scope="row">{e.year}</th>
                 {e.values ? (
                   <>
-                    <td>{formatIndex(e.values.ndvi)}</td><td>{formatIndex(e.values.mndwi)}</td><td>{formatIndex(e.values.ndbi)}</td>
+                    <td>{formatIndex(e.values.ndvi)}</td><td>{formatIndex(e.values.ndwi)}</td><td>{formatIndex(e.values.mndwi)}</td><td>{formatIndex(e.values.ndbi)}</td>
                     <td>{(e.platforms ?? []).map((p) => p.replace("landsat-", "L").replace("Sentinel-", "S")).join(", ")}</td>
                   </>
-                ) : <td colSpan={4}>No usable imagery</td>}
+                ) : <td colSpan={5}>No usable imagery</td>}
               </tr>
             ))}
           </tbody>
+          {result.summary.trends && (
+            <tfoot>
+              <tr>
+                <th scope="row" title="Least-squares change per decade, years with a clear view of most of the area">Trend / 10 yr</th>
+                {(["ndvi", "ndwi", "mndwi", "ndbi"] as const).map((id) => {
+                  const t = result.summary.trends?.[id];
+                  return <td key={id}>{t ? `${t.perDecade >= 0 ? "+" : "−"}${Math.abs(t.perDecade).toFixed(3)}` : "–"}</td>;
+                })}
+                <td />
+              </tr>
+            </tfoot>
+          )}
         </table>
         <p className="muted">
           {observed.length} of {result.series.length} years have a composite.

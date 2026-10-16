@@ -9,7 +9,7 @@ import { STORED_ANALYSIS } from "../demo/stored";
 import { AreaChoices } from "./AreaPrompt";
 import { DeviceStep, useDevice } from "./DeviceStep";
 
-const SEASONS = [
+export const SEASONS = [
   { id: "year", label: "Whole year", start: 1, end: 12 },
   { id: "q1", label: "Jan to Mar", start: 1, end: 3 },
   { id: "q2", label: "Apr to Jun", start: 4, end: 6 },
@@ -24,10 +24,12 @@ const QUESTIONS: { index: IndexId; label: string }[] = [
 ];
 /** Points in an index series; each one is a full composite, so more is slower. */
 const SERIES_POINTS = 5;
-const DEFAULT_MAX_CLOUD = 20;
+export const DEFAULT_MAX_CLOUD = 20;
 
-function seriesYears(first: number, last: number): number[] {
-  const count = Math.min(SERIES_POINTS, last - first + 1);
+/** `points` years spread evenly from first to last, both included. */
+export function seriesYears(first: number, last: number, points = SERIES_POINTS): number[] {
+  const count = Math.min(points, last - first + 1);
+  if (count <= 1) return [first];
   const years = Array.from({ length: count }, (_, i) => Math.round(first + ((last - first) * i) / (count - 1)));
   return [...new Set(years)];
 }
@@ -91,7 +93,7 @@ export function AnalysisForm() {
         years: seriesYears(beforeYear, afterYear),
         startMonth: season.start,
         endMonth: season.end,
-      });
+      }, device, quality);
     }
   }
 
@@ -144,15 +146,12 @@ export function AnalysisForm() {
         <button className="primary" disabled={!!problem || running} onClick={() => run("change")}>
           Detect change on this device
         </button>
-        {/* The index series still runs on the Python backend, so it is offered only where one exists. */}
-        {!HOSTED && (
-          <button disabled={!!problem || running} onClick={() => run("series")}
-            title={`Mean indices for ${SERIES_POINTS} years between the two dates`}>
-            Index series
-          </button>
-        )}
+        <button disabled={!!problem || running} onClick={() => run("series")}
+          title={`Mean of four indices for ${SERIES_POINTS} years from ${beforeYear} to ${afterYear}`}>
+          Index series, {SERIES_POINTS} years
+        </button>
         {HOSTED && (
-          <button onClick={() => void s.loadAnalysis(STORED_ANALYSIS.id)} title="A district-wide result computed earlier by the backend">
+          <button className="link" onClick={() => void s.loadAnalysis(STORED_ANALYSIS.id)} title="A district-wide result computed earlier by the backend">
             Open stored example
           </button>
         )}
