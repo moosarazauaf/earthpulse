@@ -29,10 +29,10 @@ export function MyPlaces() {
 
   return (
     <dialog ref={dialog} className="sheet places" aria-labelledby="places-title" onClose={() => set({ placesOpen: false })}>
-      <header className="row">
+      <div className="row">
         <h2 id="places-title">My places</h2>
         <button className="ghost" onClick={() => set({ placesOpen: false })}>Close</button>
-      </header>
+      </div>
       <section>
         <h3>Saved areas</h3>
         {aoi && !isSaved(places, aoi.geometry) && (

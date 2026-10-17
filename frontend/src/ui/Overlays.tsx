@@ -101,10 +101,10 @@ export function DataSources() {
 
   return (
     <dialog ref={dialog} className="sheet" aria-labelledby="sources-title" onClose={() => set({ sourcesOpen: false })}>
-      <header className="row">
+      <div className="row">
         <h2 id="sources-title">Data sources</h2>
         <button className="ghost" onClick={() => set({ sourcesOpen: false })}>Close</button>
-      </header>
+      </div>
       {!catalog && <p className="note">The catalogue could not be loaded from the analysis service.</p>}
       {catalog?.datasets.map((d) => (
         <section key={d.id}>

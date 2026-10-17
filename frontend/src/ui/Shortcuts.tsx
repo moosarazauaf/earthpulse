@@ -108,10 +108,10 @@ export function ShortcutsCard() {
   }, [open]);
   return (
     <dialog ref={dialog} className="sheet shortcuts" aria-labelledby="shortcuts-title" onClose={() => set({ shortcutsOpen: false })}>
-      <header className="row">
+      <div className="row">
         <h2 id="shortcuts-title">Keyboard shortcuts</h2>
         <button className="ghost" onClick={() => set({ shortcutsOpen: false })}>Close</button>
-      </header>
+      </div>
       {SHORTCUTS.map((g) => (
         <section key={g.group}>
           <h3>{g.group}</h3>

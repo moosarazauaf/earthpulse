@@ -53,6 +53,7 @@ export function LayerPanel() {
       </button>
       {open && (
         <div className="panel-body">
+          <h2 className="sr-only">Layers</h2>
           <section>
             <header className="row">
               <label className="check">

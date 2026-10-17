@@ -78,7 +78,7 @@ export function ContextPanel() {
         <button className="panel-toggle" onClick={() => setOpen(!open)} aria-expanded={open}>
           <span>Live hazards</span><span aria-hidden="true">{open ? "−" : "+"}</span>
         </button>
-        {open && <div className="panel-body"><LivePanel /></div>}
+        {open && <div className="panel-body"><h2 className="sr-only">Live hazards</h2><LivePanel /></div>}
       </aside>
     );
   }
@@ -94,6 +94,8 @@ export function ContextPanel() {
       </button>
       {open && (
         <div className="panel-body">
+          {/* Screen readers navigate by headings: the panel's own name is the level between the page and its sections. */}
+          {mode !== "area" && <h2 className="sr-only">{title}</h2>}
           {mode !== "area" && aoi && !running && (
             <button className="link back" onClick={() => set({ mode: "area" })}>← Overview of {aoi.label}</button>
           )}

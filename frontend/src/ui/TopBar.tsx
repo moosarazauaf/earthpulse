@@ -60,7 +60,7 @@ function AnalyseMenu() {
         {active ? `Analyse: ${active.label}` : "Analyse"} <span aria-hidden="true">▾</span>
       </button>
       {open && createPortal(
-        <div ref={menu} className="analyse-menu" style={{ left }}>
+        <div ref={menu} className="analyse-menu" style={{ left }} role="dialog" aria-label="Choose an analysis">
           <p className="eyebrow">What do you want to measure?</p>
           <button className="overview-item" onClick={() => { set({ mode: "area" }); setOpen(false); }}>
             <strong>What is this place like?</strong>
