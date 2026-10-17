@@ -461,3 +461,7 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
   .topbar .measure-btn, .topbar .reset { display: none; }
   .topbar .search { flex: 1 1 120px; min-width: 120px; }
 }
+.topbar select.lang { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line-strong); border-radius: 4px; padding: 5px 4px; font-size: 12px; max-width: 92px; }
+/* Right-to-left languages: text flows right to left; the globe and panels keep their places. */
+[dir="rtl"] .panel-body, [dir="rtl"] .intro, [dir="rtl"] .analyse-menu, [dir="rtl"] .area-prompt { text-align: right; }
+[dir="rtl"] .quick-runs button, [dir="rtl"] .analysis-list button, [dir="rtl"] .cards button { text-align: right; }

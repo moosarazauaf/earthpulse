@@ -8,11 +8,12 @@ import { useStore } from "../app/store";
 import type { Place } from "../app/types";
 import { getGlobe } from "../globe/GlobeViewer";
 import { ANALYSES, type AnalysisMode } from "./modes";
+import { LANGUAGES, type Lang, useLang, useT } from "../i18n";
 
 /** Three entries for a newcomer: what is happening, look around, measure something. */
 const MODES = [
-  { id: "live", label: "Live" },
-  { id: "explore", label: "Explore" },
+  { id: "live", label: "nav.live" },
+  { id: "explore", label: "nav.explore" },
 ] as const;
 /** Camera height after flying to typed coordinates: a district-sized view. */
 const COORDINATE_VIEW_HEIGHT_M = 120_000;
@@ -20,13 +21,15 @@ const COORDINATE_VIEW_HEIGHT_M = 120_000;
 /** The analyses, chosen by the question they answer. */
 export function AnalysisList({ onPick }: { onPick: (id: AnalysisMode) => void }) {
   const mode = useStore((s) => s.mode);
+  const t = useT();
+  const english = useLang((s) => s.lang) === "en";
   return (
     <ul className="analysis-list" role="menu">
       {ANALYSES.map((a, i) => (
         <li key={a.id} role="none">
           <button role="menuitem" className={mode === a.id ? "on" : ""} onClick={() => onPick(a.id)}>
-            <strong>{a.question}</strong>
-            <span>{a.label} · {a.detail} <kbd>Shift {i + 1}</kbd></span>
+            <strong>{t(`q.${a.id}`)}</strong>
+            <span>{t(`label.${a.id}`)}{english ? ` · ${a.detail}` : ""} <kbd>Shift {i + 1}</kbd></span>
           </button>
         </li>
       ))}
@@ -36,6 +39,7 @@ export function AnalysisList({ onPick }: { onPick: (id: AnalysisMode) => void })
 
 function AnalyseMenu() {
   const mode = useStore((s) => s.mode);
+  const t = useT();
   const set = useStore((s) => s.set);
   const [open, setOpen] = useState(false);
   const [left, setLeft] = useState(0);
@@ -57,17 +61,17 @@ function AnalyseMenu() {
     <>
       <button ref={button} className={active ? "on" : ""} aria-haspopup="menu" aria-expanded={open}
         onClick={() => { setLeft(button.current?.getBoundingClientRect().left ?? 0); setOpen(!open); }}>
-        {active ? `Analyse: ${active.label}` : "Analyse"} <span aria-hidden="true">▾</span>
+        {active ? t("nav.analyseActive", { name: t(`label.${active.id}`) }) : t("nav.analyse")} <span aria-hidden="true">▾</span>
       </button>
       {open && createPortal(
-        <div ref={menu} className="analyse-menu" style={{ left }} role="dialog" aria-label="Choose an analysis">
-          <p className="eyebrow">What do you want to measure?</p>
+        <div ref={menu} className="analyse-menu" style={{ left }} role="dialog" aria-label={t("menu.title")}>
+          <p className="eyebrow">{t("menu.title")}</p>
           <button className="overview-item" onClick={() => { set({ mode: "area" }); setOpen(false); }}>
-            <strong>What is this place like?</strong>
-            <span>Area overview · land cover, climate, nearby hazards and one-click analyses <kbd>O</kbd></span>
+            <strong>{t("menu.overview")}</strong>
+            <span>{t("menu.overviewDetail")} <kbd>O</kbd></span>
           </button>
           <AnalysisList onPick={(id) => { set({ mode: id }); setOpen(false); }} />
-          <p className="muted">Each analysis asks for an area, then runs on your own computer.</p>
+          <p className="muted">{t("menu.footer")}</p>
         </div>,
         document.body,
       )}
@@ -89,8 +93,20 @@ export function shareUrl(): string {
   return `${window.location.origin}${window.location.pathname}?${query}`;
 }
 
+function LanguagePicker() {
+  const lang = useLang((s) => s.lang);
+  const setLang = useLang((s) => s.setLang);
+  const t = useT();
+  return (
+    <select className="lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t("top.language")} title={t("top.language")}>
+      {LANGUAGES.map((l) => <option key={l.id} value={l.id} lang={l.id}>{l.name}</option>)}
+    </select>
+  );
+}
+
 export function TopBar() {
   const mode = useStore((s) => s.mode);
+  const t = useT();
   const drawTool = useStore((s) => s.drawTool);
   const set = useStore((s) => s.set);
   const [query, setQuery] = useState("");
@@ -153,16 +169,16 @@ export function TopBar() {
         {MODES.map((m) => (
           <button key={m.id} className={mode === m.id ? "on" : ""} aria-current={mode === m.id ? "page" : undefined}
             onClick={() => set({ mode: m.id })}>
-            {m.label}
+            {t(m.label)}
           </button>
         ))}
         <AnalyseMenu />
       </nav>
 
       <form className="search" role="search" onSubmit={search}>
-        <input type="search" value={query} placeholder="Place, or lat, lon" aria-label="Search a place or type latitude, longitude"
+        <input type="search" value={query} placeholder={t("top.search")} aria-label="Search a place or type latitude, longitude"
           onChange={(e) => setQuery(e.target.value)} />
-        <button type="submit" disabled={busy}>{busy ? "…" : "Go"}</button>
+        <button type="submit" disabled={busy}>{busy ? "…" : t("top.go")}</button>
         {(places?.length || message) && (
           <ul className="results" role="listbox" aria-label="Search results">
             {places?.map((place) => (
@@ -180,8 +196,8 @@ export function TopBar() {
 
       <button className={drawTool === "point" ? "ghost pick on" : "ghost pick"} aria-pressed={drawTool === "point"}
         onClick={() => set({ drawTool: drawTool === "point" ? "none" : "point", introOpen: false })}
-        title="Click a spot on the globe to analyse the area around it (A)">
-        <span aria-hidden="true">◎</span><span className="label"> Analyse here</span>
+        title={t("top.analyseHereTitle")}>
+        <span aria-hidden="true">◎</span><span className="label"> {t("top.analyseHere")}</span>
       </button>
       <button className={drawTool === "measure" ? "ghost measure-btn on" : "ghost measure-btn"} aria-pressed={drawTool === "measure"}
         onClick={() => set(drawTool === "measure" ? { drawTool: "none" } : { drawTool: "measure", measure: [], introOpen: false })}
@@ -192,9 +208,10 @@ export function TopBar() {
         <span aria-hidden="true">⟲</span><span className="label"> Reset view</span>
       </button>
       <button className="ghost places-btn" onClick={() => set({ placesOpen: true })} title="My places: saved areas and recent analyses (M)" aria-label="My places">
-        <span aria-hidden="true">★</span><span className="label"> My places</span>
+        <span aria-hidden="true">★</span><span className="label"> {t("top.places")}</span>
       </button>
-      <button className="ghost" onClick={share} title="Copy a link to this view (S)">Share</button>
+      <button className="ghost" onClick={share} title="Copy a link to this view (S)">{t("top.share")}</button>
+      <LanguagePicker />
       <button className="ghost keys" onClick={() => set({ shortcutsOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
     </header>
   );

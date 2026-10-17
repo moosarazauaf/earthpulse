@@ -7,6 +7,7 @@ import { enclosedKm2, formatKm, formatKm2, pathKm } from "../area/measure";
 import { STORED_ANALYSIS, STORED_FLOOD } from "../demo/stored";
 import { exploreEvidence, startLahoreTour, stopTour } from "../demo/lahore";
 import { AnalysisList } from "./TopBar";
+import { useLang, useT } from "../i18n";
 
 const NOTICE_SECONDS = 6;
 
@@ -15,31 +16,36 @@ export function Intro() {
   const set = useStore((s) => s.set);
   const loadAnalysis = useStore((s) => s.loadAnalysis);
   const [step, setStep] = useState<"start" | "analyse">("start");
+  const t = useT();
+  const english = useLang((s) => s.lang) === "en";
   if (!open) return null;
   const close = () => { setStep("start"); set({ introOpen: false, mode: "explore" }); };
   return (
     <div className="intro" role="dialog" aria-modal="false" aria-labelledby="intro-title">
       <button className="ghost intro-close" onClick={close} aria-label="Close and explore the globe">×</button>
-      <p className="eyebrow">Open satellite archives · live hazards · reproducible analysis</p>
-      <h1 id="intro-title">See what is changing on Earth.</h1>
+      <p className="eyebrow">{t("intro.eyebrow")}</p>
+      <h1 id="intro-title">{t("intro.title")}</h1>
       {step === "start" ? (
         <>
           <div className="cards three">
             <button className="lead" onClick={() => set({ introOpen: false, mode: "live", liveTab: "news" })}>
-              <strong>What is happening now</strong>
-              <span>Earthquakes, floods, storms and fires in today&apos;s news, on the globe, with how each one happened.</span>
+              <strong>{t("intro.now")}</strong>
+              <span>{t("intro.nowText")}</span>
             </button>
             <button onClick={close}>
-              <strong>Explore 40 years of Earth</strong>
-              <span>Move through Landsat and Sentinel-2 imagery since 1984 and compare any two years.</span>
+              <strong>{t("intro.explore")}</strong>
+              <span>{t("intro.exploreText")}</span>
             </button>
             <button onClick={() => setStep("analyse")}>
-              <strong>Measure a place</strong>
-              <span>Floods, burn scars, lakes, city growth or vegetation change for an area you choose.</span>
+              <strong>{t("intro.measure")}</strong>
+              <span>{t("intro.measureText")}</span>
             </button>
           </div>
           <p className="examples">
-            Or start from an example:{" "}
+            {t("intro.tip")}{english ? "" : ` ${t("note.partial")}`}
+          </p>
+          <p className="examples">
+            {t("intro.examples")}{" "}
             <button className="link" onClick={() => void startLahoreTour()}>Lahore, 1993 to today</button>
             {HOSTED && (
               <>
@@ -53,9 +59,9 @@ export function Intro() {
         </>
       ) : (
         <>
-          <p className="lede">What do you want to measure? You will choose the area next; the analysis runs on your computer.</p>
+          <p className="lede">{t("intro.pick")}</p>
           <AnalysisList onPick={(id) => { setStep("start"); set({ introOpen: false, mode: id }); }} />
-          <button className="link" onClick={() => setStep("start")}>← Back</button>
+          <button className="link" onClick={() => setStep("start")}>{t("intro.back")}</button>
         </>
       )}
     </div>

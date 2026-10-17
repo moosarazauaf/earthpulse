@@ -17,6 +17,7 @@ import { describe } from "../news/weather";
 import { KindBadge } from "../ui/KindBadge";
 import { type QuickActionInfo, quickActions } from "./actions";
 import { isSaved } from "./saved";
+import { useT } from "../i18n";
 import { type ClimateProfile, describeNormals, fetchClimate } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
@@ -28,10 +29,11 @@ const MONTHS = "JFMAMJJASOND";
 
 export function AreaOverview() {
   const aoi = useStore((s) => s.aoi);
+  const t = useT();
   if (!aoi) {
     return (
       <section>
-        <p>Press <strong>◎ Analyse here</strong> (or A on a keyboard) and then tap or click a spot on the globe, or choose an area below.</p>
+        <p>{t("area.empty")}</p>
         <AreaChoices />
       </section>
     );
@@ -41,6 +43,7 @@ export function AreaOverview() {
 
 function Overview() {
   const aoi = useStore((s) => s.aoi)!;
+  const t = useT();
   const centre = useStore((s) => s.pickCentre);
   const size = useStore((s) => s.pickSizeKm);
   const analyseAt = useStore((s) => s.analyseAt);
@@ -56,15 +59,15 @@ function Overview() {
   return (
     <>
       <section>
-        <p className="eyebrow">Area overview</p>
+        <p className="eyebrow">{t("area.eyebrow")}</p>
         <h2 className="story-title">{aoi.label}</h2>
         <div className="row-actions">
-          <button onClick={saveCurrentPlace} disabled={saved} title="Keep this area in My places, in this browser (Shift+S)">{saved ? "★ Saved" : "☆ Save"}</button>
-          <button onClick={() => window.print()} title="Print this overview, or save it as a PDF">Print report</button>
+          <button onClick={saveCurrentPlace} disabled={saved} title="Keep this area in My places, in this browser (Shift+S)">{saved ? t("area.saved") : t("area.save")}</button>
+          <button onClick={() => window.print()} title="Print this overview, or save it as a PDF">{t("area.print")}</button>
         </div>
         <p className="muted">
           {formatArea(projected.areaM2 / 10_000)} · centre {formatLatLon(lat, lon)} ·{" "}
-          <button className="link" onClick={() => setAoi(null)}>Choose another area</button>
+          <button className="link" onClick={() => setAoi(null)}>{t("area.another")}</button>
         </p>
         {centre && (
           <div className="seg" role="radiogroup" aria-label="Size of the square">
@@ -89,19 +92,20 @@ function Overview() {
 
 function QuickRuns() {
   const aoi = useStore((s) => s.aoi)!;
+  const t = useT();
   const runQuick = useStore((s) => s.runQuick);
   const running = useStore((s) => s.job.status === "running" || s.job.status === "submitting");
   const device = useMemo(deviceProfile, []);
   const actions = useMemo(() => quickActions(aoi.geometry, aoi.label), [aoi]);
   return (
     <section>
-      <h3>Analyse this area</h3>
+      <h3>{t("area.analyse")}</h3>
       <ul className="quick-runs">
         {actions.map((info, i) => (
           <li key={info.action.id}>
             <button disabled={running} onClick={() => runQuick(info, device)} title={info.explain}>
               <kbd aria-hidden="true">{i + 1}</kbd>
-              <span><strong>{info.label}</strong><em>{info.explain}</em></span>
+              <span><strong>{t(`quick.${info.action.id}`)}</strong><em>{info.explain}</em></span>
               <Weight w={info.weight} />
             </button>
           </li>
@@ -116,13 +120,15 @@ function QuickRuns() {
 }
 
 function Weight({ w }: { w: QuickActionInfo["weight"] }) {
-  const label = w === "light" ? "Quick" : w === "medium" ? "A minute or two" : "Several minutes";
+  const t = useT();
+  const label = t(`weight.${w}`);
   return <span className={`weight ${w}`} title={`${label} on a typical connection`}>{label}</span>;
 }
 
 // ---- land cover ------------------------------------------------------------------------------
 
 function LandCover() {
+  const t = useT();
   const aoi = useStore((s) => s.aoi)!;
   const cover = useStore((s) => s.areaCover);
   const show = useStore((s) => s.showCover);
@@ -139,7 +145,7 @@ function LandCover() {
 
   return (
     <section>
-      <header className="row"><h3>Land cover</h3><KindBadge kind="MODELED" /></header>
+      <header className="row"><h3>{t("area.landCover")}</h3><KindBadge kind="MODELED" /></header>
       {error && <p className="note">{error}</p>}
       {!cover && !error && <p className="muted" role="status">Reading the ESA WorldCover map…</p>}
       {cover && (
@@ -171,6 +177,7 @@ function LandCover() {
 // ---- terrain ---------------------------------------------------------------------------------
 
 function TerrainSection() {
+  const t = useT();
   const aoi = useStore((s) => s.aoi)!;
   const [terrain, setTerrain] = useState<Terrain | null | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
@@ -186,7 +193,7 @@ function TerrainSection() {
   const at = (p: [number, number]) => formatLatLon(p[1], p[0]);
   return (
     <section>
-      <header className="row"><h3>Terrain</h3><KindBadge kind="DERIVED" /></header>
+      <header className="row"><h3>{t("area.terrain")}</h3><KindBadge kind="DERIVED" /></header>
       {error && <p className="note">{error}</p>}
       {terrain === undefined && !error && <p className="muted" role="status">Reading elevation…</p>}
       {terrain === null && <p className="muted">No elevation inside this area.</p>}
@@ -223,6 +230,7 @@ const SLOPE_COLOURS = ["#2e7d32", "#9ccc65", "#fdd835", "#fb8c00", "#c62828"];
 // ---- climate ------------------------------------------------------------------------------------
 
 function Climate({ lat, lon }: { lat: number; lon: number }) {
+  const t = useT();
   const [profile, setProfile] = useState<ClimateProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -237,7 +245,7 @@ function Climate({ lat, lon }: { lat: number; lon: number }) {
 
   return (
     <section>
-      <header className="row"><h3>Climate</h3><KindBadge kind="MODELED" /></header>
+      <header className="row"><h3>{t("area.climate")}</h3><KindBadge kind="MODELED" /></header>
       {error && <p className="note">{error}</p>}
       {!profile && !error && <p className="muted" role="status">Reading 30 years of weather…</p>}
       {profile && (
@@ -275,6 +283,7 @@ function ClimateChart({ months }: { months: ClimateProfile["months"] }) {
 // ---- hazards nearby -------------------------------------------------------------------------------
 
 function Nearby({ lat, lon }: { lat: number; lon: number }) {
+  const t = useT();
   const news = useStore((s) => s.news);
   const quakes = useStore((s) => s.quakes);
   const alerts = useStore((s) => s.alerts);
@@ -296,7 +305,7 @@ function Nearby({ lat, lon }: { lat: number; lon: number }) {
 
   return (
     <section>
-      <h3>Happening nearby</h3>
+      <h3>{t("area.nearby")}</h3>
       {nothing && <p className="muted">No hazard news within {NEWS_KM} km in the last 3 days, and no earthquake or GDACS alert within {QUAKE_KM} km in the past week.</p>}
       <ul className="stories">
         {stories.map((story) => (
