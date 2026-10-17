@@ -456,3 +456,8 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 }
 .topbar .measure-btn.on { border-color: var(--cyan); }
 .tool-hint.measure strong { color: var(--cyan); font-family: var(--mono); }
+/* Phones: the search box needs the room; measuring and Reset view matter least on a small touch screen. */
+@media (max-width: 800px) {
+  .topbar .measure-btn, .topbar .reset { display: none; }
+  .topbar .search { flex: 1 1 120px; min-width: 120px; }
+}

@@ -31,7 +31,7 @@ export function AreaOverview() {
   if (!aoi) {
     return (
       <section>
-        <p>Click <strong>Analyse here</strong> (or press A) and then a spot on the globe, or choose an area below.</p>
+        <p>Press <strong>◎ Analyse here</strong> (or A on a keyboard) and then tap or click a spot on the globe, or choose an area below.</p>
         <AreaChoices />
       </section>
     );
