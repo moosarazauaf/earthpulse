@@ -7,7 +7,7 @@
 import type { AoiGeometry, IndexId, SeriesEntry } from "../app/types";
 import { type EngineHooks, M2_PER_HA, mean } from "./common";
 import { type Grid, buildGrid, projectAoi, rasterMask } from "./geo";
-import { BANDS, FIRST_YEAR, NATIVE_RES, type OpticalDataset, type Scene, landsatPlatforms, searchScenes, selectScenes } from "./pc";
+import { BANDS, FIRST_YEAR, NATIVE_RES, type OpticalDataset, type Scene, landsatPlatforms, searchScenes, seasonWindow, selectScenes } from "./pc";
 import { compositeBands, normalizedDifference } from "./raster";
 import { linearTrend } from "./water";
 
@@ -36,13 +36,6 @@ export const SERIES_INDICES: { id: IndexId; a: string; b: string }[] = [
   { id: "ndbi", a: "swir1", b: "nir" },
 ];
 
-const pad = (n: number) => String(n).padStart(2, "0");
-function periodFor(year: number, startMonth: number, endMonth: number): [string, string] {
-  const lastDay = new Date(Date.UTC(year, endMonth, 0)).getUTCDate();
-  const today = new Date().toISOString().slice(0, 10);
-  const end = `${year}-${pad(endMonth)}-${pad(lastDay)}`;
-  return [`${year}-${pad(startMonth)}-01`, end > today ? today : end];
-}
 
 /** Change per decade from a least-squares line, or null with fewer than three years. */
 export function trendPerDecade(points: [number, number][]): { perDecade: number; n: number } | null {
@@ -62,7 +55,7 @@ export async function runSeries(request: SeriesRequest, hooks: EngineHooks) {
   hooks.progress({ stage: "ACQUIRING_DATA", done: 0, total: request.years.length, detail: "Searching the archive" });
   let searched = 0;
   const plan = await Promise.all(request.years.map(async (year) => {
-    const period = periodFor(year, request.startMonth, request.endMonth);
+    const period = seasonWindow(year, request.startMonth, request.endMonth);
     if (year < FIRST_YEAR[dataset]) return { year, period, scenes: [] as Scene[], reason: `This archive starts in ${FIRST_YEAR[dataset]}.` };
     const found = await searchScenes(dataset, aoi.lonLatBounds, period[0], period[1], request.maxCloud, hooks.signal);
     const scenes = selectScenes(found, SCENES_PER_FOOTPRINT, MAX_SCENES_PER_YEAR);

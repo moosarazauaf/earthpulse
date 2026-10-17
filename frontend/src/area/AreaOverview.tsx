@@ -16,6 +16,7 @@ import { distanceKm } from "../news/stories";
 import { describe } from "../news/weather";
 import { KindBadge } from "../ui/KindBadge";
 import { type QuickActionInfo, quickActions } from "./actions";
+import { isSaved } from "./saved";
 import { type ClimateProfile, describeNormals, fetchClimate } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
@@ -45,7 +46,7 @@ function Overview() {
   const analyseAt = useStore((s) => s.analyseAt);
   const setAoi = useStore((s) => s.setAoi);
   const saveCurrentPlace = useStore((s) => s.saveCurrentPlace);
-  const saved = useStore((s) => s.places.some((p) => p.label === aoi.label));
+  const saved = useStore((s) => isSaved(s.places, aoi.geometry));
   const projected = useMemo(() => projectAoi(aoi.geometry), [aoi.geometry]);
   const [lon, lat] = centre ?? [
     (projected.lonLatBounds[0] + projected.lonLatBounds[2]) / 2,

@@ -37,6 +37,12 @@ function typing(target: EventTarget | null): boolean {
   return el.isContentEditable || tag === "TEXTAREA" || tag === "SELECT" || (tag === "INPUT" && !["checkbox", "radio", "button", "range"].includes((el as HTMLInputElement).type));
 }
 
+/** Space presses focused buttons, links and checkboxes; the shortcut must not take that away from keyboard users. */
+function activatesWithSpace(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  return !!el && el !== document.body && (el.tagName === "BUTTON" || el.tagName === "A" || el.tagName === "SUMMARY" || el.tagName === "INPUT" || el.getAttribute("role") === "button" || el.getAttribute("role") === "radio" || el.getAttribute("role") === "tab");
+}
+
 export function useShortcuts() {
   const device = useMemo(deviceProfile, []);
   useEffect(() => {
@@ -74,7 +80,7 @@ export function useShortcuts() {
       else if (key === "h") void getGlobe()?.resetView();
       else if (key === "ArrowLeft") s.setYear(s.year - 1);
       else if (key === "ArrowRight") s.setYear(s.year + 1);
-      else if (key === " ") document.querySelector<HTMLButtonElement>(".timeline .icon-btn")?.click();
+      else if (key === " " && !activatesWithSpace(event.target)) document.querySelector<HTMLButtonElement>(".timeline .icon-btn")?.click();
       else if (key === "c") s.setCompare({ enabled: !s.compare.enabled });
       else if (key === "s" && event.shiftKey) s.saveCurrentPlace();
       else if (key === "s") {

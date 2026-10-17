@@ -10,7 +10,7 @@
 import type { AoiGeometry } from "../app/types";
 import { type EngineHooks, type EngineOverlay, M2_PER_HA, type Rgb, hex, makeOverlay, rampImage } from "./common";
 import { type Grid, buildGrid, projectAoi, rasterMask } from "./geo";
-import { BANDS, FIRST_YEAR, landsatPlatforms, type Scene, searchScenes, selectScenes } from "./pc";
+import { BANDS, FIRST_YEAR, landsatPlatforms, type Scene, searchScenes, seasonWindow, selectScenes } from "./pc";
 import { compositeBands, normalizedDifference } from "./raster";
 
 const NATIVE_RES = 30;
@@ -42,11 +42,25 @@ export function hotSeason(lat: number): { startMonth: number; endMonth: number; 
   return { startMonth: 1, endMonth: 12, label: "the whole year" };
 }
 
+/** The finite values, sorted, so several quantiles can be read with one sort. */
+export function sortedFinite(values: Float32Array): Float32Array {
+  let n = 0;
+  for (const v of values) if (Number.isFinite(v)) n += 1;
+  const out = new Float32Array(n);
+  let k = 0;
+  for (const v of values) if (Number.isFinite(v)) out[k++] = v;
+  return out.sort();
+}
+
+/** Value at a quantile (0 to 1) of an already sorted array. */
+export function quantileOf(sorted: Float32Array, q: number): number | null {
+  if (!sorted.length) return null;
+  return sorted[Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))))]!;
+}
+
 /** Value at a quantile of the finite values (0 to 1). */
 export function quantile(values: Float32Array, q: number): number | null {
-  const finite = Array.from(values).filter(Number.isFinite).sort((a, b) => a - b);
-  if (!finite.length) return null;
-  return finite[Math.min(finite.length - 1, Math.max(0, Math.round(q * (finite.length - 1))))]!;
+  return quantileOf(sortedFinite(values), q);
 }
 
 /** Mean temperature of vegetated and of bare or built pixels, when each covers at least 5% of the area. */
@@ -62,13 +76,6 @@ export function greenContrast(lst: Float32Array, ndvi: Float32Array): { green: n
   return { green: g / gn, bare: b / bn, greenShare: gn / n, bareShare: bn / n };
 }
 
-const pad = (n: number) => String(n).padStart(2, "0");
-function period(year: number, startMonth: number, endMonth: number): [string, string] {
-  const lastDay = new Date(Date.UTC(year, endMonth, 0)).getUTCDate();
-  const today = new Date().toISOString().slice(0, 10);
-  const end = `${year}-${pad(endMonth)}-${pad(lastDay)}`;
-  return [`${year}-${pad(startMonth)}-01`, end > today ? today : end];
-}
 
 export async function runHeat(request: HeatRequest, hooks: EngineHooks) {
   const aoi = projectAoi(request.aoi);
@@ -80,7 +87,7 @@ export async function runHeat(request: HeatRequest, hooks: EngineHooks) {
   hooks.progress({ stage: "ACQUIRING_DATA", done: 0, total: years.length, detail: "Searching for Landsat scenes" });
   const plans = await Promise.all(years.map(async (year) => {
     if (year < FIRST_YEAR.landsat) throw new Error(`Landsat starts in ${FIRST_YEAR.landsat}.`);
-    const [start, end] = period(year, request.startMonth, request.endMonth);
+    const [start, end] = seasonWindow(year, request.startMonth, request.endMonth);
     const found = await searchScenes("landsat", aoi.lonLatBounds, start, end, request.maxCloud, hooks.signal);
     const scenes = selectScenes(found, SCENES_PER_FOOTPRINT, MAX_SCENES);
     if (!scenes.length) throw new Error(`No Landsat scene with at most ${request.maxCloud}% cloud in ${start} to ${end}. The archive has gaps in some years and regions: try a year either side.`);
@@ -105,9 +112,11 @@ export async function runHeat(request: HeatRequest, hooks: EngineHooks) {
   hooks.progress({ stage: "CALCULATING_INDICES", done: total, total, detail: "Summarising temperatures" });
   const latest = composites[composites.length - 1]!;
   const stats = (lst: Float32Array) => {
-    let sum = 0, n = 0;
-    for (const v of lst) if (Number.isFinite(v)) { sum += v; n += 1; }
-    return { mean: n ? sum / n : null, p10: quantile(lst, 0.1), p90: quantile(lst, 0.9), max: quantile(lst, 1), n };
+    const sorted = sortedFinite(lst);
+    let sum = 0;
+    for (const v of sorted) sum += v;
+    const n = sorted.length;
+    return { mean: n ? sum / n : null, p10: quantileOf(sorted, 0.1), p90: quantileOf(sorted, 0.9), p98: quantileOf(sorted, 0.98), max: quantileOf(sorted, 1), n };
   };
   const now = stats(latest.lst);
   if (now.mean === null) throw new Error("No clear view of the ground in the chosen season.");
@@ -129,7 +138,7 @@ export async function runHeat(request: HeatRequest, hooks: EngineHooks) {
   }
 
   hooks.progress({ stage: "GENERATING_RESULTS", done: total, total, detail: "Drawing the maps" });
-  const lo = Math.floor(now.p10 ?? now.mean - 5), hi = Math.ceil(quantile(latest.lst, 0.98) ?? now.mean + 5);
+  const lo = Math.floor(now.p10 ?? now.mean - 5), hi = Math.ceil(now.p98 ?? now.mean + 5);
   const overlays: Record<string, EngineOverlay> = {
     lst: await makeOverlay(`Surface temperature, ${latest.year}`, rampImage(latest.lst, lo, hi, HEAT_RAMP), grid,
       { min: lo, max: hi, colors: HEAT_RAMP.map(hex), unit: "°C" }, hooks),

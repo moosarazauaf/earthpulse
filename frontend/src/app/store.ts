@@ -280,7 +280,8 @@ export const useStore = create<State>((set, get) => {
     setYear: (year) => set({ year: clampYear(year) }),
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
-    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, ...(aoi ? {} : { pickCentre: null }) }),
+    // Any other way of setting the area is not "around a point", so the size chips and centre go.
+    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, pickCentre: null }),
     measure: [],
     places: loadPlaces(),
     recent: loadRecent(),
@@ -292,7 +293,10 @@ export const useStore = create<State>((set, get) => {
       set(next ? { places: next, notice: `Saved "${aoi.label}" in My places, in this browser.` } : { notice: "This area could not be saved: the outline is too detailed, or the browser is not allowing storage." });
     },
     forgetPlace: (id) => set({ places: removePlace(get().places, id) }),
-    openPlace: (place) => set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, result: null, job: IDLE, placesOpen: false, introOpen: false, drawTool: "none" }),
+    openPlace: (place) => {
+      get().cancelJob(); // a run for the previous area must not land on this one
+      set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, result: null, placesOpen: false, introOpen: false, drawTool: "none" });
+    },
     pickSizeKm: 5,
     pickCentre: null,
     areaCover: null,
@@ -300,9 +304,10 @@ export const useStore = create<State>((set, get) => {
     analyseAt: (lon, lat, sizeKm) => {
       const km = sizeKm ?? get().pickSizeKm;
       const label = `${km} km around ${formatLatLon(lat, lon)}`;
+      get().cancelJob(); // a run for the previous area must not land on this one
       set({
         aoi: { geometry: squareAround(lon, lat, km), label }, pickCentre: [lon, lat], pickSizeKm: km,
-        drawTool: "none", mode: "area", areaCover: null, introOpen: false, result: null, job: IDLE,
+        drawTool: "none", mode: "area", areaCover: null, introOpen: false, result: null,
       });
       // Name the place when OpenStreetMap knows it; the coordinates stay if it does not answer.
       void reverseGeocode(lat, lon).then((name) => {

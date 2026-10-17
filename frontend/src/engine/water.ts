@@ -7,7 +7,7 @@
  */
 import type { AoiGeometry } from "../app/types";
 import { type Grid, buildGrid, projectAoi, rasterMask } from "./geo";
-import { BANDS, FIRST_YEAR, NATIVE_RES, type OpticalDataset, type Scene, landsatPlatforms, searchScenes, selectScenes } from "./pc";
+import { BANDS, FIRST_YEAR, NATIVE_RES, type OpticalDataset, type Scene, landsatPlatforms, searchScenes, seasonWindow, selectScenes } from "./pc";
 import { compositeBands, normalizedDifference, toGeographicRgba } from "./raster";
 
 export const SOFTWARE_VERSION = "0.2.0-alpha.2";
@@ -126,14 +126,7 @@ function paint(rgba: Uint8ClampedArray, i: number, rgb: [number, number, number]
   rgba[i * 4 + 3] = 255;
 }
 const hex = (rgb: [number, number, number]) => `#${rgb.map((c) => c.toString(16).padStart(2, "0")).join("")}`;
-const pad = (n: number) => String(n).padStart(2, "0");
 
-function periodFor(year: number, startMonth: number, endMonth: number): [string, string] {
-  const lastDay = new Date(Date.UTC(year, endMonth, 0)).getUTCDate();
-  const today = new Date().toISOString().slice(0, 10);
-  const end = `${year}-${pad(endMonth)}-${pad(lastDay)}`;
-  return [`${year}-${pad(startMonth)}-01`, end > today ? today : end];
-}
 
 // ---- the analysis ----------------------------------------------------------------
 export async function runWater(request: WaterRequest, hooks: EngineHooks) {
@@ -150,7 +143,7 @@ export async function runWater(request: WaterRequest, hooks: EngineHooks) {
   let searched = 0;
   hooks.progress({ stage: "ACQUIRING_DATA", done: 0, total: request.years.length, detail: "Searching the archive" });
   const plan = await Promise.all(request.years.map(async (year) => {
-    const period = periodFor(year, request.startMonth, request.endMonth);
+    const period = seasonWindow(year, request.startMonth, request.endMonth);
     if (year < FIRST_YEAR[dataset]) {
       return { year, period, scenes: [] as Scene[], reason: `This archive starts in ${FIRST_YEAR[dataset]}.` };
     }

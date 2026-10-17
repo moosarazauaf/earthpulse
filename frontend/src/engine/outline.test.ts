@@ -37,3 +37,18 @@ describe("traceOutline", () => {
     expect(Math.abs(ringArea(ring))).toBe(9);
   });
 });
+
+describe("traceOutlines", () => {
+  it("traces several regions in one pass with the same rings as one at a time", async () => {
+    const { traceOutlines } = await import("./outline");
+    const rows = ["11.22", "11.22", "....2", "33..."];
+    const width = 5, height = 4;
+    const labels = new Int32Array(width * height);
+    rows.forEach((row, r) => [...row].forEach((ch, c) => { labels[r * width + c] = ch === "." ? 0 : Number(ch); }));
+    const rings = traceOutlines(labels, width, height, new Set([1, 2, 3]));
+    expect(Math.abs(ringArea(rings.get(1)!))).toBe(4);
+    expect(Math.abs(ringArea(rings.get(2)!))).toBe(5);
+    expect(Math.abs(ringArea(rings.get(3)!))).toBe(2);
+    expect(rings.get(2)).toEqual(traceOutline(labels, width, height, 2, { minCol: 0, maxCol: 4, minRow: 0, maxRow: 3 }));
+  });
+});

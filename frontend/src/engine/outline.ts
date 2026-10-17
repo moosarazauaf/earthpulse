@@ -39,8 +39,47 @@ export function traceOutline(
       if (!inside(c - 1, r)) add(c, r + 1, c, r); // left, upward
     }
   }
-  if (out.size === 0) return null;
+  return linkEdges(out, W, 4 * labels.length);
+}
 
+/**
+ * Outer outlines of many regions at once: one pass over the label raster
+ * collects every region's boundary edges, then each is linked. Cheaper than
+ * tracing each region inside its bounding box when boxes overlap.
+ */
+export function traceOutlines(labels: Int32Array, width: number, height: number, wanted: Set<number>): Map<number, PixelRing> {
+  const W = width + 1;
+  const edges = new Map<number, Map<number, number[]>>();
+  for (const label of wanted) edges.set(label, new Map());
+  const at = (c: number, r: number) => (c >= 0 && r >= 0 && c < width && r < height ? labels[r * width + c] : 0);
+  for (let r = 0; r < height; r += 1) {
+    for (let c = 0; c < width; c += 1) {
+      const label = labels[r * width + c] as number;
+      const out = label ? edges.get(label) : undefined;
+      if (!out) continue;
+      const add = (fc: number, fr: number, tc: number, tr: number) => {
+        const from = fr * W + fc;
+        const list = out.get(from);
+        if (list) list.push(tr * W + tc);
+        else out.set(from, [tr * W + tc]);
+      };
+      if (at(c, r - 1) !== label) add(c, r, c + 1, r);
+      if (at(c + 1, r) !== label) add(c + 1, r, c + 1, r + 1);
+      if (at(c, r + 1) !== label) add(c + 1, r + 1, c, r + 1);
+      if (at(c - 1, r) !== label) add(c, r + 1, c, r);
+    }
+  }
+  const rings = new Map<number, PixelRing>();
+  for (const [label, out] of edges) {
+    const ring = linkEdges(out, W, 4 * labels.length);
+    if (ring) rings.set(label, ring);
+  }
+  return rings;
+}
+
+/** Link oriented boundary edges into closed rings and keep the largest, simplified. */
+function linkEdges(out: Map<number, number[]>, W: number, guardLimit: number): PixelRing | null {
+  if (out.size === 0) return null;
   const decode = (k: number): [number, number] => [k % W, Math.floor(k / W)];
   let best: PixelRing | null = null;
   let bestArea = 0;
@@ -50,7 +89,7 @@ export function traceOutline(
       let prev = startKey;
       let current = out.get(startKey)!.pop()!;
       let guard = 0;
-      while (current !== startKey && guard++ < 4 * labels.length) {
+      while (current !== startKey && guard++ < guardLimit) {
         ring.push(decode(current));
         const choices = out.get(current);
         if (!choices || choices.length === 0) break;

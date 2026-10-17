@@ -53,11 +53,18 @@ function write(key: string, items: unknown[]): boolean {
 export const loadPlaces = () => read<SavedPlace>(PLACES_KEY).filter((p) => p && typeof p.label === "string" && p.geometry);
 export const loadRecent = () => read<RecentRun>(RECENT_KEY).filter((r) => r && typeof r.headline === "string");
 
-/** Add a place (replacing one with the same label); returns the new list, or null if it could not be stored. */
+/** True when a saved place has exactly this outline. Labels repeat ("Drawn area"), outlines do not. */
+export function isSaved(places: SavedPlace[], geometry: AoiGeometry): boolean {
+  const key = JSON.stringify(geometry);
+  return places.some((p) => JSON.stringify(p.geometry) === key);
+}
+
+/** Add a place (replacing one with the same outline); returns the new list, or null if it could not be stored. */
 export function savePlace(places: SavedPlace[], label: string, geometry: AoiGeometry): SavedPlace[] | null {
-  if (JSON.stringify(geometry).length > MAX_PLACE_CHARS) return null;
+  const key = JSON.stringify(geometry);
+  if (key.length > MAX_PLACE_CHARS) return null;
   const place: SavedPlace = { id: `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, label, geometry, savedAt: new Date().toISOString() };
-  const next = [place, ...places.filter((p) => p.label !== label)].slice(0, MAX_PLACES);
+  const next = [place, ...places.filter((p) => JSON.stringify(p.geometry) !== key)].slice(0, MAX_PLACES);
   return write(PLACES_KEY, next) ? next : null;
 }
 

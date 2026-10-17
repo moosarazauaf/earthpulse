@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 
 import { decodeRun, modeForRun } from "../app/shareRun";
 import { useStore } from "../app/store";
-import { clearRecent } from "../area/saved";
+import { clearRecent, isSaved } from "../area/saved";
 import { ago } from "../news/hazards";
 
 export function MyPlaces() {
@@ -35,7 +35,7 @@ export function MyPlaces() {
       </header>
       <section>
         <h3>Saved areas</h3>
-        {aoi && !places.some((p) => p.label === aoi.label) && (
+        {aoi && !isSaved(places, aoi.geometry) && (
           <button onClick={saveCurrentPlace}>☆ Save the current area: {aoi.label}</button>
         )}
         {places.length === 0 ? (

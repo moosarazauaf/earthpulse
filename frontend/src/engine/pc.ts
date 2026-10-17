@@ -147,3 +147,12 @@ export async function readToken(collection: string): Promise<string> {
 export function thermalAsset(scene: Scene): string {
   return scene.assets.lwir11 ? "lwir11" : "lwir";
 }
+
+/** The dates of a season in one year, ending today at the latest. */
+export function seasonWindow(year: number, startMonth: number, endMonth: number): [string, string] {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const lastDay = new Date(Date.UTC(year, endMonth, 0)).getUTCDate();
+  const today = new Date().toISOString().slice(0, 10);
+  const end = `${year}-${pad(endMonth)}-${pad(lastDay)}`;
+  return [`${year}-${pad(startMonth)}-01`, end > today ? today : end];
+}

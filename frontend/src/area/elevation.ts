@@ -119,8 +119,11 @@ async function readTile(z: number, x: number, y: number, signal?: AbortSignal): 
   const response = await fetch(`${TILES}/${z}/${x}/${y}.png`, { signal });
   if (!response.ok) throw new Error("Elevation tiles could not be read.");
   const bitmap = await createImageBitmap(await response.blob());
-  const canvas = new OffscreenCanvas(TILE, TILE);
-  const context = canvas.getContext("2d")!;
+  // Older Safari has no 2D OffscreenCanvas; a detached canvas element does the same job.
+  const canvas: OffscreenCanvas | HTMLCanvasElement = typeof OffscreenCanvas !== "undefined"
+    ? new OffscreenCanvas(TILE, TILE)
+    : Object.assign(document.createElement("canvas"), { width: TILE, height: TILE });
+  const context = canvas.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
   context.drawImage(bitmap, 0, 0);
   const { data } = context.getImageData(0, 0, TILE, TILE);
   const out = new Float32Array(TILE * TILE);

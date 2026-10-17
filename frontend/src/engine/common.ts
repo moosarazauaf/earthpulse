@@ -1,6 +1,6 @@
 /** Pieces shared by the browser analyses: regions, histograms, colour ramps, result images. */
 import { type Grid, transformer } from "./geo";
-import { traceOutline } from "./outline";
+import { traceOutlines } from "./outline";
 import { toGeographicRgba } from "./raster";
 
 export const M2_PER_HA = 10_000;
@@ -161,8 +161,10 @@ export function regionsToGeoJson(regions: Region[], grid: Grid, directionOf: (va
   const toLonLat = transformer(grid.epsg, 4326);
   const pixelHa = grid.res ** 2 / M2_PER_HA;
   const corner = (col: number, row: number) => toLonLat(grid.west + col * grid.res, grid.north - row * grid.res);
-  const features = regions.slice(0, MAX_REGIONS).map((region, index) => {
-    const traced = labels ? traceOutline(labels, grid.width, grid.height, region.label, region) : null;
+  const shown = regions.slice(0, MAX_REGIONS);
+  const rings = labels ? traceOutlines(labels, grid.width, grid.height, new Set(shown.map((r) => r.label))) : null;
+  const features = shown.map((region, index) => {
+    const traced = rings?.get(region.label) ?? null;
     const box = [
       corner(region.minCol, region.maxRow + 1), corner(region.maxCol + 1, region.maxRow + 1),
       corner(region.maxCol + 1, region.minRow), corner(region.minCol, region.minRow),
