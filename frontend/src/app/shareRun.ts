@@ -73,6 +73,31 @@ export function encodeRun(result: AnalysisResult): string | null {
   return null;
 }
 
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const WORD = /^[a-z0-9]{1,20}$/;
+
+/**
+ * Every field a link may carry has a known shape: numbers, ISO dates, short
+ * lower-case words or lists of years. Anything else is refused, so link
+ * content can never reach generated text (such as an Earth Engine script)
+ * as anything but plain values.
+ */
+function fieldsAreSafe(r: Record<string, unknown>): boolean {
+  for (const [key, value] of Object.entries(r)) {
+    if (key === "aoi" || key === "label" || value === null || value === undefined) continue;
+    if (typeof value === "number") { if (!Number.isFinite(value)) return false; continue; }
+    if (typeof value === "string") { if (!WORD.test(value) && !DATE.test(value)) return false; continue; }
+    if (Array.isArray(value)) { if (!value.every((v) => Number.isInteger(v))) return false; continue; }
+    if (typeof value === "object") {
+      const p = value as Record<string, unknown>;
+      if (Object.keys(p).some((k) => k !== "start" && k !== "end") || !DATE.test(String(p.start)) || !DATE.test(String(p.end))) return false;
+      continue;
+    }
+    return false;
+  }
+  return true;
+}
+
 /** Parse a shared link parameter, validating everything that came from the URL. */
 export function decodeRun(param: string | null): SharedRun | null {
   if (!param || param.length > MAX_PARAM_LENGTH * 2 || !/^[A-Za-z0-9_-]+$/.test(param)) return null;
@@ -83,6 +108,7 @@ export function decodeRun(param: string | null): SharedRun | null {
     if (!Number.isFinite(maxPixels) || maxPixels < 10_000 || maxPixels > 5_000_000) return null;
     const aoi = areaFromGeoJson(body.r.aoi); // throws on anything that is not a sane polygon
     const label = typeof body.r.label === "string" ? body.r.label.slice(0, 60) : null;
+    if (!fieldsAreSafe(body.r)) return null;
     return { kind: body.k as RunKind, request: { ...body.r, aoi, label }, maxPixels };
   } catch {
     return null;

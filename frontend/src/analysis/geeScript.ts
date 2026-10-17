@@ -70,8 +70,9 @@ export function changeScript(result: ChangeResult): string {
   if (!bands) throw new NotReproducible(`No Earth Engine recipe for ${index.id}.`);
   const families = new Set([...scenes.before, ...scenes.after].map((s) => geeAssetId(s.id)[1]));
   const { request, summary } = result;
-  const t = summary.threshold;
-  const scale = prov.workingResolutionM;
+  // Numbers only: nothing from a request reaches the script as text.
+  const t = Number(summary.threshold);
+  const scale = Number(prov.workingResolutionM);
   const dataset = prov.dataset ? `${prov.dataset.name} (${prov.dataset.provider})` : request.dataset === "sentinel2" ? "Sentinel-2 L2A (ESA)" : "Landsat Collection 2 Level-2 (USGS)";
   return `// EarthPulse generated script
 // Analysis ID : ${result.id}

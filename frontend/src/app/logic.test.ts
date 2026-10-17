@@ -120,3 +120,16 @@ describe("hosted-mode tile presets", () => {
     expect(new URLSearchParams(tileQuery("landsat", 1993, "truecolor")).getAll("assets")).toEqual(["red", "green", "blue"]);
   });
 });
+
+describe("shared links refuse fields of an unexpected shape", () => {
+  it("rejects text where a number or date belongs", async () => {
+    const { decodeRun } = await import("./shareRun");
+    const enc = (r: object) => btoa(JSON.stringify({ v: 1, k: "change", m: 250000, r })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const aoi = { type: "Polygon", coordinates: [[[74, 31], [74.1, 31], [74.1, 31.1], [74, 31.1], [74, 31]]] };
+    const good = { aoi, dataset: "landsat", index: "ndvi", before: { start: "2000-01-01", end: "2000-12-31" }, after: { start: "2025-01-01", end: "2025-12-31" }, threshold: 0.15, maxCloud: 20, minAreaHa: 0.5 };
+    expect(decodeRun(enc(good))).not.toBeNull();
+    expect(decodeRun(enc({ ...good, threshold: "0); evil();//" }))).toBeNull();
+    expect(decodeRun(enc({ ...good, before: { start: "2000-01-01\nevil()", end: "2000-12-31" } }))).toBeNull();
+    expect(decodeRun(enc({ ...good, years: [2000, "x"] }))).toBeNull();
+  });
+});
