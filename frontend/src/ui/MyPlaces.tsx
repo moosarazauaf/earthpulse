@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { decodeRun, modeForRun } from "../app/shareRun";
 import { useStore } from "../app/store";
 import { clearRecent, isSaved } from "../area/saved";
+import { type NearbyItem, WATCH_KM, useWatchedPlaces } from "../area/watch";
 import { ago } from "../news/hazards";
 
 export function MyPlaces() {
@@ -16,6 +17,12 @@ export function MyPlaces() {
   const forgetPlace = useStore((s) => s.forgetPlace);
   const saveCurrentPlace = useStore((s) => s.saveCurrentPlace);
   const dialog = useRef<HTMLDialogElement>(null);
+  const watched = useWatchedPlaces();
+  const nearby = (id: string) => watched.find((w) => w.place.id === id)?.items ?? [];
+  function openItem(item: NearbyItem) {
+    if (item.kind === "news") set({ placesOpen: false, mode: "live", liveTab: "news", selectedStory: item.story, introOpen: false });
+    else if (item.kind === "alert") set({ placesOpen: false, mode: "live", liveTab: "alerts", selectedAlert: item.alert, introOpen: false });
+  }
   useEffect(() => {
     if (open && !dialog.current?.open) dialog.current?.showModal();
     if (!open && dialog.current?.open) dialog.current.close();
@@ -49,11 +56,29 @@ export function MyPlaces() {
                   <em>saved {ago(p.savedAt)}</em>
                 </button>
                 <button className="ghost" aria-label={`Remove ${p.label}`} title="Remove" onClick={() => forgetPlace(p.id)}>×</button>
+                {nearby(p.id).length > 0 && (
+                  <ul className="nearby-list">
+                    {nearby(p.id).slice(0, 4).map((item, i) => (
+                      <li key={i}>
+                        {item.kind === "quake"
+                          ? <a href={item.url} target="_blank" rel="noopener noreferrer"><b>{item.label}</b> · {Math.round(item.km)} km · {item.title}</a>
+                          : <button className="link" onClick={() => openItem(item)}><b>{item.label}</b> · {Math.round(item.km)} km · {item.title}</button>}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>
         )}
       </section>
+      {places.length > 0 && (
+        <p className="muted">
+          Each time EarthPulse opens it checks hazard news within {WATCH_KM.news} km of your places, and USGS earthquakes and
+          GDACS alerts within {WATCH_KM.quake} km, here in your browser. It is not a warning service: follow your national
+          authorities for safety decisions.
+        </p>
+      )}
       <section>
         <header className="row">
           <h3>Recent analyses</h3>

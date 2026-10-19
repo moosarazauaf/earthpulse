@@ -9,6 +9,7 @@ import type { Place } from "../app/types";
 import { getGlobe } from "../globe/GlobeViewer";
 import { ANALYSES, type AnalysisMode } from "./modes";
 import { LANGUAGES, type Lang, useLang, useT } from "../i18n";
+import { useWatchedPlaces } from "../area/watch";
 
 /** Three entries for a newcomer: what is happening, look around, measure something. */
 const MODES = [
@@ -107,6 +108,7 @@ function LanguagePicker() {
 export function TopBar() {
   const mode = useStore((s) => s.mode);
   const t = useT();
+  const watchedCount = useWatchedPlaces().length;
   const drawTool = useStore((s) => s.drawTool);
   const set = useStore((s) => s.set);
   const [query, setQuery] = useState("");
@@ -209,6 +211,7 @@ export function TopBar() {
       </button>
       <button className="ghost places-btn" onClick={() => set({ placesOpen: true })} title="My places: saved areas and recent analyses (M)" aria-label="My places">
         <span aria-hidden="true">★</span><span className="label"> {t("top.places")}</span>
+        {watchedCount > 0 && <span className="badge" aria-label={`${watchedCount} of your places have hazards nearby`}>{watchedCount}</span>}
       </button>
       <button className="ghost" onClick={share} title="Copy a link to this view (S)">{t("top.share")}</button>
       <LanguagePicker />

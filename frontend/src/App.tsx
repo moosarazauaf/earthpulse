@@ -13,6 +13,7 @@ import { Timeline } from "./timeline/Timeline";
 import { DataSources, Intro, Notice, StoryCaption, ToolHint } from "./ui/Overlays";
 import { MyPlaces } from "./ui/MyPlaces";
 import { PanelBoundary } from "./ui/PanelBoundary";
+import { useWatchOnStart } from "./area/watch";
 import { useDocumentLanguage } from "./i18n";
 import { ShortcutsCard, useShortcuts } from "./ui/Shortcuts";
 import { TopBar } from "./ui/TopBar";
@@ -44,6 +45,7 @@ function restoreFromUrl() {
 export function App() {
   useShortcuts();
   useDocumentLanguage();
+  useWatchOnStart();
   useEffect(() => {
     void useStore.getState().loadCatalog();
     restoreFromUrl();

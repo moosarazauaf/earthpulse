@@ -465,3 +465,8 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 /* Right-to-left languages: text flows right to left; the globe and panels keep their places. */
 [dir="rtl"] .panel-body, [dir="rtl"] .intro, [dir="rtl"] .analyse-menu, [dir="rtl"] .area-prompt { text-align: right; }
 [dir="rtl"] .quick-runs button, [dir="rtl"] .analysis-list button, [dir="rtl"] .cards button { text-align: right; }
+.badge { display: inline-block; min-width: 16px; margin-left: 4px; padding: 1px 4px; border-radius: 8px; background: var(--orange); color: #111; font: 700 10px/14px var(--mono); text-align: center; }
+.place-list li { flex-wrap: wrap; }
+.nearby-list { list-style: none; margin: 2px 0 4px; padding: 0 0 0 10px; width: 100%; display: grid; gap: 2px; border-left: 2px solid var(--orange); font-size: 12px; }
+.nearby-list a, .nearby-list .link { color: var(--text); text-decoration: none; text-align: left; }
+.nearby-list b { color: var(--orange); font-weight: 600; }
