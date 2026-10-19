@@ -12,6 +12,7 @@ import { LayerPanel } from "./layers/LayerPanel";
 import { Timeline } from "./timeline/Timeline";
 import { DataSources, Intro, Notice, StoryCaption, ToolHint } from "./ui/Overlays";
 import { MyPlaces } from "./ui/MyPlaces";
+import { PanelBoundary } from "./ui/PanelBoundary";
 import { useDocumentLanguage } from "./i18n";
 import { ShortcutsCard, useShortcuts } from "./ui/Shortcuts";
 import { TopBar } from "./ui/TopBar";
@@ -56,8 +57,8 @@ export function App() {
       <GlobeViewer />
       <div className="grid-overlay" aria-hidden="true" />
       <TopBar />
-      <LayerPanel />
-      <ContextPanel />
+      <PanelBoundary name="layers"><LayerPanel /></PanelBoundary>
+      <PanelBoundary name="analysis"><ContextPanel /></PanelBoundary>
       <SwipeHandle />
       <Intro />
       <AreaPrompt />
