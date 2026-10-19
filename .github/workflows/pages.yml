@@ -6,11 +6,12 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/pages.yml"
-  # Every hour: scan the news feeds for hazard stories and redeploy with the
-  # fresh news.json. GitHub may delay scheduled runs at busy times, and it
-  # pauses schedules in repositories with no activity for 60 days.
+  # Scan the news feeds for hazard stories and redeploy with the fresh
+  # news.json. Asked for twice an hour because GitHub delays or drops
+  # scheduled runs at busy times (in practice they arrive every 2 to 6
+  # hours); it also pauses schedules after 60 days without activity.
   schedule:
-    - cron: "17 * * * *"
+    - cron: "7,37 * * * *"
   workflow_dispatch:
 
 permissions:

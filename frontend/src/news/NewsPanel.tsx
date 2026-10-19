@@ -98,8 +98,8 @@ export function NewsTab() {
             </ul>
           )}
           <p className="muted">
-            Scanned every hour from the public feeds of {news.feeds.length} news outlets and agencies
-            {news.generated ? `; last scan ${news.generated.slice(11, 16)} UTC` : ""}. Headlines are matched by keyword and
+            Scanned through the day (GitHub runs the scan every one to a few hours) from the public feeds of {news.feeds.length} news outlets and agencies
+            {news.generated ? `; last scan ${ago(news.generated)} (${news.generated.slice(11, 16)} UTC)` : ""}. Headlines are matched by keyword and
             placed from the place names they contain, automatically, so some will be misplaced or off-topic.
             Read the source before relying on any of it.
           </p>
