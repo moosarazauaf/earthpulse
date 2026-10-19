@@ -5,6 +5,38 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.11] - 2026-10-19
+
+### Added
+- **Watch my places**: with saved places, the app checks hazard news,
+  USGS earthquakes and GDACS alerts near each one when it opens; the star
+  button shows a count and My places lists what is near each place.
+- **Rain lately** in the area overview: the last 3, 7 and 30 days of rain
+  against the same days in 1991 to 2020, and a note on landslide
+  conditions when an unusually wet week falls on steep ground (not a forecast).
+- **Languages**: Urdu (right to left), Spanish and French for the top bar,
+  opening card, Analyse menu and area overview, with a language picker.
+  Place names come back in the chosen language.
+- An error boundary around each panel, so one failing panel no longer
+  blanks the page.
+
+### Changed
+- Accessibility: every main screen passes axe-core with no violations
+  (landmarks, heading order, menu and dialog roles).
+- Phones: the place search keeps its width in the top bar.
+- Cesium and React load as separate cached files: after a release,
+  returning visitors download 366 KB instead of 4.8 MB.
+- The news scan is requested twice an hour, and the list shows how old the
+  last scan is.
+- Shared links accept only numbers, dates, short words and lists of years.
+
+### Fixed
+- Space activated the timeline instead of the focused button.
+- A drawn or uploaded area kept the previous Analyse-here centre.
+- Opening a new area left an old analysis running, whose result then
+  replaced the new overview.
+- Saving a second "Drawn area" replaced the first.
+
 ## [0.2.0-alpha.10] - 2026-10-16
 
 ### Added

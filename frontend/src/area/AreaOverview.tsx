@@ -13,12 +13,12 @@ import { projectAoi } from "../engine/geo";
 import { corroborate } from "../news/corroborate";
 import { HAZARD_INFO, ago } from "../news/hazards";
 import { distanceKm } from "../news/stories";
-import { describe } from "../news/weather";
+import { type WeatherContext, describe, fetchWeatherContext } from "../news/weather";
 import { KindBadge } from "../ui/KindBadge";
 import { type QuickActionInfo, quickActions } from "./actions";
 import { isSaved } from "./saved";
 import { useT } from "../i18n";
-import { type ClimateProfile, describeNormals, fetchClimate } from "./climate";
+import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
 
@@ -82,6 +82,7 @@ function Overview() {
       <QuickRuns />
       <LandCover />
       <TerrainSection />
+      <RecentRain lat={lat} lon={lon} />
       <Climate lat={lat} lon={lon} />
       <Nearby lat={lat} lon={lon} />
     </>
@@ -185,7 +186,10 @@ function TerrainSection() {
     const controller = new AbortController();
     setTerrain(undefined);
     setError(null);
-    fetchTerrain(aoi.geometry, controller.signal).then(setTerrain, (e: unknown) => {
+    fetchTerrain(aoi.geometry, controller.signal).then((found) => {
+      setTerrain(found);
+      useStore.getState().set({ areaSteepShare: found ? found.slopeShares[3]! + found.slopeShares[4]! : null });
+    }, (e: unknown) => {
       if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Elevation could not be read.");
     });
     return () => controller.abort();
@@ -254,6 +258,47 @@ function Climate({ lat, lon }: { lat: number; lon: number }) {
           <p>{describeNormals(profile.months)}</p>
           {profile.lastYear && <p>Last 12 months to {profile.end}: {describe(profile.lastYear, "rain").replace(" in the 365 days to the event", "")}</p>}
           <p className="muted">ERA5 reanalysis through Open-Meteo, one grid cell of about 25 km, so local rain and mountain effects are smoothed.</p>
+        </>
+      )}
+    </section>
+  );
+}
+
+/** The last 3, 7 and 30 days of rain against the same days in 1991 to 2020, and landslide conditions where the ground is steep. */
+function RecentRain({ lat, lon }: { lat: number; lon: number }) {
+  const t = useT();
+  const steep = useStore((s) => s.areaSteepShare);
+  const [context, setContext] = useState<WeatherContext | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    setContext(null);
+    setError(null);
+    fetchWeatherContext(lat, lon, new Date().toISOString().slice(0, 10), controller.signal).then(setContext, (e: unknown) => {
+      if (!controller.signal.aborted) setError(e instanceof Error ? e.message : "Recent weather could not be loaded.");
+    });
+    return () => controller.abort();
+  }, [lat, lon]);
+  const windows = context?.rain.filter((w) => w.days !== 90) ?? [];
+  const week = windows.find((w) => w.days === 7);
+  const landslide = landslideConditions(week, steep);
+  return (
+    <section>
+      <header className="row"><h3>{t("area.recent")}</h3><KindBadge kind="MODELED" /></header>
+      {error && <p className="note">{error}</p>}
+      {!context && !error && <p className="muted" role="status">Reading the last month of weather…</p>}
+      {context && (
+        <>
+          <ul className="facts-list">
+            {windows.map((w) => <li key={w.days}>{describe(w, "rain").replace(" to the event", " to today")}</li>)}
+          </ul>
+          {landslide && steep !== null && (
+            <p className="note">
+              An unusually wet week on ground where {Math.round(steep * 100)}% is steeper than 15°: these are the conditions in which
+              landslides happen. This is not a forecast; follow local warnings.
+            </p>
+          )}
+          <p className="muted">Recent days from Open-Meteo's weather models, the baseline from ERA5; one grid cell, so local storms can be missed.</p>
         </>
       )}
     </section>

@@ -115,6 +115,8 @@ interface State {
   /** Land cover read for the area overview, shown on the globe while `showCover` is on. */
   areaCover: { overlay: Overlay; shares: { code: number; name: string; ha: number; share: number }[]; resolution: number } | null;
   showCover: boolean;
+  /** Share of the current area steeper than 15 degrees, once terrain has been read. */
+  areaSteepShare: number | null;
   /** Areas saved in this browser, and the last analyses run here (as recipes). */
   /** Points of the measuring line (D), longitude and latitude. */
   measure: [number, number][];
@@ -282,7 +284,7 @@ export const useStore = create<State>((set, get) => {
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
     // Any other way of setting the area is not "around a point", so the size chips and centre go.
-    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, pickCentre: null }),
+    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, pickCentre: null }),
     measure: [],
     places: loadPlaces(),
     recent: loadRecent(),
@@ -296,19 +298,20 @@ export const useStore = create<State>((set, get) => {
     forgetPlace: (id) => set({ places: removePlace(get().places, id) }),
     openPlace: (place) => {
       get().cancelJob(); // a run for the previous area must not land on this one
-      set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, result: null, placesOpen: false, introOpen: false, drawTool: "none" });
+      set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, areaSteepShare: null, result: null, placesOpen: false, introOpen: false, drawTool: "none" });
     },
     pickSizeKm: 5,
     pickCentre: null,
     areaCover: null,
     showCover: false,
+    areaSteepShare: null,
     analyseAt: (lon, lat, sizeKm) => {
       const km = sizeKm ?? get().pickSizeKm;
       const label = `${km} km around ${formatLatLon(lat, lon)}`;
       get().cancelJob(); // a run for the previous area must not land on this one
       set({
         aoi: { geometry: squareAround(lon, lat, km), label }, pickCentre: [lon, lat], pickSizeKm: km,
-        drawTool: "none", mode: "area", areaCover: null, introOpen: false, result: null,
+        drawTool: "none", mode: "area", areaCover: null, areaSteepShare: null, introOpen: false, result: null,
       });
       // Name the place when OpenStreetMap knows it; the coordinates stay if it does not answer.
       void reverseGeocode(lat, lon).then((name) => {

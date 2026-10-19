@@ -49,3 +49,15 @@ describe("climate normals", () => {
     expect(describeNormals(months)).toContain("21 °C in January and 32 °C in December");
   });
 });
+
+describe("landslide conditions", () => {
+  it("needs both an unusually wet week and steep ground", async () => {
+    const { landslideConditions } = await import("./climate");
+    const week = (value: number, below: number) => ({ days: 7, value, baseline: Array.from({ length: 30 }, () => 5), mean: 5, below, above: 30 - below });
+    expect(landslideConditions(week(120, 29), 0.3)).toBe(true);
+    expect(landslideConditions(week(120, 29), 0.05)).toBe(false);
+    expect(landslideConditions(week(120, 20), 0.3)).toBe(false);
+    expect(landslideConditions(week(10, 30), 0.3)).toBe(false);
+    expect(landslideConditions(undefined, 0.3)).toBe(false);
+  });
+});

@@ -67,3 +67,13 @@ export async function fetchClimate(lat: number, lon: number, signal?: AbortSigna
     end,
   };
 }
+
+/**
+ * Conditions in which landslides happen: a week wetter than nine in ten
+ * baseline years (and at least 20 mm) on ground where a tenth or more is
+ * steeper than 15 degrees. A description of conditions, not a forecast.
+ */
+export function landslideConditions(week: WindowComparison | undefined, steepShare: number | null): boolean {
+  if (!week || steepShare === null) return false;
+  return week.value >= 20 && week.below >= 0.9 * week.baseline.length && steepShare >= 0.1;
+}

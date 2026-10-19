@@ -53,7 +53,14 @@ since 2000, an index series since 1990, surface water through time,
 built-up growth, tree cover, how hot the ground gets, whether it is flooded
 now, and whether it has burned recently. Drawing or uploading an area opens
 the same overview; **☆ Save** keeps it in My places (<kbd>M</kbd>) together with
-your recent analyses, and **Print report** saves the overview as a PDF.
+your recent analyses, and **Print report** saves the overview as a PDF. Saved
+places are watched: when EarthPulse opens it tells you about hazard news,
+earthquakes or alerts near any of them. The overview also shows the rain of
+the last days against normal, and says when an unusually wet week falls on
+steep ground, the conditions in which landslides happen.
+
+EarthPulse speaks English, اردو (Urdu), Español and Français in its main
+screens; corrections from native speakers are welcome.
 
 <img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
 

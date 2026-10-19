@@ -126,10 +126,20 @@ export function recentEra5Url(lat: number, lon: number, start: string, end: stri
   return `${ARCHIVE}?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&daily=precipitation_sum,temperature_2m_max&timezone=UTC&models=era5&start_date=${start}&end_date=${end}`;
 }
 
-export async function getJson(url: string, signal?: AbortSignal): Promise<unknown> {
-  const response = await fetch(url, { signal });
-  if (!response.ok) throw new Error("The weather service did not respond.");
-  return response.json();
+const cache = new Map<string, Promise<unknown>>();
+
+/** GET JSON, shared between callers asking for the same URL during this visit; a failed request is forgotten. */
+export function getJson(url: string, signal?: AbortSignal): Promise<unknown> {
+  const hit = cache.get(url);
+  if (hit) return hit;
+  const request = fetch(url).then((response) => {
+    if (!response.ok) throw new Error("The weather service did not respond.");
+    return response.json() as Promise<unknown>;
+  });
+  cache.set(url, request);
+  request.catch(() => cache.delete(url));
+  // Abandoning the wait does not cancel a download another caller may share.
+  return signal ? Promise.race([request, new Promise<never>((_, reject) => signal.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true }))]) : request;
 }
 
 export async function fetchWeatherContext(lat: number, lon: number, eventDay: string, signal?: AbortSignal): Promise<WeatherContext> {

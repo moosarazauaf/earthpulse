@@ -85,5 +85,7 @@ Carried over to later releases:
 - [ ] Hazard news: translated feeds (Spanish, French, Bahasa, Urdu), a keyword evaluation set with measured precision
 - [ ] Hazard news: river level and soil moisture context, Sentinel-1 flood check run automatically for large stories
 - [ ] Landslide hazard layer (needs an open, reachable source)
+- [x] Landslide conditions in the area overview: unusually wet week on steep ground (not a forecast)
+- [x] Watch saved places for hazards nearby
 - [ ] Alerts filtered to the visitor's own region; alert polygons instead of points
 - [ ] Regional scan, hotspot clustering
