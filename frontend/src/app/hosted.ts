@@ -8,6 +8,7 @@
  * The layer presets mirror backend/app/services/imagery.py. If one changes,
  * change the other.
  */
+import { useLang } from "../i18n";
 import type {
   AnalysisRecord,
   ApiErrorBody,
@@ -185,7 +186,7 @@ export const hosted = {
   },
 
   async geocode(q: string): Promise<{ results: Place[]; attribution: string }> {
-    const response = await fetch(`${NOMINATIM}?format=jsonv2&limit=6&q=${encodeURIComponent(q)}`);
+    const response = await fetch(`${NOMINATIM}?format=jsonv2&limit=6&accept-language=${useLang.getState().lang},en&q=${encodeURIComponent(q)}`);
     if (!response.ok) throw new HostedError({ code: "imagery_unavailable", message: "Place search is temporarily unavailable." });
     const items = (await response.json()) as { display_name: string; lat: string; lon: string; boundingbox: string[]; addresstype?: string; type?: string }[];
     return {

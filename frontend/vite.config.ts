@@ -24,6 +24,19 @@ export default defineConfig({
     }),
   ],
   server: { port: 5173, strictPort: true },
-  build: { chunkSizeWarningLimit: 6000 },
+  build: {
+    chunkSizeWarningLimit: 6000,
+    rollupOptions: {
+      output: {
+        // Cesium is most of the download and changes only when the library is upgraded. In its own
+        // file it stays in returning visitors' cache across EarthPulse releases.
+        manualChunks(id: string) {
+          if (id.includes("node_modules/cesium") || id.includes("node_modules/@cesium")) return "cesium";
+          if (id.includes("node_modules/react") || id.includes("node_modules/scheduler")) return "react";
+          return undefined;
+        },
+      },
+    },
+  },
   test: { environment: "node", include: ["src/**/*.test.ts"] },
 });
