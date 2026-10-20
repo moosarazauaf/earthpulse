@@ -23,6 +23,10 @@ function claim(result: AnalysisResult): string {
   if (result.type === "flood") {
     return `${formatArea(result.summary.floodedAreaHa)} that was not water before ${result.request.before.end} was mapped as water between ${result.request.flood.start} and ${result.request.flood.end}.`;
   }
+  if (result.type === "classify") {
+    const a = result.summary.accuracy;
+    return `The area was classified into ${result.summary.classes.length} classes from ${result.summary.trainPixels} training pixels${a ? `; on ${a.n} held-back pixels the overall accuracy was ${(a.overall * 100).toFixed(1)}% (kappa ${a.kappa.toFixed(2)})` : ""}.`;
+  }
   if (result.type === "heat") {
     const m = result.summary;
     return `The median land surface temperature from ${m.period[0]} to ${m.period[1]} averaged ${m.meanC.toFixed(1)} °C over the observed area.`;

@@ -76,6 +76,7 @@ const en = {
   "q.heat": "How hot does the ground get in summer?",
   "q.change": "Where did vegetation, water or building change?",
   "q.research": "How have vegetation and water indices moved over the years?",
+  "q.classify": "Can I map land cover with my own training samples?",
   "label.floods": "Floods",
   "label.fires": "Fires",
   "label.water": "Water",
@@ -84,6 +85,7 @@ const en = {
   "label.heat": "Heat",
   "label.change": "Change",
   "label.research": "Research",
+  "label.classify": "Classify",
   "note.partial": "Results are shown in English for now.",
 };
 
@@ -148,6 +150,7 @@ const ur: Partial<Record<Key, string>> = {
   "q.heat": "گرمیوں میں زمین کتنی گرم ہوتی ہے؟",
   "q.change": "سبزہ، پانی یا تعمیرات کہاں بدلیں؟",
   "q.research": "سالوں کے دوران سبزے اور پانی کے انڈیکس کیسے بدلے؟",
+  "q.classify": "کیا میں اپنے تربیتی نمونوں سے زمینی احاطے کا نقشہ بنا سکتا ہوں؟",
   "label.floods": "سیلاب",
   "label.fires": "آگ",
   "label.water": "پانی",
@@ -156,6 +159,7 @@ const ur: Partial<Record<Key, string>> = {
   "label.heat": "گرمی",
   "label.change": "تبدیلی",
   "label.research": "تحقیق",
+  "label.classify": "درجہ بندی",
   "note.partial": "نتائج فی الحال انگریزی میں دکھائے جاتے ہیں۔",
 };
 
@@ -218,6 +222,7 @@ const es: Partial<Record<Key, string>> = {
   "q.heat": "¿Cuánto se calienta el suelo en verano?",
   "q.change": "¿Dónde cambió la vegetación, el agua o la construcción?",
   "q.research": "¿Cómo han variado los índices de vegetación y agua con los años?",
+  "q.classify": "¿Puedo cartografiar la cobertura del suelo con mis propias muestras?",
   "label.floods": "Inundaciones",
   "label.fires": "Incendios",
   "label.water": "Agua",
@@ -226,6 +231,7 @@ const es: Partial<Record<Key, string>> = {
   "label.heat": "Calor",
   "label.change": "Cambio",
   "label.research": "Investigación",
+  "label.classify": "Clasificar",
   "note.partial": "Por ahora los resultados se muestran en inglés.",
 };
 
@@ -288,6 +294,7 @@ const fr: Partial<Record<Key, string>> = {
   "q.heat": "Jusqu'à quelle température le sol monte-t-il en été ?",
   "q.change": "Où la végétation, l'eau ou le bâti ont-ils changé ?",
   "q.research": "Comment les indices de végétation et d'eau ont-ils évolué au fil des ans ?",
+  "q.classify": "Puis-je cartographier l'occupation du sol avec mes propres échantillons ?",
   "label.floods": "Inondations",
   "label.fires": "Incendies",
   "label.water": "Eau",
@@ -296,6 +303,7 @@ const fr: Partial<Record<Key, string>> = {
   "label.heat": "Chaleur",
   "label.change": "Changement",
   "label.research": "Recherche",
+  "label.classify": "Classifier",
   "note.partial": "Les résultats sont affichés en anglais pour l'instant.",
 };
 

@@ -345,9 +345,26 @@ export interface HeatResult extends ResultBase {
   overlays: Record<string, Overlay>;
 }
 
-export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult | UrbanResult | HeatResult;
+export interface ClassifyResult extends ResultBase {
+  type: "classify";
+  request: { aoi: AoiGeometry; label?: string | null; dataset: DatasetId; year: number; startMonth: number; endMonth: number; maxCloud: number; classes: string[]; testShare: number; seed: number };
+  summary: {
+    aoiAreaHa: number;
+    classes: { name: string; ha: number; share: number; colour: string }[];
+    trainPixels: number;
+    testPixels: number;
+    accuracy: {
+      classes: number[]; matrix: number[][]; overall: number; kappa: number;
+      producers: number[]; users: number[]; f1: number[]; n: number;
+    } | null;
+    importance: { name: string; value: number }[];
+  };
+  overlays: Record<string, Overlay>;
+}
+
+export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult | UrbanResult | HeatResult | ClassifyResult;
 /** Results that put rasters on the globe. */
-export type LayeredResult = ChangeResult | FloodResult | WaterResult | UrbanResult | HeatResult;
+export type LayeredResult = ChangeResult | FloodResult | WaterResult | UrbanResult | HeatResult | ClassifyResult;
 export const hasLayers = (r: AnalysisResult | null): r is LayeredResult =>
   r !== null && r.type !== "timeseries";
 /** Results that put rasters and regions on the globe. */

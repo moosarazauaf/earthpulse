@@ -5,6 +5,22 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.12] - 2026-10-20
+
+### Added
+- **Classify** (Phase 3): land-cover classification with uploaded training
+  samples (points or polygons, GeoJSON or zipped shapefile). Random forest
+  (50 trees) on eight features from a Sentinel-2 or Landsat composite,
+  samples split into training and test sets by feature, confusion matrix,
+  overall accuracy, kappa, producer's and user's accuracy, F1, feature
+  importance, class areas, GeoTIFF of the class map and CSV of the matrix.
+  A built-in Lahore example (labels from ESA WorldCover 2021) to try it.
+- **Error-adjusted areas** for classifications, with 95% confidence
+  intervals (Olofsson et al. 2014), tested against the paper's worked
+  example; labelled indicative when the test samples were not drawn at random.
+- The service worker caches content-hashed build files and Cesium's files,
+  so return visits load from the cache and the app opens offline.
+
 ## [0.2.0-alpha.11] - 2026-10-19
 
 ### Added

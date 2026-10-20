@@ -11,6 +11,7 @@ export const ANALYSES = [
   { id: "forests", label: "Forests", question: "Where was tree cover lost or gained?", detail: "Tree cover from 2017 to 2023, and what replaced it" },
   { id: "heat", label: "Heat", question: "How hot does the ground get in summer?", detail: "Landsat surface temperature, and how much cooler green areas are" },
   { id: "change", label: "Change", question: "Where did vegetation, water or building change?", detail: "Spectral indices between two years" },
+  { id: "classify", label: "Classify", question: "Can I map land cover with my own training samples?", detail: "Random forest on Sentinel-2 or Landsat, with an accuracy assessment" },
   { id: "research", label: "Research", question: "How have vegetation and water indices moved over the years?", detail: "Index series over up to 12 years, and the evidence behind any result" },
 ] as const;
 

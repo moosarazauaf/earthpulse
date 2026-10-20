@@ -3,6 +3,7 @@
  * visitor's machine does the work.
  */
 import { type BrowserChangeRequest, runChange } from "./change";
+import { type ClassifyRequest, runClassify } from "./classify";
 import { type CoverRequest, runCover } from "./cover";
 import { type HeatRequest, runHeat } from "./heat";
 import type { EngineHooks, Progress } from "./common";
@@ -18,7 +19,8 @@ export type WorkerRequest =
   | { kind: "urban"; request: UrbanRequest }
   | { kind: "series"; request: SeriesRequest }
   | { kind: "cover"; request: CoverRequest }
-  | { kind: "heat"; request: HeatRequest };
+  | { kind: "heat"; request: HeatRequest }
+  | { kind: "classify"; request: ClassifyRequest };
 
 export type EngineResult =
   | Awaited<ReturnType<typeof runWater>>
@@ -27,7 +29,8 @@ export type EngineResult =
   | Awaited<ReturnType<typeof runUrban>>
   | Awaited<ReturnType<typeof runSeries>>
   | Awaited<ReturnType<typeof runCover>>
-  | Awaited<ReturnType<typeof runHeat>>;
+  | Awaited<ReturnType<typeof runHeat>>
+  | Awaited<ReturnType<typeof runClassify>>;
 
 export type WorkerMessage =
   | { type: "progress"; progress: Progress }
@@ -57,6 +60,7 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
       : job.kind === "series" ? await runSeries(job.request, hooks)
       : job.kind === "cover" ? await runCover(job.request, hooks)
       : job.kind === "heat" ? await runHeat(job.request, hooks)
+      : job.kind === "classify" ? await runClassify(job.request, hooks)
       : await runFlood(job.request, hooks);
     post({ type: "done", result });
   } catch (error) {

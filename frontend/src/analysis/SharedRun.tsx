@@ -25,7 +25,9 @@ export function ShareRunButton({ result }: { result: AnalysisResult }) {
   const set = useStore((s) => s.set);
   const url = useMemo(() => shareRunUrl(result), [result]);
   if (!url) {
-    return <span className="muted">This outline is too detailed to fit in a link; export the record instead.</span>;
+    return <span className="muted">{result.type === "classify"
+      ? "A classification needs your sample file, so it cannot travel in a link; export the record instead."
+      : "This outline is too detailed to fit in a link; export the record instead."}</span>;
   }
   return (
     <button className="link" onClick={() => {

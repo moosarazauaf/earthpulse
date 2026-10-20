@@ -96,7 +96,7 @@ export function MyPlaces() {
                 </div>
                 {r.run
                   ? <button onClick={() => rerun(r.run!)} title="Run the same analysis again on this device">Run again</button>
-                  : <span className="muted">outline too large to keep</span>}
+                  : <span className="muted">{r.type === "classify" ? "needs your samples to repeat" : "outline too large to keep"}</span>}
               </li>
             ))}
           </ul>

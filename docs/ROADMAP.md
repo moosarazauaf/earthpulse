@@ -59,8 +59,10 @@ Carried over to later releases:
 
 ## Phase 3 — Classification and carbon (`v0.3.0`)
 
-- [ ] LULC engine (Random Forest, CART, SVM) with uploaded training data
-- [ ] Validation: confusion matrix, overall/producer's/user's accuracy, F1, kappa
+- [x] LULC engine: random forest with uploaded training data, in the browser
+- [ ] CART and SVM classifiers; drawing training samples on the globe
+- [x] Validation: confusion matrix, overall/producer's/user's accuracy, F1, kappa (on held-back samples, split by feature)
+- [x] Error-adjusted area estimates with confidence intervals (Olofsson et al. 2014)
 - [ ] CarbonWatch with user-defined pools and exposed equations
 
 ## Phase 4 — Research Lab (`v0.4.0`)

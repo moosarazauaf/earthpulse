@@ -7,6 +7,7 @@ import type { WorkerRequest } from "../engine/worker";
 import type { Progress } from "../engine/common";
 import type { UrbanRequest } from "../engine/urban";
 import type { HeatRequest } from "../engine/heat";
+import type { ClassifyRequest } from "../engine/classify";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import type { NewsFile, NewsStory } from "../news/types";
@@ -72,7 +73,7 @@ interface State {
   overlay: { key: OverlayKey | null; opacity: number; detections: boolean };
   selectedDetection: Detection | null;
   // interface
-  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "heat" | "research" | "area";
+  mode: "live" | "explore" | "change" | "floods" | "fires" | "water" | "cities" | "forests" | "heat" | "classify" | "research" | "area";
   // live hazards
   alerts: Alert[] | null;
   alertsError: string | null;
@@ -136,6 +137,7 @@ interface State {
   runUrban: (request: UrbanRequest, device: DeviceProfile) => Promise<void>;
   runFire: (request: ChangeRequest, device: DeviceProfile, quality: Quality) => Promise<void>;
   runHeat: (request: Omit<HeatRequest, "maxPixels" | "concurrency">, device: DeviceProfile, quality: Quality) => Promise<void>;
+  runClassify: (request: Omit<ClassifyRequest, "maxPixels" | "concurrency">, device: DeviceProfile, quality: Quality) => Promise<void>;
   loadAnalysis: (id: string) => Promise<void>;
   cancelJob: () => void;
 }
@@ -349,6 +351,8 @@ export const useStore = create<State>((set, get) => {
       runLocal({ kind: "flood", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "flood", "floods", "sentinel1"),
     runWater: (request, device) => runLocal({ kind: "water", request }, device, "persistence", "water", request.dataset),
     runUrban: (request, device) => runLocal({ kind: "urban", request }, device, "growth", request.focus === 2 ? "forests" : "cities", "none"),
+    runClassify: (request, device, quality) =>
+      runLocal({ kind: "classify", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "classes", "classify", request.dataset),
     runHeat: (request, device, quality) =>
       runLocal({ kind: "heat", request: { ...request, maxPixels: PIXEL_BUDGET[quality], concurrency: device.concurrency } }, device, "lst", "heat", "landsat"),
     runFire: (request, device, quality) =>

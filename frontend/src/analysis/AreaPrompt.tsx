@@ -77,6 +77,7 @@ const QUESTIONS: Record<string, string> = {
   fires: "Where did the fire burn?",
   forests: "Which forest or region do you want to check?",
   heat: "Which city or area do you want to check for heat?",
+  classify: "Which area do you want to classify?",
 };
 
 export function AreaPrompt() {

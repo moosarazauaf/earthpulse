@@ -25,6 +25,18 @@ export function resultCsv(result: AnalysisResult): string | null {
       result.series.map((s) => [s.year, s.focusHa, ...classes.map((c) => s.classes[c] ?? 0)]),
     );
   }
+  if (result.type === "classify") {
+    const s = result.summary;
+    const names = result.request.classes;
+    const areas = rows(["class", "area_ha", "share"], s.classes.map((c) => [c.name, c.ha, c.share]));
+    if (!s.accuracy) return head + areas;
+    const a = s.accuracy;
+    const matrix = rows(["reference \\ predicted", ...names, "producers_accuracy"], names.map((n, i) => [n, ...a.matrix[i]!, a.producers[i]]));
+    const users = rows(["users_accuracy", ...a.users.map((u) => (Number.isFinite(u) ? u.toFixed(6) : "")), ""], []);
+    return `${head}${areas}
+# confusion matrix of held-back test pixels; overall accuracy ${a.overall.toFixed(4)}, kappa ${a.kappa.toFixed(4)}, n ${a.n}
+${matrix}${users}`;
+  }
   if (result.type === "change" || result.type === "flood") {
     return head + rows(
       ["region", "direction", "area_ha", "before", "after", "change", "centroid_lon", "centroid_lat"],

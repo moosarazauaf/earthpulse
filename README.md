@@ -132,6 +132,16 @@ cover was lost and gained from 2017 to 2023, and what the lost tree cover
 became (crops, pasture, buildings). It says plainly that leaving the Trees
 class is a change of map class, not deforestation as FAO defines it.
 
+### 🗺️ Classify land cover with your own samples
+Upload training points or polygons (GeoJSON or a zipped shapefile) with a
+class attribute, and **Classify** trains a random forest on a Sentinel-2 or
+Landsat composite in your browser, maps every pixel, and reports a
+confusion matrix, overall accuracy, kappa, and producer's and user's
+accuracy on samples held back from training. The split is made by feature,
+not by pixel, so pixels from one polygon never sit on both sides and the
+accuracy is not inflated. Class map as GeoTIFF, confusion matrix as CSV.
+A Lahore example set is built in to try it.
+
 ### 📈 Follow an index for decades
 **Research** computes mean NDVI, NDWI, MNDWI and NDBI over your area for up
 to 12 years since 1984, with per-decade trends that leave out years with too
