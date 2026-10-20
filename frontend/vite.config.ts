@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import react from "@vitejs/plugin-react";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { defineConfig } from "vitest/config";
@@ -8,10 +10,12 @@ const CESIUM_BUILD = "node_modules/cesium/Build/Cesium";
 const CESIUM_BASE = "cesium";
 // "/" locally; "/earthpulse/" when built for GitHub Pages.
 const BASE = process.env.VITE_BASE ?? "/";
+// The service worker caches Cesium's files per version, so an upgrade replaces them.
+const CESIUM_VERSION = (JSON.parse(readFileSync(new URL("./node_modules/cesium/package.json", import.meta.url), "utf8")) as { version: string }).version;
 
 export default defineConfig({
   base: BASE,
-  define: { CESIUM_BASE_URL: JSON.stringify(`${BASE}${CESIUM_BASE}`) },
+  define: { CESIUM_BASE_URL: JSON.stringify(`${BASE}${CESIUM_BASE}`), CESIUM_VERSION: JSON.stringify(CESIUM_VERSION) },
   plugins: [
     react(),
     viteStaticCopy({
