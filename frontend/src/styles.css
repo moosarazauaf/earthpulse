@@ -473,3 +473,5 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 .table.matrix td.diag { background: rgba(123, 216, 143, 0.18); font-weight: 700; }
 .table.matrix td.off { color: var(--orange); }
 .table.matrix caption { caption-side: bottom; text-align: left; padding-top: 4px; }
+.draw-samples { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px; }
+.draw-samples button.on { border-color: var(--amber); color: var(--amber); }

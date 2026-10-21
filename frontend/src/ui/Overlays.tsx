@@ -149,6 +149,7 @@ export function ToolHint() {
   const tool = useStore((s) => s.drawTool);
   const size = useStore((s) => s.pickSizeKm);
   const measure = useStore((s) => s.measure);
+  const sampleClass = useStore((s) => s.sampleClass);
   const set = useStore((s) => s.set);
   if (tool === "measure" || measure.length > 0) {
     const area = enclosedKm2(measure);
@@ -161,6 +162,9 @@ export function ToolHint() {
         {" "}<button className="link" onClick={() => set({ measure: [], drawTool: "none" })}>Clear</button>
       </div>
     );
+  }
+  if (tool === "sample") {
+    return <div className="notice tool-hint" role="status">Click the globe to add a &quot;{sampleClass}&quot; training point. Esc stops.</div>;
   }
   if (tool !== "point") return null;
   return <div className="notice tool-hint" role="status">Click a spot on the globe to analyse the {size} km around it. Esc cancels.</div>;

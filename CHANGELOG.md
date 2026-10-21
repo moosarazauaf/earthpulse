@@ -5,6 +5,12 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+### Added
+- Classify: draw training points on the globe. Type a class, press Draw
+  points, click; switch class and click again. Drawn points join an
+  uploaded file's samples or stand alone, each as its own feature in the
+  train/test split, and show on the globe in their class colour.
+
 ### Removed
 - The Urdu, Spanish and French screens and the language picker: the
   interface is English only.

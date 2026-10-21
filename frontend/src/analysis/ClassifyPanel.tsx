@@ -26,7 +26,13 @@ export function ClassifyForm() {
   const season = SEASONS.find((x) => x.id === seasonId) ?? SEASONS[0];
   const running = s.job.status === "submitting" || s.job.status === "running";
 
-  const samples = useMemo(() => (file && field ? samplesFor(file, field) : []), [file, field]);
+  const drawn = s.drawnSamples;
+  // Points clicked on the globe join the file's samples; each is its own feature, numbered after the file's.
+  const samples = useMemo(() => {
+    const fromFile = file && field ? samplesFor(file, field) : [];
+    const offset = file ? file.features.length : 0;
+    return [...fromFile, ...drawn.map((p, i) => ({ feature: offset + i, className: p.className, geometry: { type: "Point" as const, coordinates: [p.lon, p.lat] as [number, number] } }))];
+  }, [file, field, drawn]);
   const classes = useMemo(() => [...new Set(samples.map((x) => x.className))].sort(), [samples]);
   const perClass = useMemo(() => classes.map((c) => ({ name: c, features: new Set(samples.filter((x) => x.className === c).map((x) => x.feature)).size })), [classes, samples]);
 
@@ -63,7 +69,7 @@ export function ClassifyForm() {
 
   let problem: string | null = null;
   if (!s.aoi) problem = "Choose an area first.";
-  else if (!file) problem = "Upload your training samples.";
+  else if (samples.length === 0) problem = "Upload training samples, or draw them on the globe.";
   else if (classes.length < 2) problem = "The chosen attribute needs at least two classes.";
   else if (dataset === "sentinel2" && year < 2016) problem = "Sentinel-2 starts in 2016; use Landsat for earlier years.";
 
@@ -82,14 +88,30 @@ export function ClassifyForm() {
         </div>
         <input ref={input} type="file" hidden accept=".zip,.geojson,.json" aria-label="Upload training samples" onChange={onFile} />
         {error && <p className="note" role="alert">{error}</p>}
-        {file && (
+        <div className="draw-samples">
+          <label className="field">
+            <span>Or draw them: class for the next clicks</span>
+            <input type="text" list="sample-classes" maxLength={30} value={s.sampleClass} placeholder="e.g. Water"
+              onChange={(e) => s.set({ sampleClass: e.target.value })} />
+            <datalist id="sample-classes">{classes.map((c) => <option key={c} value={c} />)}</datalist>
+          </label>
+          <div className="row-actions">
+            <button className={s.drawTool === "sample" ? "on" : ""} aria-pressed={s.drawTool === "sample"} disabled={!s.sampleClass.trim()}
+              onClick={() => s.set({ drawTool: s.drawTool === "sample" ? "none" : "sample", sampleClass: s.sampleClass.trim() })}>
+              {s.drawTool === "sample" ? "Stop drawing" : "Draw points on the globe"}
+            </button>
+            {drawn.length > 0 && <button className="link" onClick={() => s.set({ drawnSamples: drawn.slice(0, -1) })}>Undo last</button>}
+            {drawn.length > 0 && <button className="link" onClick={() => s.set({ drawnSamples: [] })}>Clear drawn ({drawn.length})</button>}
+          </div>
+        </div>
+        {samples.length > 0 && (
           <>
-            <label className="field">
+            {file && <label className="field">
               <span>Attribute holding the class</span>
               <select value={field} onChange={(e) => setField(e.target.value)}>
                 {file.fields.map((f) => <option key={f}>{f}</option>)}
               </select>
-            </label>
+            </label>}
             <ul className="class-list">
               {perClass.map((c) => (
                 <li key={c.name}><strong>{c.name}</strong> · {c.features} {c.features === 1 ? "feature" : "features"}{c.features < 2 ? " (too few to test)" : ""}</li>

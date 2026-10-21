@@ -445,6 +445,18 @@ export class Globe {
     this.render();
   }
 
+  private sampleEntities: Entity[] = [];
+
+  /** Training points drawn for Classify, coloured by class. */
+  setSamples(points: { lon: number; lat: number; colour: [number, number, number] }[]) {
+    for (const entity of this.sampleEntities) this.viewer.entities.remove(entity);
+    this.sampleEntities = points.map((p) => this.viewer.entities.add({
+      position: Cartesian3.fromDegrees(p.lon, p.lat),
+      point: { pixelSize: 9, color: Color.fromBytes(p.colour[0], p.colour[1], p.colour[2]), outlineColor: Color.WHITE, outlineWidth: 1.5, disableDepthTestDistance: Number.POSITIVE_INFINITY },
+    }));
+    this.render();
+  }
+
   private measureEntity: Entity | null = null;
 
   /** The measuring line, with a closing segment drawn faintly when it encloses an area. */

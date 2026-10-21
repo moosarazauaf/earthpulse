@@ -14,6 +14,7 @@ import { type EngineHooks, type EngineOverlay, M2_PER_HA, type Rgb, classImage, 
 import { accuracy, predict, rng, trainForest } from "./forest";
 import { type Grid, buildGrid, projectAoi, rasterMask, transformer } from "./geo";
 import { BANDS, FIRST_YEAR, NATIVE_RES, type OpticalDataset, landsatPlatforms, searchScenes, seasonWindow, selectScenes } from "./pc";
+import { CLASS_COLOURS } from "./palette";
 import { compositeBands, normalizedDifference } from "./raster";
 
 export const FEATURE_NAMES = ["Green", "Red", "NIR", "SWIR-1", "SWIR-2", "NDVI", "MNDWI", "NDBI"];
@@ -22,11 +23,6 @@ const MAX_SCENES = 6;
 /** Pixels taken from one polygon at most, so large polygons do not swamp the rest. */
 const MAX_PIXELS_PER_POLYGON = 60;
 const TREES = 50;
-/** Distinct colours for up to 12 classes (colour-blind-aware ordering, after Okabe and Ito, extended). */
-export const CLASS_COLOURS: Rgb[] = [
-  [0, 114, 178], [230, 159, 0], [0, 158, 115], [213, 94, 0], [86, 180, 233], [204, 121, 167],
-  [240, 228, 66], [120, 120, 120], [140, 86, 75], [23, 190, 207], [148, 103, 189], [188, 189, 34],
-];
 
 export interface ClassifyRequest {
   aoi: AoiGeometry;

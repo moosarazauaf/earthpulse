@@ -33,7 +33,7 @@ import type {
 
 export type CompareMode = "swipe" | "blink" | "opacity";
 /** "point" is Analyse here: one click makes a square area around the spot. */
-export type DrawTool = "none" | "rectangle" | "polygon" | "point" | "measure";
+export type DrawTool = "none" | "rectangle" | "polygon" | "point" | "measure" | "sample";
 /** Name of a result raster, as keyed in the result's `overlays`. */
 export type OverlayKey = string;
 
@@ -120,6 +120,9 @@ interface State {
   /** Areas saved in this browser, and the last analyses run here (as recipes). */
   /** Points of the measuring line (D), longitude and latitude. */
   measure: [number, number][];
+  /** Training points clicked on the globe for Classify, and the class the next click gets. */
+  drawnSamples: { lon: number; lat: number; className: string }[];
+  sampleClass: string;
   places: SavedPlace[];
   recent: RecentRun[];
   saveCurrentPlace: () => void;
@@ -287,6 +290,8 @@ export const useStore = create<State>((set, get) => {
     // Any other way of setting the area is not "around a point", so the size chips and centre go.
     setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, pickCentre: null }),
     measure: [],
+    drawnSamples: [],
+    sampleClass: "",
     places: loadPlaces(),
     recent: loadRecent(),
     placesOpen: false,

@@ -96,7 +96,7 @@ export class Drawing {
     }
     const point = this.locate(position);
     if (!point) return;
-    if (this.tool === "point") {
+    if (this.tool === "point" || this.tool === "sample") {
       this.onPoint(point[0], point[1]);
       return;
     }

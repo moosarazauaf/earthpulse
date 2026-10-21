@@ -7,6 +7,7 @@ import { ApiError, api } from "../app/api";
 import { datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
 import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedResult, type Overlay, hasLayers, isMapped } from "../app/types";
+import { CLASS_COLOURS } from "../engine/palette";
 import { newsMarkers } from "../news/corroborate";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
@@ -62,7 +63,14 @@ export function GlobeViewer() {
         const found = id === null ? null : features.find((f) => String(f.id) === id) ?? null;
         state.set({ selectedDetection: found as Detection | null });
       },
-      (lon, lat) => useStore.getState().analyseAt(lon, lat),
+      (lon, lat) => {
+        const state = useStore.getState();
+        if (state.drawTool === "sample") {
+          const className = state.sampleClass.trim();
+          if (className) state.set({ drawnSamples: [...state.drawnSamples, { lon, lat, className }] });
+        }
+        else state.analyseAt(lon, lat);
+      },
       (points, done) => useStore.getState().set(done ? { measure: points, drawTool: "none" } : { measure: points }),
     );
     const onKey = (event: KeyboardEvent) => {
@@ -145,6 +153,10 @@ export function GlobeViewer() {
   }, [s.aoi]);
   useEffect(() => drawing.current?.setTool(s.drawTool), [s.drawTool]);
   useEffect(() => instance?.setMeasure(s.measure), [s.measure]);
+  useEffect(() => {
+    const classes = [...new Set(s.drawnSamples.map((p) => p.className))].sort();
+    instance?.setSamples(s.mode === "classify" ? s.drawnSamples.map((p) => ({ ...p, colour: CLASS_COLOURS[classes.indexOf(p.className) % CLASS_COLOURS.length]! })) : []);
+  }, [s.drawnSamples, s.mode]);
 
   // Live hazards: layers and alert markers are shown only in Live mode.
   const live = s.mode === "live";
