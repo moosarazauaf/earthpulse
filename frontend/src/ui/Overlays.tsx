@@ -7,7 +7,7 @@ import { enclosedKm2, formatKm, formatKm2, pathKm } from "../area/measure";
 import { STORED_ANALYSIS, STORED_FLOOD } from "../demo/stored";
 import { exploreEvidence, startLahoreTour, stopTour } from "../demo/lahore";
 import { AnalysisList } from "./TopBar";
-import { useLang, useT } from "../i18n";
+import { useT } from "../i18n";
 
 const NOTICE_SECONDS = 6;
 
@@ -17,7 +17,6 @@ export function Intro() {
   const loadAnalysis = useStore((s) => s.loadAnalysis);
   const [step, setStep] = useState<"start" | "analyse">("start");
   const t = useT();
-  const english = useLang((s) => s.lang) === "en";
   if (!open) return null;
   const close = () => { setStep("start"); set({ introOpen: false, mode: "explore" }); };
   return (
@@ -42,7 +41,7 @@ export function Intro() {
             </button>
           </div>
           <p className="examples">
-            {t("intro.tip")}{english ? "" : ` ${t("note.partial")}`}
+            {t("intro.tip")}
           </p>
           <p className="examples">
             {t("intro.examples")}{" "}

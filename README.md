@@ -59,9 +59,6 @@ earthquakes or alerts near any of them. The overview also shows the rain of
 the last days against normal, and says when an unusually wet week falls on
 steep ground, the conditions in which landslides happen.
 
-EarthPulse speaks English, اردو (Urdu), Español and Français in its main
-screens; corrections from native speakers are welcome.
-
 <img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
 
 ### 🔴 See what is happening now

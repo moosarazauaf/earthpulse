@@ -5,6 +5,15 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+### Removed
+- The Urdu, Spanish and French screens and the language picker: the
+  interface is English only.
+
+### Verified
+- Offline start: in headless Chrome, after one visit the service worker
+  held the page, the build files and Cesium's files; with the network off,
+  a reload still showed the opening card, the top bar and the globe.
+
 ## [0.2.0-alpha.12] - 2026-10-20
 
 ### Added

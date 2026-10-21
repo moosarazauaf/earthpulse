@@ -13,7 +13,6 @@ import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sou
 import type { NewsFile, NewsStory } from "../news/types";
 import { clampYear, currentYear, datasetForYear, formatLatLon, squareAround } from "./logic";
 import type { QuickActionInfo } from "../area/actions";
-import { useLang } from "../i18n";
 import { type RecentRun, type SavedPlace, addRecent, loadPlaces, loadRecent, removePlace, savePlace } from "../area/saved";
 import type { SharedRun } from "./shareRun";
 import type {
@@ -389,7 +388,7 @@ const NOMINATIM_REVERSE = "https://nominatim.openstreetmap.org/reverse";
 /** The nearest named place to a point, from OpenStreetMap; null if none or the service is busy. */
 async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
   try {
-    const response = await fetch(`${NOMINATIM_REVERSE}?format=jsonv2&zoom=10&accept-language=${useLang.getState().lang},en&lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`);
+    const response = await fetch(`${NOMINATIM_REVERSE}?format=jsonv2&zoom=10&accept-language=en&lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}`);
     if (!response.ok) return null;
     const body = (await response.json()) as { address?: Record<string, string>; name?: string };
     const a = body.address ?? {};

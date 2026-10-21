@@ -8,7 +8,7 @@ import { useStore } from "../app/store";
 import type { Place } from "../app/types";
 import { getGlobe } from "../globe/GlobeViewer";
 import { ANALYSES, type AnalysisMode } from "./modes";
-import { LANGUAGES, type Lang, useLang, useT } from "../i18n";
+import { useT } from "../i18n";
 import { useWatchedPlaces } from "../area/watch";
 
 /** Three entries for a newcomer: what is happening, look around, measure something. */
@@ -23,14 +23,13 @@ const COORDINATE_VIEW_HEIGHT_M = 120_000;
 export function AnalysisList({ onPick }: { onPick: (id: AnalysisMode) => void }) {
   const mode = useStore((s) => s.mode);
   const t = useT();
-  const english = useLang((s) => s.lang) === "en";
   return (
     <ul className="analysis-list" role="menu">
       {ANALYSES.map((a, i) => (
         <li key={a.id} role="none">
           <button role="menuitem" className={mode === a.id ? "on" : ""} onClick={() => onPick(a.id)}>
             <strong>{t(`q.${a.id}`)}</strong>
-            <span>{t(`label.${a.id}`)}{english ? ` · ${a.detail}` : ""} <kbd>Shift {i + 1}</kbd></span>
+            <span>{t(`label.${a.id}`)} · {a.detail} <kbd>Shift {i + 1}</kbd></span>
           </button>
         </li>
       ))}
@@ -92,17 +91,6 @@ export function shareUrl(): string {
     analysis: s.result?.id ?? null,
   });
   return `${window.location.origin}${window.location.pathname}?${query}`;
-}
-
-function LanguagePicker() {
-  const lang = useLang((s) => s.lang);
-  const setLang = useLang((s) => s.setLang);
-  const t = useT();
-  return (
-    <select className="lang" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label={t("top.language")} title={t("top.language")}>
-      {LANGUAGES.map((l) => <option key={l.id} value={l.id} lang={l.id}>{l.name}</option>)}
-    </select>
-  );
 }
 
 export function TopBar() {
@@ -214,7 +202,6 @@ export function TopBar() {
         {watchedCount > 0 && <span className="badge" aria-label={`${watchedCount} of your places have hazards nearby`}>{watchedCount}</span>}
       </button>
       <button className="ghost" onClick={share} title="Copy a link to this view (S)">{t("top.share")}</button>
-      <LanguagePicker />
       <button className="ghost keys" onClick={() => set({ shortcutsOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
     </header>
   );
