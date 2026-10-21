@@ -8,7 +8,7 @@ export const ANALYSES = [
   { id: "fires", label: "Fires", question: "How badly did the land burn?", detail: "Burn severity from Sentinel-2 or Landsat" },
   { id: "water", label: "Water", question: "How have lakes and rivers changed?", detail: "Yearly water maps, back to 1984" },
   { id: "cities", label: "Cities", question: "Where did a city grow, and onto what?", detail: "Built-up land from 2017 to 2023" },
-  { id: "forests", label: "Forests", question: "Where was tree cover lost or gained?", detail: "Tree cover from 2017 to 2023, and what replaced it" },
+  { id: "forests", label: "Forests", question: "Where was tree cover lost or gained?", detail: "Tree cover 2017 to 2023, and canopy loss since 1985 from Landsat" },
   { id: "heat", label: "Heat", question: "How hot does the ground get in summer?", detail: "Landsat surface temperature, and how much cooler green areas are" },
   { id: "change", label: "Change", question: "Where did vegetation, water or building change?", detail: "Spectral indices between two years" },
   { id: "classify", label: "Classify", question: "Can I map land cover with my own training samples?", detail: "Random forest on Sentinel-2 or Landsat, with an accuracy assessment" },

@@ -9,9 +9,9 @@ import { Evidence } from "./Evidence";
 import { FireForm } from "./FirePanel";
 import { HeatForm, HeatResults } from "./HeatPanel";
 import { ClassifyForm, ClassifyResults } from "./ClassifyPanel";
+import { DisturbanceResults, ForestForms } from "./DisturbancePanel";
 import { FloodForm, FloodResults } from "./FloodPanel";
 import { UrbanForm, UrbanResults } from "./UrbanPanel";
-import { TREES } from "../engine/urban";
 import { WaterForm, WaterResults } from "./WaterPanel";
 import { ChangeResults, SeriesResults } from "./Results";
 import { SeriesForm } from "./SeriesPanel";
@@ -133,10 +133,11 @@ export function ContextPanel() {
               {!running && result?.type === "urban" && <UrbanResults result={result} />}
               {!running && result?.type === "heat" && <HeatResults result={result} />}
               {!running && result?.type === "classify" && <ClassifyResults result={result} />}
+              {!running && result?.type === "disturbance" && <DisturbanceResults result={result} />}
               {!running && (
                 <details className="form-wrap" open={!result}>
                   <summary>{result ? "New analysis" : "Set up an analysis"}</summary>
-                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : mode === "cities" ? <UrbanForm /> : mode === "forests" ? <UrbanForm focus={TREES} /> : mode === "heat" ? <HeatForm /> : mode === "classify" ? <ClassifyForm /> : mode === "fires" ? <FireForm /> : <AnalysisForm />}
+                  {mode === "floods" ? <FloodForm /> : mode === "water" ? <WaterForm /> : mode === "cities" ? <UrbanForm /> : mode === "forests" ? <ForestForms /> : mode === "heat" ? <HeatForm /> : mode === "classify" ? <ClassifyForm /> : mode === "fires" ? <FireForm /> : <AnalysisForm />}
                 </details>
               )}
             </>

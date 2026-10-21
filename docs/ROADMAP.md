@@ -54,13 +54,14 @@ Carried over to later releases:
 - [ ] UrbanEye: Landsat-era built-up history before 2017
 - [x] HeatWatch: land surface temperature, green versus built contrast, change
 - [x] ForestEye: tree cover loss and gain 2017-2023 and what replaced it (Impact Observatory maps)
-- [ ] ForestEye: disturbance from the Landsat record before 2017
+- [x] ForestEye: canopy loss from the Landsat record since 1985
 - [x] FireWatch: active-fire detections in Live, and dNBR burn severity (Key and Benson 2006)
 
 ## Phase 3 — Classification and carbon (`v0.3.0`)
 
 - [x] LULC engine: random forest with uploaded training data, in the browser
-- [ ] CART and SVM classifiers; drawing training samples on the globe
+- [x] Drawing training samples on the globe
+- [ ] CART and SVM classifiers
 - [x] Validation: confusion matrix, overall/producer's/user's accuracy, F1, kappa (on held-back samples, split by feature)
 - [x] Error-adjusted area estimates with confidence intervals (Olofsson et al. 2014)
 - [ ] CarbonWatch with user-defined pools and exposed equations

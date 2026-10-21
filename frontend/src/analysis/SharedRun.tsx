@@ -61,6 +61,7 @@ export function SharedRunCard() {
     else if (shared.kind === "flood") void store.runFlood(request, device, quality);
     else if (shared.kind === "timeseries") void store.runTimeSeries(request, device, quality);
     else if (shared.kind === "heat") void store.runHeat(request, device, quality);
+    else if (shared.kind === "disturbance") void store.runDisturbance(request, device, quality);
     else if (shared.kind === "urban") void store.runUrban({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
     else void store.runWater({ ...(shared.request as object), maxPixels: shared.maxPixels, concurrency: device.concurrency } as never, device);
   }

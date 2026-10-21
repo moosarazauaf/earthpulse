@@ -362,9 +362,16 @@ export interface ClassifyResult extends ResultBase {
   overlays: Record<string, Overlay>;
 }
 
-export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult | UrbanResult | HeatResult | ClassifyResult;
+export interface DisturbanceResult extends ResultBase {
+  type: "disturbance";
+  request: { aoi: AoiGeometry; label?: string | null; years: number[]; startMonth: number; endMonth: number; threshold: number; forestNbr: number; maxCloud: number };
+  summary: { aoiAreaHa: number; years: number[]; forestHa: number; disturbedHa: number; periods: { from: number; to: number; ha: number }[] };
+  overlays: Record<string, Overlay>;
+}
+
+export type AnalysisResult = ChangeResult | TimeSeriesResult | FloodResult | WaterResult | UrbanResult | HeatResult | ClassifyResult | DisturbanceResult;
 /** Results that put rasters on the globe. */
-export type LayeredResult = ChangeResult | FloodResult | WaterResult | UrbanResult | HeatResult | ClassifyResult;
+export type LayeredResult = ChangeResult | FloodResult | WaterResult | UrbanResult | HeatResult | ClassifyResult | DisturbanceResult;
 export const hasLayers = (r: AnalysisResult | null): r is LayeredResult =>
   r !== null && r.type !== "timeseries";
 /** Results that put rasters and regions on the globe. */

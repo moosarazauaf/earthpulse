@@ -25,6 +25,9 @@ export function resultCsv(result: AnalysisResult): string | null {
       result.series.map((s) => [s.year, s.focusHa, ...classes.map((c) => s.classes[c] ?? 0)]),
     );
   }
+  if (result.type === "disturbance") {
+    return head + rows(["from_year", "to_year", "canopy_loss_ha"], result.summary.periods.map((p) => [p.from, p.to, p.ha]));
+  }
   if (result.type === "classify") {
     const s = result.summary;
     const names = result.request.classes;

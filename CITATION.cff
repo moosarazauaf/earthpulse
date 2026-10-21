@@ -8,7 +8,7 @@ authors:
 repository-code: "https://github.com/moosarazauaf/earthpulse"
 url: "https://moosarazauaf.github.io/earthpulse/"
 license: MIT
-version: "0.2.0-alpha.12"
+version: "0.2.0-alpha.13"
 date-released: "2026-10-15"
 keywords:
   - remote sensing

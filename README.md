@@ -127,7 +127,10 @@ late-morning ground temperature, not air temperature.
 **ForestEye** follows the Trees class of the same annual maps: where tree
 cover was lost and gained from 2017 to 2023, and what the lost tree cover
 became (crops, pasture, buildings). It says plainly that leaving the Trees
-class is a change of map class, not deforestation as FAO defines it.
+class is a change of map class, not deforestation as FAO defines it. For
+the years before those maps, **canopy loss since 1985** finds, pixel by
+pixel, the largest drop in the Landsat burn ratio from dense canopy and
+dates it, so the history of clearing shows period by period.
 
 ### 🗺️ Classify land cover with your own samples
 Upload training points or polygons (GeoJSON or a zipped shapefile) with a

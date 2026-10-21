@@ -5,7 +5,15 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.13] - 2026-10-21
+
 ### Added
+- **ForestEye: canopy loss since 1985.** Yearly Landsat NBR composites (5,
+  8 or 12 years), and for each pixel the largest drop of at least 0.25 from
+  dense canopy (NBR 0.4 or more), dated to the later year. Area per
+  period, a map coloured by period, GeoTIFF of the year and CSV per period.
+  On Rondonia (1988 to 2016) it found 4,323 ha of loss in 8,117 ha of 1988
+  canopy, peaking in 1996 to 2000.
 - Classify: draw training points on the globe. Type a class, press Draw
   points, click; switch class and click again. Drawn points join an
   uploaded file's samples or stand alone, each as its own feature in the

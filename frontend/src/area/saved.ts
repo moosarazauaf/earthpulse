@@ -90,6 +90,8 @@ export function headline(result: AnalysisResult): string {
       return `${result.summary.focusName} ${formatArea(result.summary.firstHa)} to ${formatArea(result.summary.lastHa)}, ${result.summary.firstYear}–${result.summary.lastYear}`;
     case "heat":
       return `Surface ${result.summary.meanC.toFixed(1)} °C on average, ${result.summary.year}${result.summary.comparison ? ` (${result.summary.comparison.change >= 0 ? "+" : "−"}${Math.abs(result.summary.comparison.change).toFixed(1)} °C since ${result.summary.comparison.year})` : ""}`;
+    case "disturbance":
+      return `Canopy loss ${formatArea(result.summary.disturbedHa)}, ${result.summary.years[0]}–${result.summary.years[result.summary.years.length - 1]}`;
     case "classify":
       return `Classified into ${result.summary.classes.length} classes${result.summary.accuracy ? `, overall accuracy ${Math.round(result.summary.accuracy.overall * 100)}%` : ""}`;
     case "timeseries":
