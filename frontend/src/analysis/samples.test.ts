@@ -36,3 +36,18 @@ describe("train/test split by feature", () => {
     expect(test.size).toBe(1);
   });
 });
+
+describe("pixels inside a polygon", () => {
+  it("matches a mask of the whole grid while rasterising only the polygon's box", async () => {
+    const { pixelsInside } = await import("../engine/classify");
+    const { rasterMask } = await import("../engine/geo");
+    const grid = { epsg: 32643, west: 0, north: 1000, res: 10, width: 100, height: 100 };
+    const rings: [number, number][][] = [[[123, 877], [377, 905], [402, 611], [150, 640], [123, 877]]];
+    const full = rasterMask(rings, grid);
+    const expected: number[] = [];
+    full.forEach((v, i) => { if (v) expected.push(i); });
+    expect(expected.length).toBeGreaterThan(100);
+    expect(pixelsInside(rings, grid)).toEqual(expected);
+    expect(pixelsInside([[[5000, 5000], [5100, 5000], [5100, 5100], [5000, 5000]]], grid)).toEqual([]);
+  });
+});

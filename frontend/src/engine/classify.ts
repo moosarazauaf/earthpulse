@@ -56,9 +56,7 @@ export function samplePixels(sample: Sample, grid: Grid, random: () => number): 
   }
   const polygons = sample.geometry.type === "Polygon" ? [sample.geometry.coordinates] : sample.geometry.coordinates;
   const rings = polygons.map((p) => p[0]!.map(([lon, lat]) => toGrid(lon!, lat!)));
-  const mask = rasterMask(rings, grid);
-  const inside: number[] = [];
-  for (let i = 0; i < mask.length; i += 1) if (mask[i]) inside.push(i);
+  const inside = pixelsInside(rings, grid);
   if (inside.length === 0) {
     // A polygon smaller than one pixel still counts: use the pixel under its first vertex.
     const [x, y] = rings[0]![0]!;
@@ -70,6 +68,27 @@ export function samplePixels(sample: Sample, grid: Grid, random: () => number): 
     [inside[i], inside[j]] = [inside[j]!, inside[i]!];
   }
   return inside.slice(0, MAX_PIXELS_PER_POLYGON);
+}
+
+/**
+ * Grid indices of pixel centres inside the rings, rasterising only the rings'
+ * bounding box: a mask of the whole grid per polygon is far too slow for
+ * files with thousands of polygons.
+ */
+export function pixelsInside(rings: [number, number][][], grid: Grid): number[] {
+  const xs = rings.flat().map((p) => p[0]), ys = rings.flat().map((p) => p[1]);
+  const col0 = Math.max(0, Math.floor((Math.min(...xs) - grid.west) / grid.res));
+  const col1 = Math.min(grid.width - 1, Math.floor((Math.max(...xs) - grid.west) / grid.res));
+  const row0 = Math.max(0, Math.floor((grid.north - Math.max(...ys)) / grid.res));
+  const row1 = Math.min(grid.height - 1, Math.floor((grid.north - Math.min(...ys)) / grid.res));
+  if (col1 < col0 || row1 < row0) return [];
+  const sub = { ...grid, west: grid.west + col0 * grid.res, north: grid.north - row0 * grid.res, width: col1 - col0 + 1, height: row1 - row0 + 1 };
+  const mask = rasterMask(rings, sub);
+  const out: number[] = [];
+  for (let j = 0; j < mask.length; j += 1) {
+    if (mask[j]) out.push((Math.floor(j / sub.width) + row0) * grid.width + (j % sub.width) + col0);
+  }
+  return out;
 }
 
 /** Which features go to testing: a share of each class's features, at random; classes with one feature stay in training. */
