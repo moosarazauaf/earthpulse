@@ -5,6 +5,17 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.14] - 2026-10-22
+
+### Fixed
+- The sample-drawing tool stayed on after leaving Classify, so globe clicks
+  elsewhere added hidden training points and stopped selecting markers.
+- Classify froze on files with thousands of polygons: each polygon was
+  masked against the whole grid; it is now masked only over its box.
+- Classify trains on at most 20,000 sample pixels, sampled within each
+  class, so very large sample files no longer take tens of minutes.
+- Drawn training points now have the same colour as their class on the map.
+
 ## [0.2.0-alpha.13] - 2026-10-21
 
 ### Added
