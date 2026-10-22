@@ -51,3 +51,15 @@ describe("pixels inside a polygon", () => {
     expect(pixelsInside([[[5000, 5000], [5100, 5000], [5100, 5100], [5000, 5000]]], grid)).toEqual([]);
   });
 });
+
+describe("training cap", () => {
+  it("keeps every row under the cap, and each class in proportion above it", async () => {
+    const { capPerClass } = await import("../engine/classify");
+    expect(capPerClass([0, 1, 1], 10, rng(1))).toEqual([0, 1, 2]);
+    const labels = [...Array.from({ length: 900 }, () => 0), ...Array.from({ length: 100 }, () => 1)];
+    const kept = capPerClass(labels, 100, rng(1));
+    expect(kept.filter((i) => labels[i] === 0)).toHaveLength(90);
+    expect(kept.filter((i) => labels[i] === 1)).toHaveLength(10);
+    expect(new Set(kept).size).toBe(100);
+  });
+});

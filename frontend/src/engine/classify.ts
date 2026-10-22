@@ -23,6 +23,8 @@ const MAX_SCENES = 6;
 /** Pixels taken from one polygon at most, so large polygons do not swamp the rest. */
 const MAX_PIXELS_PER_POLYGON = 60;
 const TREES = 50;
+/** Training rows beyond this make each tree slow to grow in a browser for little gain. */
+const MAX_TRAINING_PIXELS = 20_000;
 
 export interface ClassifyRequest {
   aoi: AoiGeometry;
@@ -89,6 +91,22 @@ export function pixelsInside(rings: [number, number][][], grid: Grid): number[] 
     if (mask[j]) out.push((Math.floor(j / sub.width) + row0) * grid.width + (j % sub.width) + col0);
   }
   return out;
+}
+
+/** Indices of at most `max` rows, chosen at random within each class in proportion to its size (all rows when under the cap). */
+export function capPerClass(labels: number[], max: number, random: () => number): number[] {
+  if (labels.length <= max) return labels.map((_, i) => i);
+  const byClass = new Map<number, number[]>();
+  labels.forEach((label, i) => byClass.set(label, [...(byClass.get(label) ?? []), i]));
+  const kept: number[] = [];
+  for (const rows of byClass.values()) {
+    for (let i = rows.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(random() * (i + 1));
+      [rows[i], rows[j]] = [rows[j]!, rows[i]!];
+    }
+    kept.push(...rows.slice(0, Math.max(1, Math.round((max * rows.length) / labels.length))));
+  }
+  return kept;
 }
 
 /** Which features go to testing: a share of each class's features, at random; classes with one feature stay in training. */
@@ -176,8 +194,10 @@ export async function runClassify(request: ClassifyRequest, hooks: EngineHooks) 
   if (missing.length) warnings.push(`No usable training samples for ${missing.join(", ")}; ${missing.length === 1 ? "it" : "they"} cannot appear in the map.`);
   if (present.size < 2) throw new Error("At least two classes need usable training samples inside the area.");
 
-  hooks.progress({ stage: "DETECTING_CHANGE", done: total, total, detail: `Training ${TREES} trees on ${train.y.length} pixels` });
-  const forest = trainForest(train.x, train.y, { trees: TREES, maxDepth: 14, minLeaf: 1, seed: request.seed });
+  const kept = capPerClass(train.y, MAX_TRAINING_PIXELS, random);
+  if (kept.length < train.y.length) warnings.push(`Training used a random ${kept.length.toLocaleString("en")} of ${train.y.length.toLocaleString("en")} sample pixels, in proportion to each class, to keep training to minutes.`);
+  hooks.progress({ stage: "DETECTING_CHANGE", done: total, total, detail: `Training ${TREES} trees on ${kept.length} pixels` });
+  const forest = trainForest(kept.map((i) => train.x[i]!), kept.map((i) => train.y[i]!), { trees: TREES, maxDepth: 14, minLeaf: 1, seed: request.seed });
 
   const assessed = test.y.length > 0 ? accuracy(test.y, test.x.map((row) => predict(forest, row)), request.classes.map((_, i) => i)) : null;
   if (!assessed) warnings.push("No samples were left for testing (each class needs at least two features), so no accuracy can be reported.");
@@ -243,7 +263,7 @@ export async function runClassify(request: ClassifyRequest, hooks: EngineHooks) 
     summary: {
       aoiAreaHa: aoi.areaM2 / M2_PER_HA,
       classes: request.classes.map((name, i) => ({ name, ha: counts[i]! * pixelHa, share: classified ? counts[i]! / classified : 0, colour: hex(CLASS_COLOURS[i % CLASS_COLOURS.length]!) })),
-      trainPixels: train.y.length,
+      trainPixels: kept.length,
       testPixels: test.y.length,
       accuracy: assessed,
       importance: FEATURE_NAMES.map((name, i) => ({ name, value: forest.importance[i]! })).sort((a, b) => b.value - a.value),
