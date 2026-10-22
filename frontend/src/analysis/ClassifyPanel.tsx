@@ -1,5 +1,5 @@
 /** Classify: land cover from the visitor's own training samples, with an accuracy assessment. */
-import { type ChangeEvent, useMemo, useRef, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { currentYear, formatArea } from "../app/logic";
 import { useStore } from "../app/store";
@@ -16,6 +16,10 @@ const pct = (v: number | undefined) => (v === undefined || !Number.isFinite(v) ?
 export function ClassifyForm() {
   const s = useStore();
   const { device, quality, setQuality } = useDevice();
+  // Leaving Classify must give globe clicks back to markers and Analyse here.
+  useEffect(() => () => {
+    if (useStore.getState().drawTool === "sample") useStore.getState().set({ drawTool: "none" });
+  }, []);
   const input = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<SampleFile | null>(null);
   const [field, setField] = useState("");
