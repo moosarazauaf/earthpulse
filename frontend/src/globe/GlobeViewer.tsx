@@ -7,7 +7,6 @@ import { ApiError, api } from "../app/api";
 import { datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
 import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedResult, type Overlay, hasLayers, isMapped } from "../app/types";
-import { CLASS_COLOURS } from "../engine/palette";
 import { newsMarkers } from "../news/corroborate";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
@@ -153,10 +152,6 @@ export function GlobeViewer() {
   }, [s.aoi]);
   useEffect(() => drawing.current?.setTool(s.drawTool), [s.drawTool]);
   useEffect(() => instance?.setMeasure(s.measure), [s.measure]);
-  useEffect(() => {
-    const classes = [...new Set(s.drawnSamples.map((p) => p.className))].sort();
-    instance?.setSamples(s.mode === "classify" ? s.drawnSamples.map((p) => ({ ...p, colour: CLASS_COLOURS[classes.indexOf(p.className) % CLASS_COLOURS.length]! })) : []);
-  }, [s.drawnSamples, s.mode]);
 
   // Live hazards: layers and alert markers are shown only in Live mode.
   const live = s.mode === "live";

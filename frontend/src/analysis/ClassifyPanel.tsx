@@ -9,6 +9,8 @@ import { DeviceStep, useDevice } from "./DeviceStep";
 import { AdjustedAreas } from "./AdjustedAreas";
 import { Exports, ResultHeader } from "./Results";
 import { rectangleAoi } from "../app/logic";
+import { CLASS_COLOURS } from "../engine/palette";
+import { getGlobe } from "../globe/GlobeViewer";
 import { type SampleFile, parseSamples, readSampleFile, samplesFor } from "./samples";
 
 const pct = (v: number | undefined) => (v === undefined || !Number.isFinite(v) ? "–" : `${Math.round(v * 100)}%`);
@@ -38,6 +40,11 @@ export function ClassifyForm() {
     return [...fromFile, ...drawn.map((p, i) => ({ feature: offset + i, className: p.className, geometry: { type: "Point" as const, coordinates: [p.lon, p.lat] as [number, number] } }))];
   }, [file, field, drawn]);
   const classes = useMemo(() => [...new Set(samples.map((x) => x.className))].sort(), [samples]);
+  // Drawn points take their colour from the same class order the map will use, file classes included.
+  useEffect(() => {
+    getGlobe()?.setSamples(drawn.map((p) => ({ ...p, colour: CLASS_COLOURS[classes.indexOf(p.className) % CLASS_COLOURS.length]! })));
+  }, [drawn, classes]);
+  useEffect(() => () => getGlobe()?.setSamples([]), []);
   const perClass = useMemo(() => classes.map((c) => ({ name: c, features: new Set(samples.filter((x) => x.className === c).map((x) => x.feature)).size })), [classes, samples]);
 
   async function onFile(event: ChangeEvent<HTMLInputElement>) {
