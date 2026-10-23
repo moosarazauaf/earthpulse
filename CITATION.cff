@@ -8,8 +8,8 @@ authors:
 repository-code: "https://github.com/moosarazauaf/earthpulse"
 url: "https://moosarazauaf.github.io/earthpulse/"
 license: MIT
-version: "0.2.0-alpha.14"
-date-released: "2026-10-15"
+version: "0.2.0-alpha.15"
+date-released: "2026-10-23"
 keywords:
   - remote sensing
   - change detection

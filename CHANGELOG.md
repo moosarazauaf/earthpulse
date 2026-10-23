@@ -5,6 +5,19 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.15] - 2026-10-23
+
+### Added
+- **Air quality in the area overview.** US AQI with its EPA band, PM2.5,
+  PM10, NO₂ and ozone from the CAMS model through Open-Meteo, and how many
+  of the past seven days averaged above the WHO PM2.5 guideline.
+- **Methods text.** Every result can copy a methods paragraph and a
+  reference list written from its record, ready for a paper or report.
+- Search and sharing: keyword-led title and description, canonical URL,
+  Open Graph and Twitter card with a preview image, schema.org
+  WebApplication data, and a crawlable description shown while the globe
+  loads. The app is listed in the site's sitemap.
+
 ## [0.2.0-alpha.14] - 2026-10-22
 
 ### Fixed
