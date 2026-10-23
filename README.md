@@ -8,6 +8,8 @@
 
 No account. No API key. No server. Satellite analyses run on your own computer.
 
+If EarthPulse is useful to you, a ⭐ helps other researchers find it.
+
 [![CI](https://github.com/moosarazauaf/earthpulse/actions/workflows/ci.yml/badge.svg)](https://github.com/moosarazauaf/earthpulse/actions/workflows/ci.yml)
 [![Deploy](https://github.com/moosarazauaf/earthpulse/actions/workflows/pages.yml/badge.svg)](https://moosarazauaf.github.io/earthpulse/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-5fd0c5.svg)](LICENSE)
@@ -17,7 +19,8 @@ No account. No API key. No server. Satellite analyses run on your own computer.
 
 </div>
 
-EarthPulse puts four decades of open satellite imagery, live hazard feeds and
+EarthPulse is a free, open-source remote sensing web app for researchers,
+students, journalists and anyone curious about a place. It puts four decades of open satellite imagery, live hazard feeds and
 a reproducible analysis engine on one 3D globe in the browser. Ask *"what
 changed here?"* about any place on Earth and get an answer that names the
 scenes, the method and the limits behind it.
@@ -57,7 +60,9 @@ your recent analyses, and **Print report** saves the overview as a PDF. Saved
 places are watched: when EarthPulse opens it tells you about hazard news,
 earthquakes or alerts near any of them. The overview also shows the rain of
 the last days against normal, and says when an unusually wet week falls on
-steep ground, the conditions in which landslides happen.
+steep ground, the conditions in which landslides happen, and today's air
+quality (US AQI, PM2.5, PM10, NO₂, ozone) with how many of the past seven days
+were above the WHO PM2.5 guideline.
 
 <img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
 
@@ -147,8 +152,10 @@ A Lahore example set is built in to try it.
 to 12 years since 1984, with per-decade trends that leave out years with too
 little clear view. Every result exports as CSV and JSON; change, burn, flood and
 heat maps as GeoTIFF for QGIS or ArcGIS; and change and burn analyses also as
-a Google Earth Engine script that repeats them with the same scenes. The
-measuring tool (<kbd>D</kbd>) gives distances and areas on the ground.
+a Google Earth Engine script that repeats them with the same scenes. **Methods text** copies a
+ready-to-paste methods paragraph and reference list for any result, written
+from its record: data, method, formula, cloud mask, scene dates, grid and
+limits. The measuring tool (<kbd>D</kbd>) gives distances and areas on the ground.
 
 ### ⌨️ Keyboard first
 <kbd>L</kbd> Live, <kbd>E</kbd> Explore, <kbd>A</kbd> Analyse here, <kbd>M</kbd> My places, <kbd>D</kbd> measure, <kbd>R</kbd>/<kbd>P</kbd> draw, <kbd>U</kbd> upload,
@@ -232,8 +239,7 @@ accounting with exposed equations, and story mode. See [docs/ROADMAP.md](docs/RO
 
 ## Contributing
 
-Contributions are welcome, especially new open data sources, analyses and
-translations. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it sets the
+Contributions are welcome, especially new open data sources and analyses. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it sets the
 scientific rules every change must follow. Issues labelled
 [good first issue](https://github.com/moosarazauaf/earthpulse/labels/good%20first%20issue)
 are a good place to start.
