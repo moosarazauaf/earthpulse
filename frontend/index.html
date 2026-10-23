@@ -3,15 +3,64 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="EarthPulse: see what is changing on Earth, with the satellite evidence behind every number." />
-    <title>EarthPulse</title>
+    <title>EarthPulse: Free Satellite Image Analysis in Your Browser</title>
+    <meta name="description" content="Analyse any place on Earth for free: flood mapping, land cover classification, surface water, urban growth, heat, air quality and hazard news, from Landsat and Sentinel imagery, in your browser. No account." />
+    <link rel="canonical" href="https://moosarazauaf.github.io/earthpulse/" />
+    <meta name="author" content="Muhammad Moosa Raza" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="EarthPulse" />
+    <meta property="og:title" content="EarthPulse: free satellite image analysis in your browser" />
+    <meta property="og:description" content="Floods, land cover, water, cities, heat and hazard news for any place on Earth, from Landsat and Sentinel. Runs on your own computer; no account, no key." />
+    <meta property="og:url" content="https://moosarazauaf.github.io/earthpulse/" />
+    <meta property="og:image" content="https://moosarazauaf.github.io/earthpulse/social-preview.jpg" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta property="og:image:alt" content="EarthPulse: a 3D globe with satellite analysis panels" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "EarthPulse",
+        "url": "https://moosarazauaf.github.io/earthpulse/",
+        "description": "Free, open-source remote sensing web app. Flood mapping with Sentinel-1 radar, land cover classification with random forest and accuracy assessment, surface water since 1984, urban growth, land surface temperature, canopy loss, burn severity, air quality and natural-hazard news on a 3D globe. Analyses run in the browser.",
+        "applicationCategory": "ScienceApplication",
+        "operatingSystem": "Any (web browser)",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "license": "https://opensource.org/licenses/MIT",
+        "author": { "@type": "Person", "name": "Muhammad Moosa Raza", "url": "https://moosarazauaf.github.io/" },
+        "codeRepository": "https://github.com/moosarazauaf/earthpulse",
+        "image": "https://moosarazauaf.github.io/earthpulse/social-preview.jpg",
+        "keywords": "remote sensing, satellite imagery, flood mapping, land cover classification, change detection, Landsat, Sentinel-1, Sentinel-2, NDVI, surface water, urban growth, land surface temperature, natural hazards, GIS"
+      }
+    </script>
     <link rel="manifest" href="%BASE_URL%manifest.webmanifest" />
     <meta name="theme-color" content="#080c0f" />
     <link rel="apple-touch-icon" href="%BASE_URL%icon-192.png" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230b1114' stroke='%235fd0c5' stroke-width='2'/%3E%3Cpath d='M4 16h7l3-7 4 14 3-7h7' fill='none' stroke='%237bd88f' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E" />
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin: 0; background: #080c0f">
+    <div id="root">
+      <!-- Shown while the app loads, and read by search engines; React replaces it. -->
+      <main style="max-width: 640px; margin: 12vh auto 0; padding: 0 16px; color: #c9d4d8; font: 15px/1.5 system-ui, sans-serif">
+        <h1 style="color: #fff; font-size: 24px">EarthPulse: free satellite image analysis in your browser</h1>
+        <p>
+          Click any place on Earth and see what is changing there, with the satellite evidence behind every number.
+          Landsat, Sentinel-1 and Sentinel-2 imagery is read straight from the public archive and analysed on your own
+          computer. No account, no API key.
+        </p>
+        <ul>
+          <li>Flood mapping with Sentinel-1 radar, which sees through cloud</li>
+          <li>Land cover classification with your own training samples: random forest, confusion matrix, kappa, error-adjusted areas</li>
+          <li>Surface water since 1984, urban growth, tree cover and canopy loss, burn severity and land surface temperature</li>
+          <li>Natural-hazard news mapped on a 3D globe, checked against USGS earthquakes and GDACS alerts</li>
+          <li>Air quality, rainfall against the 1991 to 2020 normal, terrain and land cover for any area</li>
+          <li>GeoTIFF, GeoJSON and CSV export, Google Earth Engine scripts and shareable analysis links</li>
+        </ul>
+        <p>Loading the globe… EarthPulse needs JavaScript and WebGL. <a style="color: #5fd0c5" href="https://github.com/moosarazauaf/earthpulse">Source code on GitHub</a></p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

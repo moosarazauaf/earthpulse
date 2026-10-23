@@ -1,7 +1,7 @@
 {
   "name": "EarthPulse",
   "short_name": "EarthPulse",
-  "description": "See what is changing on Earth: live hazards and satellite analysis.",
+  "description": "Free satellite image analysis in your browser: floods, land cover, water, cities, heat, air quality and hazard news for any place on Earth.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
