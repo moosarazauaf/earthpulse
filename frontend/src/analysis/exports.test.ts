@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { ChangeResult, TimeSeriesResult } from "../app/types";
 import { resultCsv } from "./csv";
+import { methodsText } from "./methods";
 import { NotReproducible, changeScript, geeAssetId } from "./geeScript";
 
 describe("Earth Engine script", () => {
@@ -47,5 +48,30 @@ describe("CSV export", () => {
     expect(lines[1]).toBe("year,status,ndvi,ndwi,mndwi,ndbi,valid_fraction,sensors,scenes");
     expect(lines[2]).toBe("2000,OBSERVED,0.500000,-0.200000,-0.100000,0,1,landsat-5,2");
     expect(lines[3]).toBe("2005,NO_DATA,,,,,,,0");
+  });
+});
+
+describe("methods text", () => {
+  it("writes what the record says, with scene dates, platforms and references", () => {
+    const result = {
+      type: "change", id: "EP-2026-TEST-L0001", softwareVersion: "0.2.0", label: "Test",
+      provenance: {
+        provider: { name: "Microsoft Planetary Computer" }, computedOn: "browser", crs: "EPSG:32643",
+        workingResolutionM: 60, nativeResolutionM: 30, maxCloudPercent: 20,
+        method: "Median composites; change = after minus before",
+        index: { name: "NDVI", formula: "(NIR - Red) / (NIR + Red)", reference: "Tucker 1979" },
+        scenes: {
+          before: [{ datetime: "1993-12-30T05:00:00Z", platform: "landsat-5" }],
+          after: [{ datetime: "2026-01-10T05:00:00Z", platform: "landsat-9" }],
+        },
+      },
+    } as unknown as ChangeResult;
+    const text = methodsText(result, "2026-10-23");
+    expect(text).toContain("EarthPulse 0.2.0 (Raza, 2026), in the web browser");
+    expect(text).toContain("change = after minus before.");
+    expect(text).toContain("2 inputs (landsat-5, landsat-9) dated 1993-12-30 to 2026-01-10");
+    expect(text).toContain("limited to 20% scene cloud cover or less");
+    expect(text).toContain("- Landsat Collection 2 Level-2 data courtesy of the U.S. Geological Survey.");
+    expect(text).not.toContain("Copernicus");
   });
 });

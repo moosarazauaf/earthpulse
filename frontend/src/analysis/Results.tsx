@@ -1,4 +1,6 @@
 /** Results of a finished analysis: numbers, charts, regions, exports. */
+import { useState } from "react";
+
 import { HOSTED, absolute, api } from "../app/api";
 import { formatArea, formatIndex, formatSigned } from "../app/logic";
 import { useStore } from "../app/store";
@@ -11,6 +13,7 @@ import { SeverityTable } from "./FirePanel";
 import { ShareRunButton } from "./SharedRun";
 import { ChangeHistogram, SeriesChart } from "./charts";
 import { resultCsv } from "./csv";
+import { methodsText } from "./methods";
 import { NotReproducible, changeScript } from "./geeScript";
 
 const MAX_LISTED_REGIONS = 8;
@@ -58,6 +61,17 @@ export function ResultHeader({ result }: { result: AnalysisResult }) {
 }
 
 /** Results computed in this tab are saved from the browser; there is no server copy to link to. */
+/** Copies a methods paragraph and references written from the result's provenance; downloads it if copying is refused. */
+export function MethodsButton({ result }: { result: AnalysisResult }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button className="link" title="A methods paragraph and references for a paper or report, written from this result's record" onClick={() => {
+      const text = methodsText(result);
+      navigator.clipboard.writeText(text).then(() => setCopied(true), () => downloadText(`${result.id}-methods.txt`, "text/plain", text));
+    }}>{copied ? "Methods copied" : "Methods text"}</button>
+  );
+}
+
 function BrowserExports({ result }: { result: AnalysisResult }) {
   const key = useStore((s) => s.overlay.key);
   const overlays: Record<string, { url: string; title: string; bounds: number[]; legend: unknown }> = hasLayers(result) ? result.overlays : {};
@@ -94,6 +108,7 @@ function BrowserExports({ result }: { result: AnalysisResult }) {
         <button className="link" onClick={() => downloadText(`${result.id}.json`, "application/json", record())}>Full record (JSON)</button>
         {script && <button className="link" onClick={() => downloadText(`${result.id}.js`, "text/javascript", script)} title="Repeats this analysis in Google Earth Engine with the same scenes">Earth Engine script</button>}
         {shown && key && <a href={shown.url} download={`${result.id}-${key}.png`}>Map shown (PNG)</a>}
+        <MethodsButton result={result} />
         <ShareRunButton result={result} />
       </div>
       <p className="muted">

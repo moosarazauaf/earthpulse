@@ -9,7 +9,7 @@ import { AreaStep } from "./AnalysisForm";
 import { DeviceStep, useDevice } from "./DeviceStep";
 import { downloadText } from "./download";
 import { ShareRunButton } from "./SharedRun";
-import { ResultHeader } from "./Results";
+import { MethodsButton, ResultHeader } from "./Results";
 import { WaterSeriesChart } from "./charts";
 
 const SEASONS = [
@@ -213,6 +213,7 @@ export function WaterResults({ result }: { result: WaterResult }) {
             Full record (JSON)
           </button>
           {key && result.overlays[key] && <a href={result.overlays[key].url} download={`${result.id}-${key}.png`}>Map shown (PNG)</a>}
+          <MethodsButton result={result} />
           <ShareRunButton result={result} />
         </div>
         <p className="muted">This result exists only in this browser tab. Export it to keep it.</p>
