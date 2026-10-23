@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { squareAround } from "../app/logic";
 import { projectAoi } from "../engine/geo";
 import { quickActions, spread } from "./actions";
+import { aqiBand, dailyMeans } from "./air";
 import { describeNormals, monthlyNormals } from "./climate";
 
 describe("Analyse here", () => {
@@ -59,5 +60,20 @@ describe("landslide conditions", () => {
     expect(landslideConditions(week(120, 20), 0.3)).toBe(false);
     expect(landslideConditions(week(10, 30), 0.3)).toBe(false);
     expect(landslideConditions(undefined, 0.3)).toBe(false);
+  });
+});
+
+describe("air quality", () => {
+  it("puts an AQI in its EPA band, upper bounds inclusive", () => {
+    expect(aqiBand(50).label).toBe("Good");
+    expect(aqiBand(51).label).toBe("Moderate");
+    expect(aqiBand(179).label).toBe("Unhealthy");
+    expect(aqiBand(500).label).toBe("Hazardous");
+  });
+
+  it("averages whole days and leaves out days with gaps", () => {
+    const times = [...Array(24)].map((_, h) => `2026-10-20T${String(h).padStart(2, "0")}:00`).concat(["2026-10-21T00:00"]);
+    const values: (number | null)[] = [...Array(24)].map((_, h): number | null => (h === 3 ? null : 20)).concat([99]);
+    expect(dailyMeans(times, values)).toEqual([{ date: "2026-10-20", pm25: 20 }]);
   });
 });

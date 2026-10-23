@@ -18,6 +18,7 @@ import { KindBadge } from "../ui/KindBadge";
 import { type QuickActionInfo, quickActions } from "./actions";
 import { isSaved } from "./saved";
 import { useT } from "../i18n";
+import { type AirQuality, WHO_PM25_DAY, aqiBand, fetchAir } from "./air";
 import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
@@ -83,6 +84,7 @@ function Overview() {
       <LandCover />
       <TerrainSection />
       <RecentRain lat={lat} lon={lon} />
+      <Air lat={lat} lon={lon} />
       <Climate lat={lat} lon={lon} />
       <Nearby lat={lat} lon={lon} />
     </>
@@ -299,6 +301,45 @@ function RecentRain({ lat, lon }: { lat: number; lon: number }) {
             </p>
           )}
           <p className="muted">Recent days from Open-Meteo's weather models, the baseline from ERA5; one grid cell, so local storms can be missed.</p>
+        </>
+      )}
+    </section>
+  );
+}
+
+/** Air now (US AQI and pollutants) and how many of the past days were above the WHO PM2.5 guideline. */
+function Air({ lat, lon }: { lat: number; lon: number }) {
+  const t = useT();
+  const [air, setAir] = useState<AirQuality | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    setAir(null);
+    setError(false);
+    fetchAir(lat, lon, controller.signal).then(setAir, () => { if (!controller.signal.aborted) setError(true); });
+    return () => controller.abort();
+  }, [lat, lon]);
+  const band = air ? aqiBand(air.usAqi) : null;
+  const above = air?.days.filter((d) => d.pm25 > WHO_PM25_DAY).length ?? 0;
+  return (
+    <section>
+      <header className="row"><h3>{t("area.air")}</h3><KindBadge kind="MODELED" /></header>
+      {error && <p className="note">Air quality could not be loaded.</p>}
+      {!air && !error && <p className="muted" role="status">Reading the air…</p>}
+      {air && band && (
+        <>
+          <div className="stat" style={{ borderTopColor: band.colour }}>
+            <span>US AQI at {air.time.slice(11, 16)} local time</span>
+            <strong>{air.usAqi} · {band.label}</strong>
+            <em>PM2.5 {air.pm25.toFixed(0)} · PM10 {air.pm10.toFixed(0)} · NO₂ {air.no2.toFixed(0)} · ozone {air.ozone.toFixed(0)} µg/m³</em>
+          </div>
+          {air.days.length > 0 && (
+            <p>
+              On {above} of the past {air.days.length} days the average PM2.5 was above the WHO guideline of {WHO_PM25_DAY} µg/m³
+              {above > 0 ? ` (highest ${Math.max(...air.days.map((d) => d.pm25)).toFixed(0)})` : ""}.
+            </p>
+          )}
+          <p className="muted">CAMS atmosphere model through Open-Meteo, about 40 km across (11 km in Europe): the air of the region, not of one street. Not a health warning; follow local advice.</p>
         </>
       )}
     </section>
