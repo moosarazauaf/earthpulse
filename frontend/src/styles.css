@@ -530,7 +530,10 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 .legal-content a { color: var(--cyan); text-decoration: underline; }
 
 /* ---- legal menu -------------------------------------------------------------- */
-.legal-menu { min-width: 280px; }
+.legal-menu { 
+  min-width: 280px; 
+  top: auto !important; /* Override .analyse-menu fixed top */
+}
 .legal-menu .overview-item { border-color: var(--line); }
 .legal-menu .overview-item strong { color: var(--text); }
 .legal-menu .overview-item:hover { border-color: var(--cyan); }
@@ -544,6 +547,7 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 /* ---- globe layers menu ------------------------------------------------------- */
 .globe-layers-menu {
   min-width: 320px; max-width: 420px; max-height: 80vh; overflow: auto;
+  top: auto !important; /* Override .analyse-menu fixed top */
 }
 .globe-layers-menu fieldset {
   border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; margin: 0;
