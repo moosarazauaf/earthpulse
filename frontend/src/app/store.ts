@@ -102,6 +102,10 @@ interface State {
   introOpen: boolean;
   story: { title: string; caption: string; done: boolean } | null;
   notice: string | null;
+  /** Legal dialog open state. */
+  legalOpen: "privacy" | "cookies" | "terms" | null;
+  /** Cookie customize dialog open state. */
+  cookieCustomizeOpen: boolean;
 
   set: (partial: Partial<State>) => void;
   setYear: (year: number) => void;
@@ -245,6 +249,8 @@ export const useStore = create<State>((set, get) => {
     introOpen: true,
     story: null,
     notice: null,
+    legalOpen: null as "privacy" | "cookies" | "terms" | null,
+    cookieCustomizeOpen: false,
 
     set: (partial) => set(partial),
     alerts: null,

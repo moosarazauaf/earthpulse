@@ -282,3 +282,11 @@ Built by **Muhammad Moosa Raza**, remote sensing and GIS
 EarthPulse works at landscape scale on public data and does not identify,
 track or profile people. Code: MIT ([LICENSE](LICENSE)). Data keeps its
 providers' licences.
+
+## Legal compliance
+
+- **Privacy Policy** — No personal data is collected or sent to any server. All analyses run locally in your browser. See the in-app Privacy Policy (⚖ Legal → Privacy) or [the policy text](https://moosarazauaf.github.io/earthpulse/?legal=privacy).
+- **Cookie Policy** — EarthPulse uses only browser localStorage (no cookies) for preferences, saved areas, and analysis history. No analytics or tracking. See the in-app Cookie Policy (⚖ Legal → Cookies).
+- **Terms of Service** — Free, open-source, no warranty. Do not use for decisions affecting life, property, or regulatory compliance without independent verification. See the in-app Terms of Service (⚖ Legal → Terms).
+
+All legal pages are accessible from the ⚖ Legal menu in the top bar and the footer links.

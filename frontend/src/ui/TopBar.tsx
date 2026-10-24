@@ -14,6 +14,7 @@ import { modeForRun } from "../app/shareRun";
 import { interpret } from "../ask/interpret";
 import { requestRun } from "../ask/request";
 import { PIXEL_BUDGET, deviceProfile } from "../engine/client";
+import { openLegal } from "./Legal";
 
 /** Three entries for a newcomer: what is happening, look around, measure something. */
 const MODES = [
@@ -76,6 +77,55 @@ function AnalyseMenu() {
           </button>
           <AnalysisList onPick={(id) => { set({ mode: id }); setOpen(false); }} />
           <p className="muted">{t("menu.footer")}</p>
+        </div>,
+        document.body,
+      )}
+    </>
+  );
+}
+
+/** Legal links menu. */
+function LegalMenu() {
+  const t = useT();
+  const set = useStore((s) => s.set);
+  const [open, setOpen] = useState(false);
+  const button = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: Event) => {
+      if (event instanceof KeyboardEvent ? event.key === "Escape" : !menu.current?.contains(event.target as Node) && !button.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", close);
+    return () => { document.removeEventListener("mousedown", close); document.removeEventListener("keydown", close); };
+  }, [open]);
+
+  return (
+    <>
+      <button ref={button} className="ghost" aria-haspopup="menu" aria-expanded={open}
+        onClick={() => setOpen(!open)} title={t("top.legalTitle")}>
+        <span aria-hidden="true">⚖</span><span className="label"> {t("top.legal")}</span>
+      </button>
+      {open && createPortal(
+        <div ref={menu} className="analyse-menu legal-menu" style={{ left: button.current?.getBoundingClientRect().left ?? 0 }} role="dialog" aria-label={t("top.legalTitle")}>
+          <button className="overview-item" onClick={() => { openLegal("privacy"); setOpen(false); }}>
+            <strong>{t("legal.privacy.title")}</strong>
+            <span>{t("legal.privacy.sections.controller.text").slice(0, 80)}…</span>
+          </button>
+          <button className="overview-item" onClick={() => { openLegal("cookies"); setOpen(false); }}>
+            <strong>{t("legal.cookies.title")}</strong>
+            <span>{t("legal.cookies.sections.what.text").slice(0, 80)}…</span>
+          </button>
+          <button className="overview-item" onClick={() => { openLegal("terms"); setOpen(false); }}>
+            <strong>{t("legal.terms.title")}</strong>
+            <span>{t("legal.terms.sections.acceptance.text").slice(0, 80)}…</span>
+          </button>
+          <button className="overview-item" onClick={() => { set({ cookieCustomizeOpen: true }); setOpen(false); }}>
+            <strong>{t("cookie.customizeTitle")}</strong>
+            <span>{t("cookie.customizeDescription").slice(0, 80)}…</span>
+          </button>
         </div>,
         document.body,
       )}
@@ -227,6 +277,7 @@ export function TopBar() {
         {watchedCount > 0 && <span className="badge" aria-label={`${watchedCount} of your places have hazards nearby`}>{watchedCount}</span>}
       </button>
       <button className="ghost" onClick={share} title="Copy a link to this view (S)">{t("top.share")}</button>
+      <LegalMenu />
       <button className="ghost keys" onClick={() => set({ shortcutsOpen: true })} title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
     </header>
   );

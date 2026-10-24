@@ -475,3 +475,68 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 .table.matrix caption { caption-side: bottom; text-align: left; padding-top: 4px; }
 .draw-samples { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px; }
 .draw-samples button.on { border-color: var(--amber); color: var(--amber); }
+
+/* ---- cookie consent ---------------------------------------------------------- */
+.cookie-banner {
+  position: fixed; bottom: calc(var(--bottom) + 16px); left: 50%; transform: translateX(-50%);
+  z-index: 50; width: min(560px, calc(100% - 32px));
+  background: var(--panel); border: 1px solid var(--cyan); border-radius: 8px;
+  padding: 16px 20px; backdrop-filter: blur(12px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  animation: slide-up 0.3s ease-out;
+}
+@keyframes slide-up { from { opacity: 0; transform: translateX(-50%) translateY(16px); } }
+.cookie-content { display: grid; gap: 12px; }
+.cookie-content h3 { font-size: 16px; font-weight: 600; }
+.cookie-content p { font-size: 13px; color: var(--muted); }
+.cookie-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.cookie-links { font-size: 12px; color: var(--muted); margin: 0; }
+.cookie-links a { color: var(--cyan); text-decoration: underline; }
+
+/* ---- cookie customize dialog ------------------------------------------------- */
+.cookie-customize-overlay {
+  position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
+  display: grid; place-items: center; padding: 16px;
+}
+.cookie-customize {
+  width: min(520px, 100%); max-height: 85vh; overflow: auto;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 8px;
+  padding: 20px; display: grid; gap: 16px;
+}
+.cookie-customize .row { display: flex; justify-content: space-between; align-items: center; }
+.cookie-customize h2 { font-size: 18px; }
+.cookie-customize fieldset { border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; }
+.cookie-customize legend { font-weight: 600; font-size: 13px; }
+.cookie-customize .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.cookie-customize .check input { accent-color: var(--cyan); }
+.cookie-customize .check span { font-size: 13px; color: var(--text); }
+.cookie-customize .actions { display: flex; gap: 8px; justify-content: flex-end; }
+.cookie-customize .cookie-links { font-size: 12px; color: var(--muted); text-align: center; }
+.cookie-customize .cookie-links a { color: var(--cyan); text-decoration: underline; }
+
+/* ---- legal sheets ------------------------------------------------------------ */
+.legal-sheet { max-width: 720px; }
+.legal-content { display: grid; gap: 20px; }
+.legal-content h2 { font-size: 22px; font-weight: 600; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.legal-updated { font-size: 12px; color: var(--muted); margin-top: -8px; }
+.legal-content section { display: grid; gap: 8px; }
+.legal-content h3 { font-size: 15px; font-weight: 600; color: var(--cyan); }
+.legal-content p { font-size: 13px; line-height: 1.6; }
+.legal-content ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.legal-content li { font-size: 13px; line-height: 1.5; }
+.legal-content table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.legal-content th, .legal-content td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+.legal-content th { background: rgba(255, 255, 255, 0.04); font-weight: 600; }
+.legal-content code { background: rgba(255, 255, 255, 0.06); padding: 2px 6px; border-radius: 3px; font-size: 12px; }
+.legal-content a { color: var(--cyan); text-decoration: underline; }
+
+/* ---- legal menu -------------------------------------------------------------- */
+.legal-menu { min-width: 280px; }
+.legal-menu .overview-item { border-color: var(--line); }
+.legal-menu .overview-item strong { color: var(--text); }
+.legal-menu .overview-item:hover { border-color: var(--cyan); }
+.legal-menu .overview-item:hover strong { color: var(--cyan); }
+
+@media (max-width: 800px) {
+  .cookie-banner { left: 8px; right: 8px; width: auto; transform: none; bottom: calc(var(--bottom) + 8px); }
+  .cookie-customize { margin: 8px; }
+}

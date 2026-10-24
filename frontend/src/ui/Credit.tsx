@@ -9,6 +9,12 @@ export function Credit() {
       Developed by <a href={AUTHOR_URL} target="_blank" rel="noreferrer">{AUTHOR}</a>
       <span aria-hidden="true"> · </span>
       <a href={REPOSITORY_URL} target="_blank" rel="noreferrer">Source</a>
+      <span aria-hidden="true"> · </span>
+      <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent("open-legal", { detail: "privacy" })); }}>Privacy</a>
+      <span aria-hidden="true"> · </span>
+      <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent("open-legal", { detail: "cookies" })); }}>Cookies</a>
+      <span aria-hidden="true"> · </span>
+      <a href="#" onClick={(e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent("open-legal", { detail: "terms" })); }}>Terms</a>
     </p>
   );
 }
