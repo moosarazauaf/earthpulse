@@ -20,6 +20,8 @@ export interface SharedRun {
   fromNews?: string;
   /** Set when the run is repeated from My places. */
   fromRecent?: boolean;
+  /** Set when the run was planned from a typed request: the words, and every assumption made. */
+  fromAsk?: { text: string; notes: string[] };
 }
 
 const VERSION = 1;

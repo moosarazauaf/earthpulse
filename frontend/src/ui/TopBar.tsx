@@ -10,6 +10,10 @@ import { getGlobe } from "../globe/GlobeViewer";
 import { ANALYSES, type AnalysisMode } from "./modes";
 import { useT } from "../i18n";
 import { useWatchedPlaces } from "../area/watch";
+import { modeForRun } from "../app/shareRun";
+import { interpret } from "../ask/interpret";
+import { requestRun } from "../ask/request";
+import { PIXEL_BUDGET, deviceProfile } from "../engine/client";
 
 /** Three entries for a newcomer: what is happening, look around, measure something. */
 const MODES = [
@@ -117,6 +121,27 @@ export function TopBar() {
     }
     setBusy(true);
     setMessage(null);
+    // A request that names an analysis ("floods in Layyah in August 2022") is planned and shown for confirmation.
+    const ask = interpret(query.trim());
+    if (ask) {
+      try {
+        const state = useStore.getState();
+        const planned = await requestRun(query.trim(), ask, state.aoi, PIXEL_BUDGET[deviceProfile().recommended]);
+        if ("error" in planned) {
+          setPlaces(null);
+          setMessage(planned.error);
+        } else {
+          setPlaces(null);
+          state.setAoi(planned.aoi);
+          state.set({ pendingRun: planned.run, mode: modeForRun(planned.run), result: null, introOpen: false });
+        }
+      } catch {
+        setMessage("Place search failed.");
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
     try {
       const { results } = await api.geocode(query.trim());
       setPlaces(results);
@@ -166,7 +191,7 @@ export function TopBar() {
       </nav>
 
       <form className="search" role="search" onSubmit={search}>
-        <input type="search" value={query} placeholder={t("top.search")} aria-label="Search a place or type latitude, longitude"
+        <input type="search" value={query} placeholder={t("top.search")} aria-label="Search a place, type latitude, longitude, or ask for an analysis"
           onChange={(e) => setQuery(e.target.value)} />
         <button type="submit" disabled={busy}>{busy ? "…" : t("top.go")}</button>
         {(places?.length || message) && (

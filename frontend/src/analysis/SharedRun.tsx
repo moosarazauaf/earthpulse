@@ -68,11 +68,15 @@ export function SharedRunCard() {
 
   return (
     <div className="area-prompt" role="dialog" aria-modal="false" aria-labelledby="shared-run-title">
-      <p className="eyebrow">{run.fromNews !== undefined ? "Check the news from space" : run.fromRecent ? "Run again" : "Shared analysis"}</p>
+      <p className="eyebrow">{run.fromAsk ? "Your request" : run.fromNews !== undefined ? "Check the news from space" : run.fromRecent ? "Run again" : "Shared analysis"}</p>
       <h2 id="shared-run-title">{run.request.label ?? "Shared area"}</h2>
+      {run.fromAsk && <p className="muted">You asked: &ldquo;{run.fromAsk.text}&rdquo;. Here is what will run:</p>}
       <p>{describeRun(run)}.</p>
+      {run.fromAsk && <ul className="facts-list">{run.fromAsk.notes.map((n) => <li key={n}>{n}</li>)}</ul>}
       <p className="muted">
-        {run.fromNews !== undefined
+        {run.fromAsk
+          ? "The area is outlined on the globe. To change something, edit your request and press Go again. "
+          : run.fromNews !== undefined
           ? `Proposed from the story "${run.fromNews}". The area outlined on the globe is a box around the place the story names; draw your own in the panel if the event was elsewhere. `
           : run.fromRecent ? "From your recent analyses, with the same area, dates and settings. " : "Someone shared the recipe for this analysis. "}
         Running it downloads the satellite scenes to this device and computes the result here, at the{" "}
