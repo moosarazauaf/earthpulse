@@ -5,6 +5,18 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.16] - 2026-10-24
+
+### Added
+- **Ask in plain words.** A request typed in the search box ("floods in
+  Layyah in August 2022", "how much has Lake Urmia shrunk since 2000", "is
+  Lahore growing?") becomes an analysis: the kind, the place (geocoded, the
+  area sized to the place up to 50 km), the years, months and season. The
+  confirmation card shows what will run and every assumption made; a
+  request that cannot be met gets a reason instead of a guess. It works by
+  rules in the browser, not a language model, so it needs no server or key.
+  A plain place name still searches as before.
+
 ## [0.2.0-alpha.15] - 2026-10-23
 
 ### Added

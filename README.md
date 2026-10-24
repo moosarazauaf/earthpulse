@@ -44,6 +44,16 @@ scenes, the method and the limits behind it.
 
 ## What you can do
 
+### 💬 Ask in plain words
+Type a request in the search box, such as *"floods in Layyah in August
+2022"*, *"how much has Lake Urmia shrunk since 2000"* or *"is Lahore
+growing?"*. EarthPulse works out the analysis, finds the place, sizes the
+area to it and picks the dates, then shows what it will run and every
+assumption it made before anything downloads. If a request cannot be met
+(radar before 2014, a fire with no month, a whole country) it says why
+instead of guessing. No code and no forms; the full form is still there
+for every analysis.
+
 ### 🎯 Click a place, get an analysis
 Press **Analyse here** (or <kbd>A</kbd>) and click anywhere on the globe. EarthPulse
 makes a square area of 2 to 25 km around the spot, names it, and in a few

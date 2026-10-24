@@ -75,7 +75,7 @@ Carried over to later releases:
 
 ## Phase 5 — Assistant and stories (`v0.5.0`)
 
-- [ ] Natural-language request to structured analysis, with confirmation step
+- [x] Natural-language request to structured analysis, with confirmation step (rules in the browser; a language model would need a server)
 - [ ] Assistant grounded in application state
 - [ ] Voice commands
 - [ ] Story mode
