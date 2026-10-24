@@ -138,12 +138,18 @@ function GlobeLayersMenu() {
   const t = useT();
   const set = useStore((s) => s.set);
   const cloudsEnabled = useStore((s) => s.cloudsEnabled);
+  const cloudOpacity = useStore((s) => s.cloudOpacity);
   const weatherEnabled = useStore((s) => s.weatherEnabled);
   const weatherLayer = useStore((s) => s.weatherLayer);
+  const weatherOpacity = useStore((s) => s.weatherOpacity);
   const pollutionEnabled = useStore((s) => s.pollutionEnabled);
   const pollutionLayer = useStore((s) => s.pollutionLayer);
+  const pollutionOpacity = useStore((s) => s.pollutionOpacity);
   const dynamicLighting = useStore((s) => s.dynamicLighting);
   const fogEnabled = useStore((s) => s.fogEnabled);
+  const fogDensity = useStore((s) => s.fogDensity);
+  const groundAtmosphere = useStore((s) => s.groundAtmosphere);
+  const timeMultiplier = useStore((s) => s.timeMultiplier);
   const [open, setOpen] = useState(false);
   const button = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
@@ -165,7 +171,7 @@ function GlobeLayersMenu() {
         <span aria-hidden="true">🌐</span><span className="label"> {t("top.effects")}</span>
       </button>
       {open && createPortal(
-        <div ref={menu} className="analyse-menu globe-layers-menu" style={{ left: button.current?.getBoundingClientRect().left ?? 0 }} role="dialog" aria-label={t("top.effectsTitle")}>
+        <div ref={menu} className="analyse-menu globe-layers-menu" style={{ left: button.current?.getBoundingClientRect().left ?? 0, top: button.current?.getBoundingClientRect().bottom ?? 0 }} role="dialog" aria-label={t("top.effectsTitle")}>
           <p className="eyebrow">{t("globe.effects")}</p>
 
           {/* Clouds */}
@@ -177,9 +183,9 @@ function GlobeLayersMenu() {
             </label>
             <div className="slider inline">
               <span>{t("globe.cloudOpacity")}</span>
-              <input type="range" min={0} max={1} step={0.05} value={useStore.getState().cloudOpacity}
+              <input type="range" min={0} max={1} step={0.05} value={cloudOpacity}
                 onChange={(e) => set({ cloudOpacity: Number(e.target.value) })} />
-              <span>{(useStore.getState().cloudOpacity * 100).toFixed(0)}%</span>
+              <span>{(cloudOpacity * 100).toFixed(0)}%</span>
             </div>
           </fieldset>
 
@@ -211,9 +217,9 @@ function GlobeLayersMenu() {
             )}
             <div className="slider inline">
               <span>{t("globe.weatherOpacity")}</span>
-              <input type="range" min={0} max={1} step={0.05} value={useStore.getState().weatherOpacity}
+              <input type="range" min={0} max={1} step={0.05} value={weatherOpacity}
                 onChange={(e) => set({ weatherOpacity: Number(e.target.value) })} disabled={!weatherEnabled} />
-              <span>{(useStore.getState().weatherOpacity * 100).toFixed(0)}%</span>
+              <span>{(weatherOpacity * 100).toFixed(0)}%</span>
             </div>
           </fieldset>
 
@@ -236,9 +242,9 @@ function GlobeLayersMenu() {
             )}
             <div className="slider inline">
               <span>{t("globe.pollutionOpacity")}</span>
-              <input type="range" min={0} max={1} step={0.05} value={useStore.getState().pollutionOpacity}
+              <input type="range" min={0} max={1} step={0.05} value={pollutionOpacity}
                 onChange={(e) => set({ pollutionOpacity: Number(e.target.value) })} disabled={!pollutionEnabled} />
-              <span>{(useStore.getState().pollutionOpacity * 100).toFixed(0)}%</span>
+              <span>{(pollutionOpacity * 100).toFixed(0)}%</span>
             </div>
           </fieldset>
 
@@ -255,17 +261,17 @@ function GlobeLayersMenu() {
             </label>
             <div className="slider inline">
               <span>{t("globe.effectsFogDensity")}</span>
-              <input type="range" min={0} max={0.001} step={0.00005} value={useStore.getState().fogDensity}
+              <input type="range" min={0} max={0.001} step={0.00005} value={fogDensity}
                 onChange={(e) => set({ fogDensity: Number(e.target.value) })} disabled={!fogEnabled} />
-              <span>{useStore.getState().fogDensity.toFixed(5)}</span>
+              <span>{fogDensity.toFixed(5)}</span>
             </div>
             <label className="check">
-              <input type="checkbox" checked={useStore.getState().groundAtmosphere} onChange={(e) => set({ groundAtmosphere: e.target.checked })} />
+              <input type="checkbox" checked={groundAtmosphere} onChange={(e) => set({ groundAtmosphere: e.target.checked })} />
               <span>{t("globe.effectsGroundAtmosphere")}</span>
             </label>
             <div className="slider inline">
               <span>{t("globe.effectsTimeLapseDesc")}</span>
-              <select value={useStore.getState().timeMultiplier} onChange={(e) => set({ timeMultiplier: Number(e.target.value) })}>
+              <select value={timeMultiplier} onChange={(e) => set({ timeMultiplier: Number(e.target.value) })}>
                 <option value={1}>1× (Real-time)</option>
                 <option value={60}>60× (1 min/sec)</option>
                 <option value={3600}>3600× (1 hr/sec)</option>
