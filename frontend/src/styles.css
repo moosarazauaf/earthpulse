@@ -540,3 +540,21 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
   .cookie-banner { left: 8px; right: 8px; width: auto; transform: none; bottom: calc(var(--bottom) + 8px); }
   .cookie-customize { margin: 8px; }
 }
+
+/* ---- globe layers menu ------------------------------------------------------- */
+.globe-layers-menu {
+  min-width: 320px; max-width: 420px; max-height: 80vh; overflow: auto;
+}
+.globe-layers-menu fieldset {
+  border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; margin: 0;
+}
+.globe-layers-menu legend { font-weight: 600; font-size: 13px; color: var(--cyan); }
+.globe-layers-menu .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+.globe-layers-menu .check input { accent-color: var(--cyan); }
+.globe-layers-menu .check span { font-size: 13px; color: var(--text); }
+.globe-layers-menu .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.globe-layers-menu .seg button { flex: 1 1 auto; min-width: 60px; padding: 6px 8px; font-size: 12px; }
+.globe-layers-menu .seg button.on { border-color: var(--cyan); background: rgba(95, 208, 197, 0.14); color: #fff; }
+.globe-layers-menu .slider.inline { grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
+.globe-layers-menu .slider.inline input { flex: 1; }
+.globe-layers-menu .slider.inline select { padding: 4px 8px; font-size: 12px; background: rgba(0,0,0,0.35); border: 1px solid var(--line-strong); border-radius: 4px; color: var(--text); }

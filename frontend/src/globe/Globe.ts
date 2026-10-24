@@ -29,6 +29,10 @@ import {
 import { absolute } from "../app/api";
 import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
 import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
+import { CloudLayer, generateCloudTimestamps } from "./CloudLayer";
+import { WeatherLayer } from "./WeatherLayer";
+import { PollutionLayer } from "./PollutionLayer";
+import { GlobeEffects, CameraFlight } from "./GlobeEffects";
 
 const ESRI_IMAGERY =
   "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
@@ -88,6 +92,20 @@ export class Globe {
   private primaryAlpha = 1;
   onDetectionPicked: ((id: number | null) => void) | null = null;
 
+  // Enhanced layers
+  private cloudLayer: CloudLayer | null = null;
+  private weatherLayer: WeatherLayer | null = null;
+  private pollutionLayer: PollutionLayer | null = null;
+  private globeEffects: GlobeEffects | null = null;
+  private cameraFlight: CameraFlight | null = null;
+
+  // Layer visibility state
+  private cloudsEnabled = false;
+  private weatherEnabled = false;
+  private pollutionEnabled = false;
+  private currentWeatherLayer: string | null = null;
+  private currentPollutionLayer: string | null = null;
+
   constructor(container: HTMLElement) {
     const ionToken = import.meta.env.VITE_CESIUM_ION_TOKEN as string | undefined;
     if (ionToken) Ion.defaultAccessToken = ionToken;
@@ -127,9 +145,60 @@ export class Globe {
       destination: Cartesian3.fromDegrees(HOME.lon, HOME.lat, HOME.height),
     });
     scene.preUpdate.addEventListener(() => this.stepFades());
+
+    // Initialize enhanced layers
+    this.initializeEnhancedLayers();
+  }
+
+  /**
+   * Initialize cloud, weather, pollution layers and globe effects
+   */
+  private async initializeEnhancedLayers(): Promise<void> {
+    // Initialize globe effects (atmosphere, lighting, fog)
+    this.globeEffects = new GlobeEffects(this.viewer, {
+      dynamicLighting: true,
+      enhancedAtmosphere: true,
+      groundAtmosphere: true,
+      fogEnabled: true,
+      fogDensity: 0.0003,
+    });
+    this.globeEffects.initialize();
+
+    // Initialize camera flight utilities
+    this.cameraFlight = new CameraFlight(this.viewer);
+
+    // Initialize cloud layer with NOAA GOES timestamps (last 24 hours)
+    const cloudTimestamps = generateCloudTimestamps(24, 30); // 30-min intervals for 24h
+    this.cloudLayer = new CloudLayer(this.viewer, {
+      urlTemplate: "https://rammb-slider.cira.colostate.edu/data/imagery/{time}/goes-16---full_disk/geocolor/{z}/{x}/{y}.png",
+      timestamps: cloudTimestamps,
+      attribution: "NOAA GOES-16 / CIRA",
+      animationIntervalMs: 1800000, // 30 minutes
+      fadeDuration: 2.0,
+      maximumLevel: 6,
+    });
+    await this.cloudLayer.initialize(this.labels);
+
+    // Initialize weather layer
+    this.weatherLayer = new WeatherLayer(this.viewer, {
+      apiBase: "https://api.open-meteo.com/v1",
+      maximumLevel: 8,
+      attribution: "Open-Meteo / NOAA / ECMWF",
+    });
+    this.weatherLayer.initialize(this.labels);
+
+    // Initialize pollution layer
+    this.pollutionLayer = new PollutionLayer(this.viewer, {
+      camsApiBase: "https://atmosphere.copernicus.eu/api",
+      openAqApiBase: "https://api.openaq.org/v2",
+      maximumLevel: 8,
+      attribution: "CAMS / OpenAQ / ESA Sentinel-5P",
+    });
+    this.pollutionLayer.initialize(this.labels);
   }
 
   destroy() {
+    this.destroyEnhancedLayers();
     if (!this.viewer.isDestroyed()) this.viewer.destroy();
   }
 
@@ -521,5 +590,325 @@ export class Globe {
       entity.polyline.width = new ConstantProperty(selected ? 4 : 1.5);
     }
     this.render();
+  }
+
+  // ---- Cloud Layer -----------------------------------------------------------
+
+  /** Enable/disable animated cloud layer */
+  setClouds(enabled: boolean): void {
+    this.cloudsEnabled = enabled;
+    if (this.cloudLayer) {
+      this.cloudLayer.setVisible(enabled);
+      if (enabled) {
+        this.cloudLayer.startAnimation();
+      } else {
+        this.cloudLayer.stopAnimation();
+      }
+    }
+    this.render();
+  }
+
+  /** Get cloud visibility state */
+  getClouds(): boolean {
+    return this.cloudsEnabled;
+  }
+
+  /** Set cloud opacity (0-1) */
+  setCloudOpacity(opacity: number): void {
+    if (this.cloudLayer) {
+      this.cloudLayer.setOpacity(Math.max(0, Math.min(1, opacity)));
+    }
+  }
+
+  /** Jump cloud layer to specific timestamp */
+  async jumpCloudsToTime(timestamp: string): Promise<void> {
+    if (this.cloudLayer) {
+      await this.cloudLayer.jumpToTime(timestamp);
+    }
+  }
+
+  /** Get available cloud timestamps */
+  getCloudTimestamps(): string[] {
+    return this.cloudLayer?.getTimestamps() ?? [];
+  }
+
+  /** Get current cloud timestamp */
+  getCurrentCloudTimestamp(): string | null {
+    return this.cloudLayer?.getCurrentTimestamp() ?? null;
+  }
+
+  // ---- Weather Layer ---------------------------------------------------------
+
+  /** Show temperature layer */
+  async showWeatherTemperature(): Promise<void> {
+    this.hideWeatherLayers();
+    await this.weatherLayer?.showTemperatureLayer();
+    this.currentWeatherLayer = "temperature";
+    this.weatherEnabled = true;
+  }
+
+  /** Show precipitation layer */
+  async showWeatherPrecipitation(): Promise<void> {
+    this.hideWeatherLayers();
+    await this.weatherLayer?.showPrecipitationLayer();
+    this.currentWeatherLayer = "precipitation";
+    this.weatherEnabled = true;
+  }
+
+  /** Show wind layer */
+  async showWeatherWind(): Promise<void> {
+    this.hideWeatherLayers();
+    await this.weatherLayer?.showWindLayer();
+    this.currentWeatherLayer = "wind";
+    this.weatherEnabled = true;
+  }
+
+  /** Show pressure layer */
+  async showWeatherPressure(): Promise<void> {
+    this.hideWeatherLayers();
+    await this.weatherLayer?.showPressureLayer();
+    this.currentWeatherLayer = "pressure";
+    this.weatherEnabled = true;
+  }
+
+  /** Show cloud cover layer */
+  async showWeatherCloudCover(): Promise<void> {
+    this.hideWeatherLayers();
+    await this.weatherLayer?.showCloudCoverLayer();
+    this.currentWeatherLayer = "clouds";
+    this.weatherEnabled = true;
+  }
+
+  /** Hide all weather layers */
+  hideWeatherLayers(): void {
+    this.weatherLayer?.hideAllLayers();
+    this.currentWeatherLayer = null;
+    this.weatherEnabled = false;
+  }
+
+  /** Set weather layer opacity */
+  setWeatherOpacity(opacity: number): void {
+    this.weatherLayer?.setOpacity(Math.max(0, Math.min(1, opacity)));
+  }
+
+  /** Get current weather layer type */
+  getWeatherLayer(): string | null {
+    return this.currentWeatherLayer;
+  }
+
+  /** Check if weather layer is active */
+  isWeatherEnabled(): boolean {
+    return this.weatherEnabled;
+  }
+
+  /** Set selected location for point weather display */
+  setWeatherLocation(lat: number, lon: number): void {
+    this.weatherLayer?.setSelectedLocation(lat, lon);
+  }
+
+  /** Clear weather location display */
+  clearWeatherLocation(): void {
+    this.weatherLayer?.clearPointDisplay();
+  }
+
+  /** Get weather forecast data */
+  getWeatherForecast(): any[] {
+    return this.weatherLayer?.getForecast() ?? [];
+  }
+
+  // ---- Pollution Layer -------------------------------------------------------
+
+  /** Show AQI layer */
+  async showPollutionAQI(): Promise<void> {
+    this.hidePollutionLayers();
+    await this.pollutionLayer?.showAQILayer();
+    this.currentPollutionLayer = "aqi";
+    this.pollutionEnabled = true;
+  }
+
+  /** Show PM2.5 layer */
+  async showPollutionPM25(): Promise<void> {
+    this.hidePollutionLayers();
+    await this.pollutionLayer?.showPM25Layer();
+    this.currentPollutionLayer = "pm25";
+    this.pollutionEnabled = true;
+  }
+
+  /** Show NO2 layer */
+  async showPollutionNO2(): Promise<void> {
+    this.hidePollutionLayers();
+    await this.pollutionLayer?.showNO2Layer();
+    this.currentPollutionLayer = "no2";
+    this.pollutionEnabled = true;
+  }
+
+  /** Show O3 layer */
+  async showPollutionO3(): Promise<void> {
+    this.hidePollutionLayers();
+    await this.pollutionLayer?.showO3Layer();
+    this.currentPollutionLayer = "o3";
+    this.pollutionEnabled = true;
+  }
+
+  /** Show CO layer */
+  async showPollutionCO(): Promise<void> {
+    this.hidePollutionLayers();
+    await this.pollutionLayer?.showCOLayer();
+    this.currentPollutionLayer = "co";
+    this.pollutionEnabled = true;
+  }
+
+  /** Show SO2 layer */
+  async showPollutionSO2(): Promise<void> {
+    this.hidePollutionLayers();
+    await this.pollutionLayer?.showSO2Layer();
+    this.currentPollutionLayer = "so2";
+    this.pollutionEnabled = true;
+  }
+
+  /** Hide all pollution layers */
+  hidePollutionLayers(): void {
+    this.pollutionLayer?.hideAllLayers();
+    this.currentPollutionLayer = null;
+    this.pollutionEnabled = false;
+  }
+
+  /** Set pollution layer opacity */
+  setPollutionOpacity(opacity: number): void {
+    this.pollutionLayer?.setOpacity(Math.max(0, Math.min(1, opacity)));
+  }
+
+  /** Get current pollution layer type */
+  getPollutionLayer(): string | null {
+    return this.currentPollutionLayer;
+  }
+
+  /** Check if pollution layer is active */
+  isPollutionEnabled(): boolean {
+    return this.pollutionEnabled;
+  }
+
+  /** Show pollution hotspots */
+  showPollutionHotspots(hotspots: any[]): void {
+    this.pollutionLayer?.showHotspots(hotspots);
+  }
+
+  /** Clear pollution hotspots */
+  clearPollutionHotspots(): void {
+    this.pollutionLayer?.clearHotspots();
+  }
+
+  /** Show ground stations (not yet implemented) */
+  showPollutionStations(_stations: any[]): void {
+    // TODO: Implement when PollutionLayer supports station display
+  }
+
+  /** Clear ground stations (not yet implemented) */
+  clearPollutionStations(): void {
+    // TODO: Implement when PollutionLayer supports station display
+  }
+
+  /** Set selected location for pollution detail (not yet implemented in PollutionLayer) */
+  setPollutionLocation(_lat: number, _lon: number): void {
+    // TODO: Implement when PollutionLayer supports point selection
+  }
+
+  /** Get pollution forecast */
+  getPollutionForecast(): any[] {
+    return this.pollutionLayer?.getForecast() ?? [];
+  }
+
+  // ---- Globe Effects ---------------------------------------------------------
+
+  /** Set dynamic lighting (time-of-day) */
+  setDynamicLighting(enabled: boolean): void {
+    this.globeEffects?.setDynamicLighting(enabled);
+  }
+
+  /** Set time multiplier for time-lapse (1=real-time, 3600=1hr/sec, 86400=1day/sec) */
+  setTimeMultiplier(multiplier: number): void {
+    this.globeEffects?.setTimeMultiplier(multiplier);
+  }
+
+  /** Set specific date/time */
+  setDateTime(date: Date): void {
+    this.globeEffects?.setDateTime(date);
+  }
+
+  /** Get current simulation date/time */
+  getDateTime(): Date {
+    return this.globeEffects?.getDateTime() ?? new Date();
+  }
+
+  /** Set fog density */
+  setFogDensity(density: number): void {
+    this.globeEffects?.setFogDensity(density);
+  }
+
+  /** Set fog enabled */
+  setFogEnabled(enabled: boolean): void {
+    this.globeEffects?.setFogEnabled(enabled);
+  }
+
+  /** Set ground atmosphere enabled */
+  setGroundAtmosphere(enabled: boolean): void {
+    this.globeEffects?.setGroundAtmosphere(enabled);
+  }
+
+  /** Fly to region with tile loading wait and smooth effects */
+  async flyToRegionWithTiles(
+    west: number,
+    south: number,
+    east: number,
+    north: number,
+    options: {
+      duration?: number;
+      padding?: number;
+      waitForTiles?: boolean;
+      maxWaitSeconds?: number;
+      onTileProgress?: (loaded: boolean) => void;
+    } = {}
+  ): Promise<void> {
+    if (this.cameraFlight) {
+      await this.cameraFlight.flyToRegion(west, south, east, north, options);
+    }
+  }
+
+  /** Fly to point with tile loading wait */
+  async flyToPointWithTiles(
+    lon: number,
+    lat: number,
+    height: number,
+    options: {
+      duration?: number;
+      waitForTiles?: boolean;
+      maxWaitSeconds?: number;
+    } = {}
+  ): Promise<void> {
+    if (this.cameraFlight) {
+      await this.cameraFlight.flyToPoint(lon, lat, height, options);
+    }
+  }
+
+  /** Cross-fade between imagery layers */
+  async crossFadeImagery(fromLayer: any, toLayer: any, duration: number = 1.0): Promise<void> {
+    if (this.globeEffects) {
+      await this.globeEffects.crossFadeLayers(fromLayer, toLayer, duration);
+    }
+  }
+
+  // ---- Cleanup ---------------------------------------------------------------
+
+  /** Destroy all enhanced layers and effects */
+  destroyEnhancedLayers(): void {
+    this.cloudLayer?.destroy();
+    this.cloudLayer = null;
+    this.weatherLayer?.destroy();
+    this.weatherLayer = null;
+    this.pollutionLayer?.destroy();
+    this.pollutionLayer = null;
+    this.globeEffects?.destroy();
+    this.globeEffects = null;
+    this.cameraFlight = null;
   }
 }
