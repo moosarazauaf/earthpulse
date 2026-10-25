@@ -9,6 +9,7 @@ import { useStore } from "../app/store";
 import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedResult, type Overlay, hasLayers, isMapped } from "../app/types";
 import { newsMarkers } from "../news/corroborate";
 import { aqiBand } from "../area/air";
+import { latestRainTime, rainTimes } from "./rain";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -173,6 +174,20 @@ export function GlobeViewer() {
   useEffect(() => instance?.setHazardLayers(live ? s.hazardLayers : []), [live, s.hazardLayers]);
   useEffect(() => instance?.setAlerts(live ? s.alerts ?? [] : [], s.selectedAlert?.id ?? null), [live, s.alerts, s.selectedAlert]);
   useEffect(() => instance?.setQuakes(live && s.quakesOn ? s.quakes ?? [] : []), [live, s.quakesOn, s.quakes]);
+  useEffect(() => {
+    const set = useStore.getState().set;
+    if (!s.rainOn) {
+      instance?.setRain(null, () => undefined);
+      set({ rainTime: null });
+      return;
+    }
+    let stale = false;
+    latestRainTime().then(
+      (latest) => { if (!stale) instance?.setRain(rainTimes(latest), (time) => set({ rainTime: time })); },
+      () => { if (!stale) set({ rainOn: false, notice: "Rain maps could not be loaded from NASA GIBS." }); },
+    );
+    return () => { stale = true; };
+  }, [s.rainOn]);
   useEffect(() => {
     if (s.airOn && s.cityAir === null) void s.loadCityAir();
     instance?.setAirSpots(s.airOn ? (s.cityAir ?? []).map((c) => ({ lon: c.lon, lat: c.lat, aqi: c.usAqi, colour: aqiBand(c.usAqi).colour, name: c.name })) : []);

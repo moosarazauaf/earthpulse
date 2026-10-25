@@ -168,6 +168,17 @@ export function LayerPanel() {
               <span>Air quality at major cities <kbd>Q</kbd></span>
             </label>
             {s.airOn && <AirHotspots />}
+            <label className="check">
+              <input type="checkbox" checked={s.rainOn} onChange={(e) => s.set({ rainOn: e.target.checked })} />
+              <span>Rain, past 3 hours <kbd>W</kbd></span>
+            </label>
+            {s.rainOn && (
+              <p className="muted">
+                {s.rainTime
+                  ? `Rain rate at ${s.rainTime.slice(11, 16)} UTC on ${s.rainTime.slice(0, 10)}, from NASA's GPM satellites (IMERG, about 10 km). The newest map is usually 4 to 8 hours old. Green is light rain, yellow to red heavy rain, blue snow.`
+                  : "Finding the newest rain map from NASA…"}
+              </p>
+            )}
             {s.cloudsOn && (
               <p className="muted">
                 {s.cloudInfo?.time

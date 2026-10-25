@@ -39,4 +39,4 @@ OpenWeatherMap, WAQI and OpenAQ v3.
       by US AQI band, with values on click.
 
 ## 5. Weather
-- [ ] NASA IMERG rain rate (global, every 30 minutes) as an animated layer.
+- [x] NASA IMERG rain rate (global, every 30 minutes) as an animated layer.

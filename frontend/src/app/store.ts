@@ -64,6 +64,9 @@ interface State {
   /** EUMETSAT cloud shell over the globe, and the map time on show. */
   cloudsOn: boolean;
   cloudInfo: { time: string | null; loaded: number } | null;
+  /** NASA IMERG rain rate over the globe, and the half hour on show. */
+  rainOn: boolean;
+  rainTime: string | null;
   layerInfo: ImageryLayerInfo | null;
   compareInfo: ImageryLayerInfo | null;
   // comparison
@@ -242,6 +245,8 @@ export const useStore = create<State>((set, get) => {
     labelsVisible: true,
     cloudsOn: false,
     cloudInfo: null,
+    rainOn: false,
+    rainTime: null,
     layerInfo: null,
     compareInfo: null,
     compare: { enabled: false, year: 1993, mode: "swipe", position: 0.5, blinkOn: true },
