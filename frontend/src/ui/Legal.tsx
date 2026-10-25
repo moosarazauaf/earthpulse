@@ -1,5 +1,5 @@
 /** Legal pages: Privacy Policy, Cookie Policy, Terms of Service. */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "../app/store";
 import { useT } from "../i18n";
@@ -50,6 +50,9 @@ function LegalContent({ page }: { page: LegalPage }) {
             <li><strong>OpenStreetMap Nominatim</strong> — {t("legal.privacy.sections.thirdParty.items.nominatim")}</li>
             <li><strong>Esri</strong> — {t("legal.privacy.sections.thirdParty.items.esri")}</li>
             <li><strong>USGS / GDACS</strong> — {t("legal.privacy.sections.thirdParty.items.usgs")}</li>
+            <li><strong>Microsoft Planetary Computer</strong> — {t("legal.privacy.sections.thirdParty.items.pc")}</li>
+            <li><strong>Open-Meteo</strong> — {t("legal.privacy.sections.thirdParty.items.meteo")}</li>
+            <li><strong>NASA, Copernicus, EUMETSAT, AWS Terrain Tiles</strong> — {t("legal.privacy.sections.thirdParty.items.layers")}</li>
             <li><strong>GitHub Pages</strong> — {t("legal.privacy.sections.thirdParty.items.github")}</li>
           </ul>
           <p>{t("legal.privacy.sections.thirdParty.text2")}</p>
@@ -114,10 +117,8 @@ function LegalContent({ page }: { page: LegalPage }) {
               <tr><th>{t("legal.cookies.sections.categories.table.name")}</th><th>{t("legal.cookies.sections.categories.table.purpose")}</th><th>{t("legal.cookies.sections.categories.table.duration")}</th></tr>
             </thead>
             <tbody>
-              <tr><td><code>earthpulse_prefs</code></td><td>{t("legal.cookies.sections.categories.rows.prefs")}</td><td>{t("legal.cookies.sections.categories.rows.prefsDur")}</td></tr>
-              <tr><td><code>earthpulse_places</code></td><td>{t("legal.cookies.sections.categories.rows.places")}</td><td>{t("legal.cookies.sections.categories.rows.placesDur")}</td></tr>
-              <tr><td><code>earthpulse_consent</code></td><td>{t("legal.cookies.sections.categories.rows.consent")}</td><td>{t("legal.cookies.sections.categories.rows.consentDur")}</td></tr>
-              <tr><td><code>earthpulse_recent</code></td><td>{t("legal.cookies.sections.categories.rows.recent")}</td><td>{t("legal.cookies.sections.categories.rows.recentDur")}</td></tr>
+              <tr><td><code>earthpulse.places.v1</code></td><td>{t("legal.cookies.sections.categories.rows.places")}</td><td>{t("legal.cookies.sections.categories.rows.placesDur")}</td></tr>
+              <tr><td><code>earthpulse.recent.v1</code></td><td>{t("legal.cookies.sections.categories.rows.recent")}</td><td>{t("legal.cookies.sections.categories.rows.recentDur")}</td></tr>
             </tbody>
           </table>
         </section>
@@ -130,8 +131,6 @@ function LegalContent({ page }: { page: LegalPage }) {
         <section>
           <h3>{t("legal.cookies.sections.manage.title")}</h3>
           <p>{t("legal.cookies.sections.manage.text1")}</p>
-          <p>{t("legal.cookies.sections.manage.text2")}</p>
-          <button className="primary" onClick={() => { localStorage.removeItem("earthpulse_consent"); useStore.getState().set({ notice: "Cookie consent reset. Reload the page to see the banner again." }); }}>Reset cookie consent</button>
         </section>
 
         <section>
@@ -223,15 +222,12 @@ function LegalContent({ page }: { page: LegalPage }) {
 const LegalDialog = ({ page, onClose }: { page: LegalPage; onClose: () => void }) => {
   const t = useT();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    if (dialog.current && !dialog.current.open) dialog.current.showModal();
-    return () => { if (dialog.current?.open) dialog.current.close(); };
+    const d = dialog.current;
+    if (d && !d.open) d.showModal();
+    return () => { if (d?.open) d.close(); };
   }, [page]);
-
-  if (!mounted) return null;
 
   const titles = {
     privacy: t("legal.privacy.title"),
@@ -267,6 +263,9 @@ export function LegalPages() {
       }
     };
     window.addEventListener("open-legal", handler as EventListener);
+    // ?legal=privacy (or cookies, terms) opens a page directly, so the policies can be linked to.
+    const asked = new URLSearchParams(window.location.search).get("legal");
+    if (asked === "privacy" || asked === "cookies" || asked === "terms") set({ legalOpen: asked, introOpen: false });
     return () => window.removeEventListener("open-legal", handler as EventListener);
   }, [set]);
 

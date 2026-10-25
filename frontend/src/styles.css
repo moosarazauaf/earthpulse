@@ -476,43 +476,6 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 .draw-samples { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px; }
 .draw-samples button.on { border-color: var(--amber); color: var(--amber); }
 
-/* ---- cookie consent ---------------------------------------------------------- */
-.cookie-banner {
-  position: fixed; bottom: calc(var(--bottom) + 16px); left: 50%; transform: translateX(-50%);
-  z-index: 50; width: min(560px, calc(100% - 32px));
-  background: var(--panel); border: 1px solid var(--cyan); border-radius: 8px;
-  padding: 16px 20px; backdrop-filter: blur(12px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
-  animation: slide-up 0.3s ease-out;
-}
-@keyframes slide-up { from { opacity: 0; transform: translateX(-50%) translateY(16px); } }
-.cookie-content { display: grid; gap: 12px; }
-.cookie-content h3 { font-size: 16px; font-weight: 600; }
-.cookie-content p { font-size: 13px; color: var(--muted); }
-.cookie-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.cookie-links { font-size: 12px; color: var(--muted); margin: 0; }
-.cookie-links a { color: var(--cyan); text-decoration: underline; }
-
-/* ---- cookie customize dialog ------------------------------------------------- */
-.cookie-customize-overlay {
-  position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
-  display: grid; place-items: center; padding: 16px;
-}
-.cookie-customize {
-  width: min(520px, 100%); max-height: 85vh; overflow: auto;
-  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 8px;
-  padding: 20px; display: grid; gap: 16px;
-}
-.cookie-customize .row { display: flex; justify-content: space-between; align-items: center; }
-.cookie-customize h2 { font-size: 18px; }
-.cookie-customize fieldset { border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; }
-.cookie-customize legend { font-weight: 600; font-size: 13px; }
-.cookie-customize .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.cookie-customize .check input { accent-color: var(--cyan); }
-.cookie-customize .check span { font-size: 13px; color: var(--text); }
-.cookie-customize .actions { display: flex; gap: 8px; justify-content: flex-end; }
-.cookie-customize .cookie-links { font-size: 12px; color: var(--muted); text-align: center; }
-.cookie-customize .cookie-links a { color: var(--cyan); text-decoration: underline; }
-
 /* ---- legal sheets ------------------------------------------------------------ */
 .legal-sheet { max-width: 720px; }
 .legal-content { display: grid; gap: 20px; }
@@ -529,36 +492,3 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 .legal-content code { background: rgba(255, 255, 255, 0.06); padding: 2px 6px; border-radius: 3px; font-size: 12px; }
 .legal-content a { color: var(--cyan); text-decoration: underline; }
 
-/* ---- legal menu -------------------------------------------------------------- */
-.legal-menu { 
-  min-width: 280px; 
-  top: auto !important; /* Override .analyse-menu fixed top */
-}
-.legal-menu .overview-item { border-color: var(--line); }
-.legal-menu .overview-item strong { color: var(--text); }
-.legal-menu .overview-item:hover { border-color: var(--cyan); }
-.legal-menu .overview-item:hover strong { color: var(--cyan); }
-
-@media (max-width: 800px) {
-  .cookie-banner { left: 8px; right: 8px; width: auto; transform: none; bottom: calc(var(--bottom) + 8px); }
-  .cookie-customize { margin: 8px; }
-}
-
-/* ---- globe layers menu ------------------------------------------------------- */
-.globe-layers-menu {
-  min-width: 320px; max-width: 420px; max-height: 80vh; overflow: auto;
-  top: auto !important; /* Override .analyse-menu fixed top */
-}
-.globe-layers-menu fieldset {
-  border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; margin: 0;
-}
-.globe-layers-menu legend { font-weight: 600; font-size: 13px; color: var(--cyan); }
-.globe-layers-menu .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-.globe-layers-menu .check input { accent-color: var(--cyan); }
-.globe-layers-menu .check span { font-size: 13px; color: var(--text); }
-.globe-layers-menu .seg { display: flex; flex-wrap: wrap; gap: 4px; }
-.globe-layers-menu .seg button { flex: 1 1 auto; min-width: 60px; padding: 6px 8px; font-size: 12px; }
-.globe-layers-menu .seg button.on { border-color: var(--cyan); background: rgba(95, 208, 197, 0.14); color: #fff; }
-.globe-layers-menu .slider.inline { grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; }
-.globe-layers-menu .slider.inline input { flex: 1; }
-.globe-layers-menu .slider.inline select { padding: 4px 8px; font-size: 12px; background: rgba(0,0,0,0.35); border: 1px solid var(--line-strong); border-radius: 4px; color: var(--text); }

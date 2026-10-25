@@ -104,36 +104,6 @@ interface State {
   notice: string | null;
   /** Legal dialog open state. */
   legalOpen: "privacy" | "cookies" | "terms" | null;
-  /** Cookie customize dialog open state. */
-  cookieCustomizeOpen: boolean;
-
-  // Enhanced globe layers
-  /** Cloud layer enabled */
-  cloudsEnabled: boolean;
-  /** Cloud layer opacity (0-1) */
-  cloudOpacity: number;
-  /** Weather layer enabled */
-  weatherEnabled: boolean;
-  /** Current weather layer type */
-  weatherLayer: "temperature" | "precipitation" | "wind" | "pressure" | "clouds" | null;
-  /** Weather layer opacity (0-1) */
-  weatherOpacity: number;
-  /** Pollution layer enabled */
-  pollutionEnabled: boolean;
-  /** Current pollution layer type */
-  pollutionLayer: "aqi" | "pm25" | "pm10" | "no2" | "o3" | "co" | "so2" | null;
-  /** Pollution layer opacity (0-1) */
-  pollutionOpacity: number;
-  /** Dynamic lighting (time-of-day) enabled */
-  dynamicLighting: boolean;
-  /** Time multiplier for time-lapse */
-  timeMultiplier: number;
-  /** Fog enabled */
-  fogEnabled: boolean;
-  /** Fog density */
-  fogDensity: number;
-  /** Ground atmosphere enabled */
-  groundAtmosphere: boolean;
 
   set: (partial: Partial<State>) => void;
   setYear: (year: number) => void;
@@ -278,22 +248,6 @@ export const useStore = create<State>((set, get) => {
     story: null,
     notice: null,
     legalOpen: null as "privacy" | "cookies" | "terms" | null,
-    cookieCustomizeOpen: false,
-
-    // Enhanced globe layers defaults
-    cloudsEnabled: false,
-    cloudOpacity: 0.7,
-    weatherEnabled: false,
-    weatherLayer: null,
-    weatherOpacity: 0.7,
-    pollutionEnabled: false,
-    pollutionLayer: null,
-    pollutionOpacity: 0.7,
-    dynamicLighting: true,
-    timeMultiplier: 1,
-    fogEnabled: true,
-    fogDensity: 0.0003,
-    groundAtmosphere: true,
 
     set: (partial) => set(partial),
     alerts: null,

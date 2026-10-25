@@ -16,7 +16,6 @@ import { PanelBoundary } from "./ui/PanelBoundary";
 import { useWatchOnStart } from "./area/watch";
 import { ShortcutsCard, useShortcuts } from "./ui/Shortcuts";
 import { TopBar } from "./ui/TopBar";
-import { CookieConsent, CookieCustomizeDialog } from "./ui/CookieConsent";
 import { LegalPages } from "./ui/Legal";
 
 /** Restore a shared view or analysis from the address bar. */
@@ -72,8 +71,6 @@ export function App() {
       <DataSources />
       <ShortcutsCard />
       <MyPlaces />
-      <CookieConsent />
-      <CookieCustomizeDialog />
       <LegalPages />
     </main>
   );
