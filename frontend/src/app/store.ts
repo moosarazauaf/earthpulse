@@ -12,7 +12,7 @@ import type { DisturbanceRequest } from "../engine/disturbance";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import type { NewsFile, NewsStory } from "../news/types";
-import { clampYear, currentYear, datasetForYear, formatLatLon, squareAround } from "./logic";
+import { clampYear, currentYear, datasetForArea, datasetForYear, formatLatLon, squareAround } from "./logic";
 import type { QuickActionInfo } from "../area/actions";
 import { type RecentRun, type SavedPlace, addRecent, loadPlaces, loadRecent, removePlace, savePlace } from "../area/saved";
 import type { SharedRun } from "./shareRun";
@@ -298,7 +298,8 @@ export const useStore = create<State>((set, get) => {
     setCompare: (partial) => set({ compare: { ...get().compare, ...partial } }),
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
     // Any other way of setting the area is not "around a point", so the size chips and centre go.
-    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, pickCentre: null }),
+    // A new area also picks the imagery that suits its size; the Layers panel can still switch it.
+    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, pickCentre: null, ...(aoi ? { preferredDataset: datasetForArea(aoi.geometry) } : {}) }),
     measure: [],
     drawnSamples: [],
     sampleClass: "",

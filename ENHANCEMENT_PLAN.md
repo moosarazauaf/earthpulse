@@ -30,9 +30,9 @@ OpenWeatherMap, WAQI and OpenAQ v3.
       through them.
 
 ## 3. Fly in with imagery
-- [ ] When an area is chosen, use Sentinel-2 (10 m) for small areas and
+- [x] When an area is chosen, use Sentinel-2 (10 m) for small areas and
       Landsat (30 m) for large ones.
-- [ ] Show that imagery is loading while tiles arrive.
+- [x] Show that imagery is loading while tiles arrive.
 
 ## 4. Air pollution hotspots
 - [ ] Current air quality (CAMS through Open-Meteo) at major cities, coloured

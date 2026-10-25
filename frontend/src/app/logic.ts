@@ -12,6 +12,19 @@ export function datasetForYear(preferred: DatasetId, year: number): DatasetId {
   return preferred === "sentinel2" && year < SENTINEL2_FIRST_YEAR ? "landsat" : preferred;
 }
 
+/** Areas up to this size, in km across, are shown with Sentinel-2 (10 m); larger ones with Landsat (30 m). */
+export const SENTINEL2_AREA_KM = 40;
+
+/** The imagery that suits an area: Sentinel-2's detail for small areas, Landsat's wider, longer record for large ones. */
+export function datasetForArea(geometry: AoiGeometry): DatasetId {
+  const points = (geometry.type === "Polygon" ? geometry.coordinates : geometry.coordinates.flat()).flat();
+  const lons = points.map((p) => p[0]!), lats = points.map((p) => p[1]!);
+  const midLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+  const widthKm = (Math.max(...lons) - Math.min(...lons)) * 111.32 * Math.cos((midLat * Math.PI) / 180);
+  const heightKm = (Math.max(...lats) - Math.min(...lats)) * 111.32;
+  return Math.max(widthKm, heightKm) <= SENTINEL2_AREA_KM ? "sentinel2" : "landsat";
+}
+
 export function clampYear(year: number): number {
   return Math.min(currentYear(), Math.max(FIRST_YEAR, Math.round(year)));
 }

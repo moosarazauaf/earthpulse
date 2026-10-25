@@ -129,7 +129,15 @@ export class Globe {
     });
     this.clouds = new CloudShell(scene, !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
     scene.preUpdate.addEventListener(() => this.stepFades());
+    scene.globe.tileLoadProgressEvent.addEventListener((queued: number) => {
+      // In request-render mode nothing draws once a tile lands; keep frames coming until the queue is empty, so it is reported.
+      if (queued > 0) this.render();
+      this.onTilesQueued?.(queued);
+    });
   }
+
+  /** Called with the number of map tiles still to load, so the interface can say imagery is on its way. */
+  onTilesQueued: ((queued: number) => void) | null = null;
 
   private clouds: CloudShell;
 

@@ -4,6 +4,7 @@ import {
   FIRST_YEAR,
   clampYear,
   currentYear,
+  datasetForArea,
   datasetForYear,
   decodeView,
   encodeView,
@@ -12,6 +13,7 @@ import {
   rectangleAoi,
   seasonNotStarted,
   seasonPeriod,
+  squareAround,
 } from "./logic";
 
 describe("timeline rules", () => {
@@ -131,5 +133,15 @@ describe("shared links refuse fields of an unexpected shape", () => {
     expect(decodeRun(enc({ ...good, threshold: "0); evil();//" }))).toBeNull();
     expect(decodeRun(enc({ ...good, before: { start: "2000-01-01\nevil()", end: "2000-12-31" } }))).toBeNull();
     expect(decodeRun(enc({ ...good, years: [2000, "x"] }))).toBeNull();
+  });
+});
+
+describe("imagery for an area", () => {
+  it("uses Sentinel-2 for small areas and Landsat for large ones", () => {
+    expect(datasetForArea(squareAround(74.3, 31.5, 10))).toBe("sentinel2");
+    expect(datasetForArea(squareAround(74.3, 31.5, 40))).toBe("sentinel2");
+    expect(datasetForArea(squareAround(74.3, 31.5, 60))).toBe("landsat");
+    // Longitude degrees shrink towards the poles: 1° by 0.2° at 60° N is about 56 km by 22 km.
+    expect(datasetForArea(rectangleAoi(10, 60, 11, 60.2))).toBe("landsat");
   });
 });

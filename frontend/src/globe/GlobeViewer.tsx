@@ -1,7 +1,7 @@
 /** Mounts the globe and keeps it in step with application state. */
 import "cesium/Build/Cesium/Widgets/widgets.css";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { ApiError, api } from "../app/api";
 import { datasetForYear } from "../app/logic";
@@ -31,6 +31,7 @@ async function fetchLayer(dataset: "landsat" | "sentinel2", year: number, render
 
 export function GlobeViewer() {
   const container = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
   const drawing = useRef<Drawing | null>(null);
   const s = useStore();
 
@@ -38,6 +39,13 @@ export function GlobeViewer() {
     if (!container.current) return;
     const globe = new Globe(container.current);
     instance = globe;
+    // Said only when tiles take a moment, so quick loads do not flash a message.
+    let timer = 0;
+    globe.onTilesQueued = (queued) => {
+      window.clearTimeout(timer);
+      if (queued === 0) setLoading(false);
+      else timer = window.setTimeout(() => setLoading(true), 500);
+    };
     // Development-only handle for inspecting the scene from the browser console.
     if (import.meta.env.DEV) (window as unknown as { __earthpulse?: Globe }).__earthpulse = globe;
     drawing.current = new Drawing(
@@ -198,11 +206,14 @@ export function GlobeViewer() {
   }, [s.selectedDetection]);
 
   return (
-    <div
-      ref={container}
-      className="globe"
-      role="application"
-      aria-label="Interactive 3D globe. Use the search box and layer controls for keyboard access."
-    />
+    <>
+      <div
+        ref={container}
+        className="globe"
+        role="application"
+        aria-label="Interactive 3D globe. Use the search box and layer controls for keyboard access."
+      />
+      {loading && <p className="tiles-loading" role="status">Loading imagery…</p>}
+    </>
   );
 }
