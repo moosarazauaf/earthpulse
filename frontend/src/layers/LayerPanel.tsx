@@ -157,6 +157,17 @@ export function LayerPanel() {
               <input type="checkbox" checked={s.labelsVisible} onChange={(e) => s.set({ labelsVisible: e.target.checked })} />
               <span>Place names and boundaries</span>
             </label>
+            <label className="check">
+              <input type="checkbox" checked={s.cloudsOn} onChange={(e) => s.set({ cloudsOn: e.target.checked })} />
+              <span>Clouds, past 24 hours <kbd>K</kbd></span>
+            </label>
+            {s.cloudsOn && (
+              <p className="muted">
+                {s.cloudInfo?.time
+                  ? `Infrared cloud map, ${s.cloudInfo.time.slice(0, 16).replace("T", " ")} UTC (${s.cloudInfo.loaded} of 8 loaded). EUMETSAT, from Meteosat, GOES and Himawari. Fades as you zoom in.`
+                  : "Loading the latest cloud map from EUMETSAT…"}
+              </p>
+            )}
             <button className="link" onClick={() => s.set({ sourcesOpen: true })}>Data sources</button>
           </section>
         </div>

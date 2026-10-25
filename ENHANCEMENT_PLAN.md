@@ -22,11 +22,11 @@ OpenWeatherMap, WAQI and OpenAQ v3.
       service listed.
 
 ## 2. Real clouds
-- [ ] EUMETSAT world cloud map (all geostationary satellites, every 3 h)
+- [x] EUMETSAT world cloud map (all geostationary satellites, every 3 h)
       as a cloud shell above the globe.
-- [ ] Toggle in the Layers panel and on a key.
-- [ ] The past 24 hours animated.
-- [ ] Clouds fade as the camera descends, so zooming to an area passes
+- [x] Toggle in the Layers panel and on a key.
+- [x] The past 24 hours animated.
+- [x] Clouds fade as the camera descends, so zooming to an area passes
       through them.
 
 ## 3. Fly in with imagery

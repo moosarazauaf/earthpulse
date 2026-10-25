@@ -60,6 +60,9 @@ interface State {
   imageryVisible: boolean;
   imageryOpacity: number;
   labelsVisible: boolean;
+  /** EUMETSAT cloud shell over the globe, and the map time on show. */
+  cloudsOn: boolean;
+  cloudInfo: { time: string | null; loaded: number } | null;
   layerInfo: ImageryLayerInfo | null;
   compareInfo: ImageryLayerInfo | null;
   // comparison
@@ -232,6 +235,8 @@ export const useStore = create<State>((set, get) => {
     imageryVisible: true,
     imageryOpacity: 1,
     labelsVisible: true,
+    cloudsOn: false,
+    cloudInfo: null,
     layerInfo: null,
     compareInfo: null,
     compare: { enabled: false, year: 1993, mode: "swipe", position: 0.5, blinkOn: true },

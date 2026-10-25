@@ -28,6 +28,7 @@ import {
 
 import { absolute } from "../app/api";
 import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
+import { CloudShell } from "./clouds";
 import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
 
 const ESRI_IMAGERY =
@@ -126,10 +127,20 @@ export class Globe {
     this.viewer.camera.setView({
       destination: Cartesian3.fromDegrees(HOME.lon, HOME.lat, HOME.height),
     });
+    this.clouds = new CloudShell(scene, !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
     scene.preUpdate.addEventListener(() => this.stepFades());
   }
 
+  private clouds: CloudShell;
+
+  setClouds(on: boolean, onTime: (time: string | null, loaded: number) => void) {
+    this.clouds.onTime = (time, loaded) => { onTime(time, loaded); this.render(); };
+    this.clouds.show(on);
+    this.render();
+  }
+
   destroy() {
+    this.clouds.destroy();
     if (!this.viewer.isDestroyed()) this.viewer.destroy();
   }
 
@@ -242,6 +253,7 @@ export class Globe {
       this.fading = [];
       busy = true;
     }
+    if (this.clouds.step()) busy = true;
     if (busy) this.render();
   }
 
