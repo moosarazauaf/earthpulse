@@ -11,6 +11,7 @@ import type { ClassifyRequest } from "../engine/classify";
 import type { DisturbanceRequest } from "../engine/disturbance";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
+import { type CityAir, fetchCityAir } from "../area/air";
 import type { NewsFile, NewsStory } from "../news/types";
 import { clampYear, currentYear, datasetForArea, datasetForYear, formatLatLon, squareAround } from "./logic";
 import type { QuickActionInfo } from "../area/actions";
@@ -87,6 +88,10 @@ interface State {
   /** Earthquakes of the past week; null until loaded, shown when `quakesOn`. */
   quakes: Quake[] | null;
   quakesOn: boolean;
+  /** Air quality now at major cities; null until loaded, shown on the globe while `airOn`. */
+  cityAir: CityAir[] | null;
+  airOn: boolean;
+  loadCityAir: () => Promise<void>;
   /** A shared analysis link waiting for the visitor to confirm before it downloads anything. */
   pendingRun: SharedRun | null;
   /** When the live feeds were last read, so a stale view is visible as stale. */
@@ -262,6 +267,15 @@ export const useStore = create<State>((set, get) => {
     hazardLayers: [],
     quakes: null,
     quakesOn: false,
+    cityAir: null,
+    airOn: false,
+    loadCityAir: async () => {
+      try {
+        set({ cityAir: await fetchCityAir() });
+      } catch {
+        set({ cityAir: [], airOn: false, notice: "Air quality could not be loaded from Open-Meteo." });
+      }
+    },
     pendingRun: null,
     feedsAt: null,
     news: null,

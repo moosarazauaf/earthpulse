@@ -91,7 +91,7 @@ export class Drawing {
       const entity = picked?.id instanceof Entity ? picked.id : null;
       // Alert and news markers carry an "alert:" or "news:" id; detection outlines carry a direction.
       const id = entity ? String(entity.id) : null;
-      this.onPick(id && (id.startsWith("alert:") || id.startsWith("news:") || entity?.properties?.direction) ? id : null);
+      this.onPick(id && (id.startsWith("alert:") || id.startsWith("news:") || id.startsWith("air:") || entity?.properties?.direction) ? id : null);
       return;
     }
     const point = this.locate(position);

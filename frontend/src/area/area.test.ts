@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { squareAround } from "../app/logic";
 import { projectAoi } from "../engine/geo";
 import { quickActions, spread } from "./actions";
-import { aqiBand, dailyMeans } from "./air";
+import { aqiBand, dailyMeans, parseCityAir } from "./air";
 import { describeNormals, monthlyNormals } from "./climate";
 
 describe("Analyse here", () => {
@@ -75,5 +75,16 @@ describe("air quality", () => {
     const times = [...Array(24)].map((_, h) => `2026-10-20T${String(h).padStart(2, "0")}:00`).concat(["2026-10-21T00:00"]);
     const values: (number | null)[] = [...Array(24)].map((_, h): number | null => (h === 3 ? null : 20)).concat([99]);
     expect(dailyMeans(times, values)).toEqual([{ date: "2026-10-20", pm25: 20 }]);
+  });
+});
+
+describe("air quality at cities", () => {
+  it("pairs each city with its answer and leaves out cities with no value", () => {
+    const now = { time: "2026-10-25T04:00", us_aqi: 159, pm2_5: 53.7, pm10: 0, nitrogen_dioxide: 0, ozone: 0 };
+    const spots = parseCityAir(
+      [["Lahore", "PK", 31.55, 74.34], ["Nowhere", "XX", 0, 0]],
+      [{ current: now }, { current: { ...now, us_aqi: null as unknown as number } }],
+    );
+    expect(spots).toEqual([{ name: "Lahore", country: "PK", lat: 31.55, lon: 74.34, usAqi: 159, pm25: 53.7, time: "2026-10-25T04:00" }]);
   });
 });

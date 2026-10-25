@@ -35,7 +35,7 @@ OpenWeatherMap, WAQI and OpenAQ v3.
 - [x] Show that imagery is loading while tiles arrive.
 
 ## 4. Air pollution hotspots
-- [ ] Current air quality (CAMS through Open-Meteo) at major cities, coloured
+- [x] Current air quality (CAMS through Open-Meteo) at major cities, coloured
       by US AQI band, with values on click.
 
 ## 5. Weather

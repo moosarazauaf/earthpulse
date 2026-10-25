@@ -440,6 +440,25 @@ export class Globe {
   }
 
   private quakeEntities: Entity[] = [];
+  private airEntities: Entity[] = [];
+
+  /** Air quality at cities: a dot per city in its AQI colour, larger where the air is worse. */
+  setAirSpots(spots: { lon: number; lat: number; aqi: number; colour: string; name: string }[]) {
+    for (const entity of this.airEntities) this.viewer.entities.remove(entity);
+    this.airEntities = spots.map((spot, i) => this.viewer.entities.add({
+      id: `air:${i}`,
+      name: spot.name,
+      // Slightly above the ground so the dot is not cut by the globe; depth-tested, so the far side stays hidden.
+      position: Cartesian3.fromDegrees(spot.lon, spot.lat, 2000),
+      point: {
+        pixelSize: 5 + Math.min(spot.aqi, 300) / 30,
+        color: Color.fromCssColorString(spot.colour).withAlpha(0.9),
+        outlineColor: Color.BLACK.withAlpha(0.5),
+        outlineWidth: 1,
+      },
+    }));
+    this.render();
+  }
 
   /** Earthquake markers; the ring grows with magnitude, which is also written beside it. */
   setQuakes(quakes: Quake[]) {

@@ -8,6 +8,7 @@ import { datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
 import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedResult, type Overlay, hasLayers, isMapped } from "../app/types";
 import { newsMarkers } from "../news/corroborate";
+import { aqiBand } from "../area/air";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -60,6 +61,11 @@ export function GlobeViewer() {
         const state = useStore.getState();
         if (id?.startsWith("alert:")) {
           state.set({ selectedAlert: state.alerts?.find((a) => `alert:${a.id}` === id) ?? null, mode: "live", liveTab: "alerts" });
+          return;
+        }
+        if (id?.startsWith("air:")) {
+          const c = state.cityAir?.[Number(id.slice(4))];
+          if (c) state.set({ notice: `${c.name}, ${c.country}: US AQI ${c.usAqi}, ${aqiBand(c.usAqi).label}. PM2.5 ${Math.round(c.pm25)} µg/m³ at ${c.time.slice(11, 16)} UTC (CAMS model, about 40 km across).` });
           return;
         }
         if (id?.startsWith("news:")) {
@@ -167,6 +173,11 @@ export function GlobeViewer() {
   useEffect(() => instance?.setHazardLayers(live ? s.hazardLayers : []), [live, s.hazardLayers]);
   useEffect(() => instance?.setAlerts(live ? s.alerts ?? [] : [], s.selectedAlert?.id ?? null), [live, s.alerts, s.selectedAlert]);
   useEffect(() => instance?.setQuakes(live && s.quakesOn ? s.quakes ?? [] : []), [live, s.quakesOn, s.quakes]);
+  useEffect(() => {
+    if (s.airOn && s.cityAir === null) void s.loadCityAir();
+    instance?.setAirSpots(s.airOn ? (s.cityAir ?? []).map((c) => ({ lon: c.lon, lat: c.lat, aqi: c.usAqi, colour: aqiBand(c.usAqi).colour, name: c.name })) : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [s.airOn, s.cityAir]);
   useEffect(() => {
     // Far enough out to see the region the event affects.
     if (s.selectedAlert) void instance?.flyTo(s.selectedAlert.lon, s.selectedAlert.lat, 2_500_000, 2);

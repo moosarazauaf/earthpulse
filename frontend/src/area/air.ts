@@ -58,3 +58,35 @@ export async function fetchAir(lat: number, lon: number, signal?: AbortSignal): 
   const days = body.hourly ? dailyMeans(body.hourly.time, body.hourly.pm2_5).filter((d) => d.date < today) : [];
   return { time: c.time, usAqi: c.us_aqi, pm25: c.pm2_5, pm10: c.pm10, no2: c.nitrogen_dioxide, ozone: c.ozone, days };
 }
+
+/** Current air at a city, for the hotspots shown on the globe. */
+export interface CityAir {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  usAqi: number;
+  pm25: number;
+  time: string;
+}
+type City = [name: string, country: string, lat: number, lon: number];
+
+/** Pairs each city with its answer; cities the model returned no value for are left out. */
+export function parseCityAir(cities: City[], bodies: Body[]): CityAir[] {
+  return cities.flatMap(([name, country, lat, lon], i) => {
+    const c = bodies[i]?.current;
+    return c && Number.isFinite(c.us_aqi) ? [{ name, country, lat, lon, usAqi: c.us_aqi, pm25: c.pm2_5, time: c.time }] : [];
+  });
+}
+
+/** Air quality now at about 480 major cities, worst first; several cities go in each request. */
+export async function fetchCityAir(): Promise<CityAir[]> {
+  const cities = (await (await fetch(`${import.meta.env.BASE_URL}data/cities.json`)).json()) as City[];
+  const batches = Array.from({ length: Math.ceil(cities.length / 100) }, (_, i) => cities.slice(i * 100, i * 100 + 100));
+  const answers = await Promise.all(batches.map(async (batch) => {
+    const lats = batch.map((c) => c[2]).join(","), lons = batch.map((c) => c[3]).join(",");
+    const body = await getJson(`${AIR}?latitude=${lats}&longitude=${lons}&current=us_aqi,pm2_5&timezone=GMT`);
+    return parseCityAir(batch, Array.isArray(body) ? (body as Body[]) : [body as Body]);
+  }));
+  return answers.flat().sort((a, b) => b.usAqi - a.usAqi);
+}

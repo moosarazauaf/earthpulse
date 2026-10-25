@@ -6,6 +6,8 @@ import { SENTINEL2_FIRST_YEAR, datasetForYear } from "../app/logic";
 import { useStore } from "../app/store";
 import { type Overlay, type RenderId, hasLayers } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
+import { aqiBand } from "../area/air";
+import { getGlobe } from "../globe/GlobeViewer";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
   { id: "truecolor", label: "True colour", hint: "Red, green, blue" },
@@ -161,6 +163,11 @@ export function LayerPanel() {
               <input type="checkbox" checked={s.cloudsOn} onChange={(e) => s.set({ cloudsOn: e.target.checked })} />
               <span>Clouds, past 24 hours <kbd>K</kbd></span>
             </label>
+            <label className="check">
+              <input type="checkbox" checked={s.airOn} onChange={(e) => s.set({ airOn: e.target.checked })} />
+              <span>Air quality at major cities <kbd>Q</kbd></span>
+            </label>
+            {s.airOn && <AirHotspots />}
             {s.cloudsOn && (
               <p className="muted">
                 {s.cloudInfo?.time
@@ -173,5 +180,27 @@ export function LayerPanel() {
         </div>
       )}
     </aside>
+  );
+}
+
+/** The cities with the worst air right now, each a button that flies there. */
+function AirHotspots() {
+  const cityAir = useStore((s) => s.cityAir);
+  if (!cityAir) return <p className="muted">Reading the air at 476 cities…</p>;
+  if (cityAir.length === 0) return null;
+  return (
+    <div className="muted">
+      <p>Worst air now (US AQI, CAMS model through Open-Meteo, about 40 km across):</p>
+      <ul className="facts-list">
+        {cityAir.slice(0, 5).map((c) => (
+          <li key={`${c.name}${c.country}`}>
+            <button className="link" onClick={() => void getGlobe()?.flyTo(c.lon, c.lat, 400_000, 2)}>
+              <span className="swatch" style={{ background: aqiBand(c.usAqi).colour }} aria-hidden="true" /> {c.name}, {c.country}: {c.usAqi}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <p>Click a dot for its values. Above 500 is beyond the index, usually desert dust. Regional air, not a street-level reading or a health warning.</p>
+    </div>
   );
 }
