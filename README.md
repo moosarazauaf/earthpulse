@@ -76,6 +76,16 @@ were above the WHO PM2.5 guideline.
 
 <img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
 
+### ☁️ Clouds, rain and air on the globe
+Three switches in the Layers panel, each with a key. **Clouds** (<kbd>K</kbd>)
+is EUMETSAT's world cloud map from every geostationary weather satellite,
+looping through the past 24 hours on a layer above the globe; fly down to an
+area and you pass through it. **Rain** (<kbd>W</kbd>) is NASA's half-hourly
+IMERG rain and snow rate for the last 3 hours it has published. **Air
+quality** (<kbd>Q</kbd>) colours 476 major cities by their US AQI right now
+and lists the five worst. Choosing an area also picks the imagery that suits
+it: Sentinel-2 at 10 m for areas up to 40 km across, Landsat beyond that.
+
 ### 🔴 See what is happening now
 Current red and orange disaster alerts (GDACS), active fire detections (NASA
 VIIRS), river flood forecasts and observed flood extent (Copernicus GloFAS),

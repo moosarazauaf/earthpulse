@@ -5,6 +5,29 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.17] - 2026-10-25
+
+### Added
+- **Clouds** (K): the EUMETSAT world cloud map (Meteosat, GOES and
+  Himawari infrared, every 3 hours) on a shell above the globe, looping
+  through the past 24 hours and fading as the camera comes down to an area.
+- **Rain and snow** (W): NASA GPM IMERG rate for the last 3 published half
+  hours, looped under the place names.
+- **Air quality at 476 cities** (Q): US AQI from CAMS through Open-Meteo,
+  a dot per city in its band colour, the five worst listed in the Layers
+  panel.
+- Choosing an area picks Sentinel-2 (10 m) for areas up to 40 km across
+  and Landsat (30 m) for larger ones, and a label shows while imagery loads.
+- Privacy, Cookies and Terms pages, linked from the footer and from
+  `?legal=privacy|cookies|terms`.
+
+### Fixed
+- An earlier version of the globe layers requested tiles that could not
+  load (OpenWeatherMap URLs with no key, CIRA tiles without CORS) on every
+  page load; it was replaced by the keyless sources above.
+- Day-and-night shading, switched on by that version, darkened the imagery
+  being analysed; it is off again.
+
 ## [0.2.0-alpha.16] - 2026-10-24
 
 ### Added

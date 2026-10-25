@@ -80,6 +80,10 @@ as an index and does not call a rise in it "urban expansion".
 | Place names and boundaries | Esri World Boundaries and Places | as above |
 | Place search | OpenStreetMap Nominatim | © OpenStreetMap contributors, ODbL; requests are cached and rate limited per the Nominatim usage policy |
 | Lahore District boundary | geoBoundaries gbOpen, PAK ADM2 (simplified), release 9469f09 | Public domain; represents 2019 |
+| Clouds (K) | EUMETSAT world cloud map, infrared 10.8 µm from Meteosat, GOES and Himawari, every 3 h, through EUMETView WMS (`mumi:worldcloudmap_ir108`) | EUMETSAT data policy; credit EUMETSAT. Brightness is turned into cloud opacity for display only |
+| Air quality at cities (Q) | CAMS global atmospheric composition forecast through the Open-Meteo Air Quality API, about 40 km | CC BY 4.0, credit Open-Meteo and CAMS; values are modelled, not measured |
+| City list for air quality | GeoNames cities15000: the 300 most populous cities and every national capital (`scripts/make-cities.ts`) | CC BY 4.0, credit GeoNames |
+| Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is
 never presented as evidence for a date. The boundary used for international
