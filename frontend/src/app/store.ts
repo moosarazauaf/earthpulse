@@ -136,6 +136,8 @@ interface State {
   showCover: boolean;
   /** Share of the current area steeper than 15 degrees, once terrain has been read. */
   areaSteepShare: number | null;
+  /** People in the current area (GHS-POP 2020), once counted. */
+  areaPeople: number | null;
   /** Areas saved in this browser, and the last analyses run here (as recipes). */
   /** Points of the measuring line (D), longitude and latitude. */
   measure: [number, number][];
@@ -325,7 +327,8 @@ export const useStore = create<State>((set, get) => {
     setOverlay: (partial) => set({ overlay: { ...get().overlay, ...partial } }),
     // Any other way of setting the area is not "around a point", so the size chips and centre go.
     // A new area also picks the imagery that suits its size; the Layers panel can still switch it.
-    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, pickCentre: null, ...(aoi ? { preferredDataset: datasetForArea(aoi.geometry) } : {}) }),
+    areaPeople: null,
+    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, areaPeople: null, pickCentre: null, ...(aoi ? { preferredDataset: datasetForArea(aoi.geometry) } : {}) }),
     measure: [],
     drawnSamples: [],
     sampleClass: "",

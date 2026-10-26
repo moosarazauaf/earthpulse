@@ -12,10 +12,12 @@ export interface District {
   admin1: string;
   country: string;
   code: number;
+  /** ISO 3166 alpha-3 code of the country file it came from (GAUL's own x-codes for disputed areas). */
+  iso3: string;
   geometry: AoiGeometry;
 }
 type Bounds = [west: number, south: number, east: number, north: number, country?: string];
-type DistrictFile = { features: { properties: Omit<District, "geometry">; geometry: AoiGeometry }[] };
+type DistrictFile = { features: { properties: Omit<District, "geometry" | "iso3">; geometry: AoiGeometry }[] };
 
 const BASE = `${import.meta.env.BASE_URL}data/districts/`;
 const files = new Map<string, Promise<DistrictFile>>();
@@ -64,7 +66,7 @@ export async function districtAt(lon: number, lat: number, country?: string): Pr
   for (const code of filesCovering(await index, lon, lat, country)) {
     const file = await load(files, code);
     const hit = file.features.find((f) => contains(f.geometry, lon, lat));
-    if (hit) return { ...hit.properties, geometry: hit.geometry };
+    if (hit) return { ...hit.properties, iso3: code, geometry: hit.geometry };
   }
   return null;
 }

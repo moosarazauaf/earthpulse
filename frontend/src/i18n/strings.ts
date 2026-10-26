@@ -41,6 +41,7 @@ export const ENGLISH = {
   "area.recent": "Rain lately",
   "area.air": "Air quality",
   "area.people": "People",
+  "area.official": "Official figures",
   "area.nearby": "Happening nearby",
   "area.empty": "Press ◎ Analyse here (or A on a keyboard) and then tap or click a spot on the globe, or choose an area below.",
   "weight.light": "Quick",

@@ -9,6 +9,8 @@ import { formatArea, formatLatLon } from "../app/logic";
 import { useStore } from "../app/store";
 import { deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } from "../engine/client";
 import { type PopulationResult, formatPeople } from "../engine/population";
+import { type CountryFacts, type FoodSecurity, type RainAnomaly, fetchCountryFacts, fetchFoodSecurity, fetchRainAnomaly } from "./official";
+import { type District, districtAt } from "./districts";
 import { WORLDCOVER } from "../engine/cover";
 import { projectAoi } from "../engine/geo";
 import { corroborate } from "../news/corroborate";
@@ -85,6 +87,7 @@ function Overview() {
       <LandCover />
       <TerrainSection />
       <People />
+      <Official lat={lat} lon={lon} />
       <RecentRain lat={lat} lon={lon} />
       <Air lat={lat} lon={lon} />
       <Climate lat={lat} lon={lon} />
@@ -247,7 +250,7 @@ function People() {
     setCount(null);
     setError(null);
     const job = populationInBrowser({ aoi: aoi.geometry });
-    job.promise.then(setCount, (e: unknown) => setError(e instanceof Error ? e.message : "The population grid could not be read."));
+    job.promise.then((c) => { setCount(c); useStore.getState().set({ areaPeople: c.people }); }, (e: unknown) => setError(e instanceof Error ? e.message : "The population grid could not be read."));
     return job.cancel;
   }, [aoi]);
   return (
@@ -263,6 +266,84 @@ function People() {
             over built-up land, so it is a good estimate for an area, not a head count.
           </p>
         </>
+      )}
+    </section>
+  );
+}
+
+// ---- official figures --------------------------------------------------------------------------
+
+/** National statistics and UN records for the district at the area's centre, beside EarthPulse's own estimates. */
+function Official({ lat, lon }: { lat: number; lon: number }) {
+  const t = useT();
+  const people = useStore((s) => s.areaPeople);
+  const aoi = useStore((s) => s.aoi);
+  const [district, setDistrict] = useState<District | null>(null);
+  const [facts, setFacts] = useState<CountryFacts | null>(null);
+  const [food, setFood] = useState<FoodSecurity | null>(null);
+  const [rain, setRain] = useState<RainAnomaly | null>(null);
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+    setDistrict(null); setFacts(null); setFood(null); setRain(null); setDone(false);
+    void (async () => {
+      const d = await districtAt(lon, lat).catch(() => null);
+      if (signal.aborted) return;
+      setDistrict(d);
+      if (!d) { setDone(true); return; }
+      const [f, ipc, r] = await Promise.all([
+        fetchCountryFacts(d.iso3, signal).catch(() => null),
+        fetchFoodSecurity(d.iso3, d.name, signal).catch(() => null),
+        fetchRainAnomaly(d.iso3, d.name, new Date(), signal).catch(() => null),
+      ]);
+      if (signal.aborted) return;
+      setFacts(f); setFood(ipc); setRain(r); setDone(true);
+    })();
+    return () => controller.abort();
+  }, [lat, lon]);
+  const n = (v: number) => v >= 1e6 ? `${(v / 1e6).toLocaleString("en", { maximumSignificantDigits: 3 })} million` : v.toLocaleString("en", { maximumSignificantDigits: 3 });
+  return (
+    <section>
+      <h3>{t("area.official")}</h3>
+      {!done && <p className="muted" role="status">Reading World Bank and UN records…</p>}
+      {done && !district && <p className="muted">No district found here (over the sea, or outside the GAUL map).</p>}
+      {facts && (
+        <p>
+          {facts.country}
+          {facts.population && `: ${n(facts.population.value)} people (${facts.population.year})`}
+          {facts.urban && `, ${Math.round(facts.urban.value)}% in towns and cities`}
+          {facts.gdpPerPerson && `, GDP US$${n(facts.gdpPerPerson.value)} per person`}
+          {facts.poverty && `, ${facts.poverty.value}% living on less than US$2.15 a day (${facts.poverty.year})`}. <span className="muted">World Bank.</span>
+        </p>
+      )}
+      {facts?.population && people !== null && people >= 1 && (
+        <p>This area&apos;s {formatPeople(people).replace("about ", "")} are {((people / facts.population.value) * 100).toPrecision(2)}% of the national population.</p>
+      )}
+      {food && (
+        <p>
+          <strong>{n(food.crisis)} people ({Math.round(food.share * 100)}%)</strong> in {food.district} were in IPC Phase 3 (Crisis) or
+          worse, {food.period[0]} to {food.period[1]}. <span className="muted">IPC, through UN OCHA&apos;s Humanitarian API.</span>
+        </p>
+      )}
+      {food && food.share > 0 && people !== null && district && aoi && JSON.stringify(aoi.geometry) === JSON.stringify(district.geometry) && (
+        <p>
+          Cross-check: the IPC analysis implies about {n(food.crisis / food.share)} people in {food.district}; the GHS-POP count above is{" "}
+          {Math.abs(Math.round((people / (food.crisis / food.share) - 1) * 100))}% {people < food.crisis / food.share ? "lower" : "higher"}.{" "}
+          <span className="muted">Population grids can miss scattered rural homes, and the IPC share is rounded, so treat both as estimates.</span>
+        </p>
+      )}
+      {rain && (
+        <p>
+          Rain in {rain.district}, month to {rain.period[1]}: <strong>{Math.round(rain.percent)}%</strong> of the long-term average.{" "}
+          <span className="muted">WFP, from CHIRPS satellite rainfall: a separate record to set beside &quot;Rain lately&quot;.</span>
+        </p>
+      )}
+      {done && district && !food && !rain && (
+        <p className="muted">
+          No IPC food-security analysis or WFP rainfall record for {district.name} in the UN&apos;s Humanitarian API; these cover places
+          with humanitarian concerns, and district names can differ between map sources.
+        </p>
       )}
     </section>
   );
