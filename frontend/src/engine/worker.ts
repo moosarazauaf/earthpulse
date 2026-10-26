@@ -9,6 +9,7 @@ import { type DisturbanceRequest, runDisturbance } from "./disturbance";
 import { type HeatRequest, runHeat } from "./heat";
 import type { EngineHooks, Progress } from "./common";
 import { type BrowserFloodRequest, runFlood } from "./flood";
+import { type PopulationRequest, runPopulation } from "./population";
 import { type SeriesRequest, runSeries } from "./series";
 import { type UrbanRequest, runUrban } from "./urban";
 import { type WaterRequest, runWater } from "./water";
@@ -22,7 +23,8 @@ export type WorkerRequest =
   | { kind: "cover"; request: CoverRequest }
   | { kind: "heat"; request: HeatRequest }
   | { kind: "classify"; request: ClassifyRequest }
-  | { kind: "disturbance"; request: DisturbanceRequest };
+  | { kind: "disturbance"; request: DisturbanceRequest }
+  | { kind: "population"; request: PopulationRequest };
 
 export type EngineResult =
   | Awaited<ReturnType<typeof runWater>>
@@ -65,6 +67,8 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
       : job.kind === "heat" ? await runHeat(job.request, hooks)
       : job.kind === "classify" ? await runClassify(job.request, hooks)
       : job.kind === "disturbance" ? await runDisturbance(job.request, hooks)
+      // A count with no map: only populationInBrowser receives it, so it stays out of EngineResult.
+      : job.kind === "population" ? (await runPopulation(job.request, hooks)) as unknown as EngineResult
       : await runFlood(job.request, hooks);
     post({ type: "done", result });
   } catch (error) {

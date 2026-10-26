@@ -7,7 +7,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import { formatArea, formatLatLon } from "../app/logic";
 import { useStore } from "../app/store";
-import { deviceProfile, landCoverInBrowser, PIXEL_BUDGET } from "../engine/client";
+import { deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } from "../engine/client";
+import { type PopulationResult, formatPeople } from "../engine/population";
 import { WORLDCOVER } from "../engine/cover";
 import { projectAoi } from "../engine/geo";
 import { corroborate } from "../news/corroborate";
@@ -83,6 +84,7 @@ function Overview() {
       <QuickRuns />
       <LandCover />
       <TerrainSection />
+      <People />
       <RecentRain lat={lat} lon={lon} />
       <Air lat={lat} lon={lon} />
       <Climate lat={lat} lon={lon} />
@@ -232,6 +234,39 @@ function TerrainSection() {
 
 const metres = (m: number) => `${Math.round(m).toLocaleString("en")} m`;
 const SLOPE_COLOURS = ["#2e7d32", "#9ccc65", "#fdd835", "#fb8c00", "#c62828"];
+
+// ---- people ---------------------------------------------------------------------------------------
+
+/** How many people live in the area (GHS-POP 2020), counted in a worker. */
+function People() {
+  const aoi = useStore((s) => s.aoi)!;
+  const t = useT();
+  const [count, setCount] = useState<PopulationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setCount(null);
+    setError(null);
+    const job = populationInBrowser({ aoi: aoi.geometry });
+    job.promise.then(setCount, (e: unknown) => setError(e instanceof Error ? e.message : "The population grid could not be read."));
+    return job.cancel;
+  }, [aoi]);
+  return (
+    <section>
+      <header className="row"><h3>{t("area.people")}</h3><KindBadge kind="MODELED" /></header>
+      {error && <p className="note">{error}</p>}
+      {!count && !error && <p className="muted" role="status">Counting people…</p>}
+      {count && (
+        <>
+          <p><strong>{formatPeople(count.people)}</strong> lived here in 2020, {Math.round(count.people / Math.max(count.areaKm2, 0.01)).toLocaleString("en")} per km².</p>
+          <p className="muted">
+            GHS-POP 2020 (European Commission JRC, CC BY 4.0), counted on a {count.cellM} m grid. A model that spreads census counts
+            over built-up land, so it is a good estimate for an area, not a head count.
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
 
 // ---- climate ------------------------------------------------------------------------------------
 

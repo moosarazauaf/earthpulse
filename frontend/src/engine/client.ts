@@ -6,6 +6,7 @@ import type { AnalysisResult, Overlay } from "../app/types";
 import type { Progress } from "./common";
 import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
 import type { CoverRequest, CoverResult } from "./cover";
+import type { PopulationRequest, PopulationResult } from "./population";
 
 export const SOFTWARE_VERSION = "0.2.0-alpha.19";
 export type Quality = "fast" | "balanced" | "detailed";
@@ -108,6 +109,23 @@ export function runInBrowser(job: WorkerRequest, device: DeviceProfile, onProgre
 }
 
 /** Land cover for the area overview: a quick worker job outside the analysis queue, so it never replaces a result. */
+/** People in an area (GHS-POP 2020), read in a worker so the globe stays smooth. */
+export function populationInBrowser(request: PopulationRequest): { promise: Promise<PopulationResult>; cancel: () => void } {
+  const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+  const promise = new Promise<PopulationResult>((resolve, reject) => {
+    worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
+      const message = event.data;
+      if (message.type === "progress") return;
+      worker.terminate();
+      if (message.type === "error") reject(new Error(message.message));
+      else resolve(message.result as unknown as PopulationResult);
+    };
+    worker.onerror = () => { worker.terminate(); reject(new Error("The population grid could not be read.")); };
+  });
+  worker.postMessage({ kind: "population", request } satisfies WorkerRequest);
+  return { promise, cancel: () => worker.terminate() };
+}
+
 export function landCoverInBrowser(request: CoverRequest): { promise: Promise<{ shares: CoverResult["shares"]; resolution: number; overlay: Overlay }>; cancel: () => void } {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
   const promise = new Promise<{ shares: CoverResult["shares"]; resolution: number; overlay: Overlay }>((resolve, reject) => {
