@@ -83,6 +83,7 @@ as an index and does not call a rise in it "urban expansion".
 | Clouds (K) | EUMETSAT world cloud map, infrared 10.8 µm from Meteosat, GOES and Himawari, every 3 h, through EUMETView WMS (`mumi:worldcloudmap_ir108`) | EUMETSAT data policy; credit EUMETSAT. Brightness is turned into cloud opacity for display only |
 | Air quality at cities (Q) | CAMS global atmospheric composition forecast through the Open-Meteo Air Quality API, about 40 km | CC BY 4.0, credit Open-Meteo and CAMS; values are modelled, not measured |
 | City list for air quality | GeoNames cities15000: the 300 most populous cities and every national capital (`scripts/make-cities.ts`) | CC BY 4.0, credit GeoNames |
+| District outlines | FAO GAUL 2024 second-level units (45,523 districts), from the GeoParquet copy on Source Cooperative (`nlebovits/gaul-l2-admin`), simplified to about 500 m by `scripts/make-districts.py` | CC BY 4.0, credit FAO. Not an official depiction of borders. GAUL 2015, the edition in Earth Engine's `FAO/GAUL/2015`, forbids redistribution and is not used |
 | Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is

@@ -54,6 +54,12 @@ assumption it made before anything downloads. If a request cannot be met
 instead of guessing. No code and no forms; the full form is still there
 for every analysis.
 
+### 🗺️ Find your district
+Search for a place and EarthPulse outlines the district it lies in, from FAO
+GAUL 2024 (45,523 districts worldwide). One click analyses the whole district,
+another downloads its outline as GeoJSON. Districts are found by where the
+place is, not by spelling, so "Layyah" finds GAUL's "Leiah".
+
 ### 🎯 Click a place, get an analysis
 Press **Analyse here** (or <kbd>A</kbd>) and click anywhere on the globe. EarthPulse
 makes a square area of 2 to 25 km around the spot, names it, and in a few

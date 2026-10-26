@@ -5,6 +5,20 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.18] - 2026-10-26
+
+### Added
+- **District outlines.** Picking a search result outlines the district
+  around it, from FAO GAUL 2024 second-level units (CC BY 4.0), simplified
+  to about 500 m and served with the site, one file per country. The card
+  offers to analyse the whole district or download its outline as GeoJSON.
+  The district is found by position, so spelling differences do not matter,
+  and the searched country's file is tried first.
+
+### Changed
+- Flying to an area now leaves room for the open side panels and the
+  district card, so the area is not hidden behind them.
+
 ## [0.2.0-alpha.17] - 2026-10-25
 
 ### Added
