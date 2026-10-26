@@ -42,6 +42,7 @@ const ESRI_CREDIT = "Basemap: Esri, Maxar, Earthstar Geographics, and the GIS Us
 const FADE_SECONDS = 0.6;
 const HOME = { lon: 60, lat: 22, height: 2.2e7 };
 const AOI_COLOR = Color.fromCssColorString("#5fd0c5");
+const DISTRICT_COLOR = Color.fromCssColorString("#f5b83d");
 const LOSS_COLOR = Color.fromCssColorString("#ff8a5c");
 const GAIN_COLOR = Color.fromCssColorString("#7bd88f");
 const ALERT_RED = Color.fromCssColorString("#ff5a5a");
@@ -176,7 +177,19 @@ export class Globe {
     // Pad the rectangle so panels do not cover the area of interest.
     const padX = (east - west) * 0.35 + 0.002;
     const padY = (north - south) * 0.35 + 0.002;
-    const destination = Rectangle.fromDegrees(west - padX, south - padY, east + padX, north + padY);
+    // Widen the view on the sides an open panel covers, so the area sits in the part of the globe that shows.
+    const canvas = this.viewer.canvas.getBoundingClientRect();
+    const covered = (side: "left" | "right") => {
+      const panel = document.querySelector(`.panel.${side}:not(.collapsed)`)?.getBoundingClientRect();
+      if (!panel || !canvas.width) return 0;
+      return Math.max(0, side === "left" ? panel.right - canvas.left : canvas.right - panel.left) / canvas.width;
+    };
+    const left = covered("left"), right = covered("right");
+    const card = document.querySelector(".district-card")?.getBoundingClientRect();
+    const bottom = card && canvas.height ? Math.max(0, canvas.bottom - card.top) / canvas.height : 0;
+    const total = (east - west + 2 * padX) / Math.max(0.3, 1 - left - right);
+    const tall = (north - south + 2 * padY) / Math.max(0.3, 1 - bottom);
+    const destination = Rectangle.fromDegrees(west - padX - total * left, south - padY - tall * bottom, east + padX + total * right, north + padY);
     return new Promise((resolve) => {
       if (reducedMotion()) {
         this.viewer.camera.setView({ destination });
@@ -355,6 +368,19 @@ export class Globe {
         );
       }
     }
+    this.render();
+  }
+
+  private districtEntities: Entity[] = [];
+
+  /** A district outline, drawn in amber so it reads apart from the chosen area. */
+  setDistrict(geometry: AoiGeometry | null) {
+    for (const entity of this.districtEntities) this.viewer.entities.remove(entity);
+    this.districtEntities = geometry
+      ? outerRings(geometry).map((ring) => this.viewer.entities.add({
+        polyline: { positions: ringPositions(ring), width: 3, material: DISTRICT_COLOR, clampToGround: true },
+      }))
+      : [];
     this.render();
   }
 

@@ -52,7 +52,8 @@ export function chooseZoom(bounds: [number, number, number, number]): number {
   return z;
 }
 
-function insideRings(lon: number, lat: number, rings: number[][][]): boolean {
+/** Even-odd test, so holes in a polygon count as outside. */
+export function insideRings(lon: number, lat: number, rings: number[][][]): boolean {
   let inside = false;
   for (const ring of rings) {
     for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {

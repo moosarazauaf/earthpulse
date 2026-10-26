@@ -13,6 +13,7 @@ import { useWatchedPlaces } from "../area/watch";
 import { modeForRun } from "../app/shareRun";
 import { interpret } from "../ask/interpret";
 import { requestRun } from "../ask/request";
+import { districtAt } from "../area/districts";
 import { PIXEL_BUDGET, deviceProfile } from "../engine/client";
 
 /** Three entries for a newcomer: what is happening, look around, measure something. */
@@ -157,6 +158,8 @@ export function TopBar() {
     setPlaces(null);
     setQuery(place.name.split(",")[0] ?? place.name);
     void getGlobe()?.flyToBounds(place.bbox);
+    // Outline the district the place lies in; the card then offers to analyse or download it.
+    districtAt(place.lon, place.lat, place.name.split(",").at(-1)?.trim()).then((district) => set({ district }), () => set({ district: null }));
   }
 
   async function share() {

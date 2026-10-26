@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { AreaPrompt } from "./analysis/AreaPrompt";
 import { SharedRunCard } from "./analysis/SharedRun";
+import { DistrictCard } from "./ui/DistrictCard";
 import { ContextPanel } from "./analysis/ContextPanel";
 import { decodeView } from "./app/logic";
 import { decodeRun, modeForRun } from "./app/shareRun";
@@ -64,6 +65,7 @@ export function App() {
       <Intro />
       <AreaPrompt />
       <SharedRunCard />
+      <DistrictCard />
       <StoryCaption />
       <Notice />
       <ToolHint />

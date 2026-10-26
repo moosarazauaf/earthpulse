@@ -167,6 +167,10 @@ export function GlobeViewer() {
     if (s.aoi) void instance?.flyToBounds(geometryBounds(s.aoi.geometry));
   }, [s.aoi]);
   useEffect(() => drawing.current?.setTool(s.drawTool), [s.drawTool]);
+  useEffect(() => {
+    instance?.setDistrict(s.district?.geometry ?? null);
+    if (s.district) void instance?.flyToBounds(geometryBounds(s.district.geometry));
+  }, [s.district]);
   useEffect(() => instance?.setMeasure(s.measure), [s.measure]);
 
   // Live hazards: layers and alert markers are shown only in Live mode.

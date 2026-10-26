@@ -12,6 +12,7 @@ import type { DisturbanceRequest } from "../engine/disturbance";
 import type { WaterRequest } from "../engine/water";
 import { type Alert, type Quake, fetchAlerts, fetchQuakes } from "../hazards/sources";
 import { type CityAir, fetchCityAir } from "../area/air";
+import type { District } from "../area/districts";
 import type { NewsFile, NewsStory } from "../news/types";
 import { clampYear, currentYear, datasetForArea, datasetForYear, formatLatLon, squareAround } from "./logic";
 import type { QuickActionInfo } from "../area/actions";
@@ -93,6 +94,8 @@ interface State {
   quakesOn: boolean;
   /** Air quality now at major cities; null until loaded, shown on the globe while `airOn`. */
   cityAir: CityAir[] | null;
+  /** The GAUL district of the place last picked in search, outlined on the globe. */
+  district: District | null;
   airOn: boolean;
   loadCityAir: () => Promise<void>;
   /** A shared analysis link waiting for the visitor to confirm before it downloads anything. */
@@ -273,6 +276,7 @@ export const useStore = create<State>((set, get) => {
     quakes: null,
     quakesOn: false,
     cityAir: null,
+    district: null,
     airOn: false,
     loadCityAir: async () => {
       try {
