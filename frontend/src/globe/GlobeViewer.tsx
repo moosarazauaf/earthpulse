@@ -124,6 +124,7 @@ export function GlobeViewer() {
 
   useEffect(() => instance?.setPrimaryAlpha(s.imageryOpacity), [s.imageryOpacity]);
   useEffect(() => instance?.setLabels(s.labelsVisible), [s.labelsVisible]);
+  useEffect(() => instance?.setPopulation(s.populationOn), [s.populationOn]);
   useEffect(() => instance?.setClouds(s.cloudsOn, (time, loaded) => useStore.getState().set({ cloudInfo: time || loaded ? { time, loaded } : null })), [s.cloudsOn]);
 
   // Comparison imagery.

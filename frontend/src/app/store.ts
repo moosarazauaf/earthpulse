@@ -67,6 +67,8 @@ interface State {
   cloudInfo: { time: string | null; loaded: number } | null;
   /** NASA IMERG rain rate over the globe, and the half hour on show. */
   rainOn: boolean;
+  /** Population density layer (GPWv4 2020). */
+  populationOn: boolean;
   rainTime: string | null;
   layerInfo: ImageryLayerInfo | null;
   compareInfo: ImageryLayerInfo | null;
@@ -249,6 +251,7 @@ export const useStore = create<State>((set, get) => {
     cloudsOn: false,
     cloudInfo: null,
     rainOn: false,
+    populationOn: false,
     rainTime: null,
     layerInfo: null,
     compareInfo: null,

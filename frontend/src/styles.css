@@ -507,3 +507,7 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
   background: var(--panel); border: 1px solid #f5b83d; border-radius: 6px;
 }
 .district-card p { margin: 0; }
+
+/* ---- population legend (GIBS GPWv4 colour map) --------------------------------- */
+.pop-legend { height: 8px; border-radius: 2px; background: linear-gradient(90deg, rgb(255,242,209), rgb(252,147,63) 33.3%, rgb(240,59,32) 66.7%, rgb(189,0,38)); }
+.pop-scale { display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px; }

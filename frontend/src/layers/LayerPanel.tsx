@@ -169,6 +169,20 @@ export function LayerPanel() {
             </label>
             {s.airOn && <AirHotspots />}
             <label className="check">
+              <input type="checkbox" checked={s.populationOn} onChange={(e) => s.set({ populationOn: e.target.checked })} />
+              <span>Population density, 2020</span>
+            </label>
+            {s.populationOn && (
+              <div className="muted">
+                <div className="pop-legend" aria-hidden="true" />
+                <div className="pop-scale"><span>&lt;1</span><span>150</span><span>500</span><span>1,000+ people/km²</span></div>
+                <p>
+                  NASA SEDAC Gridded Population of the World v4, about 1 km, from census counts spread evenly within each
+                  census area, so detail follows the size of a country&apos;s census units. Modelled, not observed.
+                </p>
+              </div>
+            )}
+            <label className="check">
               <input type="checkbox" checked={s.rainOn} onChange={(e) => s.set({ rainOn: e.target.checked })} />
               <span>Rain, past 3 hours <kbd>W</kbd></span>
             </label>

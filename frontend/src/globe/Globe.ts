@@ -316,6 +316,22 @@ export class Globe {
     }
   }
 
+  private population: ImageryLayer | null = null;
+
+  /** NASA SEDAC population density (GPWv4, 2020) through GIBS, under the place names. */
+  setPopulation(on: boolean) {
+    if (on && !this.population) {
+      this.population = new ImageryLayer(new UrlTemplateImageryProvider({
+        url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/GPW_Population_Density_2020/default/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png",
+        maximumLevel: 7,
+        credit: "NASA SEDAC GPWv4 via GIBS",
+      }), { alpha: 0.7 });
+      this.viewer.imageryLayers.add(this.population, this.viewer.imageryLayers.indexOf(this.labels));
+    }
+    if (this.population) this.population.show = on;
+    this.render();
+  }
+
   private rainLayers: ImageryLayer[] = [];
   private rainTimer = 0;
 
