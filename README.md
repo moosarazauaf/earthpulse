@@ -89,7 +89,9 @@ looping through the past 24 hours on a layer above the globe; fly down to an
 area and you pass through it. **Rain** (<kbd>W</kbd>) is NASA's half-hourly
 IMERG rain and snow rate for the last 3 hours it has published. **Air
 quality** (<kbd>Q</kbd>) colours 476 major cities by their US AQI right now
-and lists the five worst. Choosing an area also picks the imagery that suits
+and lists the five worst. **Population density** shows NASA SEDAC's 2020
+Gridded Population of the World, so you can see who lives near a flood or a
+fire. Choosing an area also picks the imagery that suits
 it: Sentinel-2 at 10 m for areas up to 40 km across, Landsat beyond that.
 
 ### 🔴 See what is happening now

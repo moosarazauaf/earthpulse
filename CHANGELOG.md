@@ -5,6 +5,13 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.19] - 2026-10-26
+
+### Added
+- **Population density layer**: NASA SEDAC Gridded Population of the World
+  v4 (2020, about 1 km) through NASA GIBS, under the place names, with a
+  legend in people per km² taken from GIBS's own colour map.
+
 ## [0.2.0-alpha.18] - 2026-10-26
 
 ### Added
