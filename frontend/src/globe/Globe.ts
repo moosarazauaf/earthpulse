@@ -29,7 +29,7 @@ import {
 import { absolute } from "../app/api";
 import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
 import { CloudShell } from "./clouds";
-import { rainTileUrl } from "./rain";
+import { rainBlend, rainTileUrl } from "./rain";
 import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
 
 const ESRI_IMAGERY =
@@ -150,7 +150,6 @@ export class Globe {
   }
 
   destroy() {
-    window.clearInterval(this.rainTimer);
     this.clouds.destroy();
     if (!this.viewer.isDestroyed()) this.viewer.destroy();
   }
@@ -277,6 +276,7 @@ export class Globe {
       busy = true;
     }
     if (this.clouds.step()) busy = true;
+    if (this.stepRain()) busy = true;
     if (busy) this.render();
   }
 
@@ -333,32 +333,43 @@ export class Globe {
   }
 
   private rainLayers: ImageryLayer[] = [];
-  private rainTimer = 0;
+  private rainTimes: string[] = [];
+  private rainStart = 0;
+  private rainShown = -1;
+  private rainAnimate = true;
+  private onRainFrame: ((time: string | null) => void) | null = null;
 
   /** Rain-rate maps for these half hours, looped under the place names; null removes them. */
   setRain(times: string[] | null, onFrame: (time: string | null) => void) {
-    window.clearInterval(this.rainTimer);
     for (const layer of this.rainLayers) this.viewer.imageryLayers.remove(layer, true);
+    // Every frame stays switched on so its tiles load ahead; the loop only changes their opacity.
     this.rainLayers = (times ?? []).map((time) => {
       const layer = new ImageryLayer(new UrlTemplateImageryProvider({ url: rainTileUrl(time), maximumLevel: 6, credit: "NASA GIBS / GPM IMERG" }), { alpha: 0 });
       this.viewer.imageryLayers.add(layer, this.viewer.imageryLayers.indexOf(this.labels));
       return layer;
     });
-    const show = (k: number) => {
-      // Every frame stays switched on so its tiles load ahead; only the current one is opaque.
-      this.rainLayers.forEach((layer, i) => { layer.alpha = i === k ? 0.8 : 0; });
-      onFrame(times?.[k] ?? null);
-      this.render();
-    };
-    if (!times?.length) return show(-1);
-    show(times.length - 1);
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    // A frame every 0.7 s, holding the newest for longer so the loop reads as "up to now".
-    let tick = 0;
-    this.rainTimer = window.setInterval(() => {
-      tick = (tick + 1) % (times.length + 2);
-      show(Math.min(tick, times.length - 1));
-    }, 700);
+    this.rainTimes = times ?? [];
+    this.onRainFrame = onFrame;
+    this.rainStart = performance.now();
+    this.rainShown = -1;
+    this.rainAnimate = !reducedMotion();
+    if (!this.rainLayers.length) onFrame(null);
+    this.stepRain();
+    this.render();
+  }
+
+  /** Called every frame to set the cross-fade (see rainBlend); returns true while it is moving. */
+  private stepRain(): boolean {
+    const n = this.rainLayers.length;
+    if (!n) return false;
+    const { a, b, f } = this.rainAnimate ? rainBlend((performance.now() - this.rainStart) / 1000, n) : { a: n - 1, b: n - 1, f: 0 };
+    this.rainLayers.forEach((layer, i) => { layer.alpha = i === a ? 0.8 * (1 - f) : i === b ? 0.8 * f : 0; });
+    const shown = f < 0.5 ? a : b;
+    if (shown !== this.rainShown) {
+      this.rainShown = shown;
+      this.onRainFrame?.(this.rainTimes[shown] ?? null);
+    }
+    return this.rainAnimate && n > 1;
   }
 
   setLabels(visible: boolean) {

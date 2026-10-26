@@ -34,3 +34,18 @@ export async function latestRainTime(now = new Date()): Promise<string> {
   if (!latest) throw new Error("No recent rain maps were listed.");
   return latest;
 }
+
+/**
+ * Which frames show `seconds` into the loop and how far the cross-fade from
+ * `a` to `b` has gone: one second per frame, the last 0.4 s of each blending
+ * into the next, and the newest held 2 s longer so the loop reads as "up to now".
+ */
+export function rainBlend(seconds: number, frames: number): { a: number; b: number; f: number } {
+  if (frames < 2) return { a: frames - 1, b: frames - 1, f: 0 };
+  const cycle = frames + 2;
+  const t = ((seconds % cycle) + cycle) % cycle;
+  const a = Math.min(Math.floor(t), frames - 1);
+  const local = a === frames - 1 ? t - (cycle - 1) : t - a;
+  const x = Math.max(0, (local - 0.6) / 0.4);
+  return { a, b: a === frames - 1 ? 0 : a + 1, f: x * x * (3 - 2 * x) };
+}

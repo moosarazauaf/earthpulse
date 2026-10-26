@@ -74,18 +74,35 @@ async function loadFrame(time: string, signal: AbortSignal): Promise<HTMLCanvasE
   return canvas;
 }
 
+// All frames live in one texture, stacked top to bottom (oldest at the top), so the loop only moves
+// between bands: swapping whole images in a material re-uploads them and makes the clouds stutter.
 const SOURCE = `
-uniform sampler2D image1;
-uniform sampler2D image2;
+uniform sampler2D atlas;
+uniform float frameA;
+uniform float frameB;
 uniform float mixing;
 uniform float opacity;
+vec2 band(float frame, vec2 st) {
+  // Kept off the band edges so filtering never reaches the neighbouring frame.
+  return vec2(st.s, (${FRAMES}.0 - 1.0 - frame + clamp(st.t, 0.002, 0.998)) / ${FRAMES}.0);
+}
 czm_material czm_getMaterial(czm_materialInput materialInput) {
   czm_material material = czm_getDefaultMaterial(materialInput);
-  float a = mix(texture(image1, materialInput.st).a, texture(image2, materialInput.st).a, mixing);
+  float a = mix(texture(atlas, band(frameA, materialInput.st)).a, texture(atlas, band(frameB, materialInput.st)).a, mixing);
   material.diffuse = vec3(0.96);
   material.alpha = a * opacity;
   return material;
 }`;
+
+/** A fresh atlas holding every frame loaded so far; a new canvas each time, so the material uploads it. */
+function atlasOf(frames: (HTMLCanvasElement | null)[]): HTMLCanvasElement {
+  const atlas = document.createElement("canvas");
+  atlas.width = WIDTH;
+  atlas.height = (WIDTH / 2) * frames.length;
+  const ctx = atlas.getContext("2d")!;
+  frames.forEach((frame, i) => { if (frame) ctx.drawImage(frame, 0, i * (WIDTH / 2), WIDTH, WIDTH / 2); });
+  return atlas;
+}
 
 /** The cloud shell: loads the frames, shows the newest at once, then loops through the past day. */
 export class CloudShell {
@@ -133,17 +150,18 @@ export class CloudShell {
         if (signal.aborted) return;
         continue;
       }
-      if (!this.primitive) this.build(this.frames[i]!);
+      if (!this.primitive) this.build(i);
+      else this.material!.uniforms.atlas = atlasOf(this.frames);
       this.onTime?.(this.times[this.shown] ?? null, this.frames.filter(Boolean).length);
       if (!this.animate) return;
     }
   }
 
-  private build(first: HTMLCanvasElement) {
+  private build(first: number) {
     const r = this.scene.globe.ellipsoid.radii;
     this.material = new Material({
       translucent: true,
-      fabric: { uniforms: { image1: first, image2: first, mixing: 0, opacity: 0 }, source: SOURCE },
+      fabric: { uniforms: { atlas: atlasOf(this.frames), frameA: first, frameB: first, mixing: 0, opacity: 0 }, source: SOURCE },
     });
     this.primitive = this.scene.primitives.add(new Primitive({
       geometryInstances: new GeometryInstance({
@@ -157,7 +175,7 @@ export class CloudShell {
       appearance: new MaterialAppearance({ material: this.material, translucent: true, closed: true, flat: true }),
       asynchronous: false,
     })) as Primitive;
-    this.shown = this.frames.indexOf(first);
+    this.shown = first;
     this.started = performance.now();
   }
 
@@ -172,9 +190,10 @@ export class CloudShell {
     const t = (performance.now() - this.started) / 2000;
     const k = Math.floor(t) % ready.length;
     const a = ready[k]!, b = ready[(k + 1) % ready.length]!;
-    this.material.uniforms.image1 = this.frames[a];
-    this.material.uniforms.image2 = this.frames[b];
-    this.material.uniforms.mixing = Math.max(0, (t % 1 - 0.6) / 0.4);
+    const f = Math.max(0, (t % 1 - 0.6) / 0.4);
+    this.material.uniforms.frameA = a;
+    this.material.uniforms.frameB = b;
+    this.material.uniforms.mixing = f * f * (3 - 2 * f);
     const now = (t % 1) < 0.8 ? a : b;
     if (now !== this.shown) {
       this.shown = now;
