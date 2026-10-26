@@ -5,6 +5,23 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.20] - 2026-10-26
+
+### Added
+- **People in the area**: GHS-POP 2020 (JRC, about 90 m) read from a public
+  COG, summed inside the area's outline. Leiah district: 1.88 million in
+  2020, against census counts of 1.82 million (2017) and 2.10 million (2023).
+- **Official figures** in the area overview: World Bank country statistics
+  and the area's share of the national population; IPC Phase 3+ food
+  insecurity and WFP rainfall anomalies from UN OCHA's Humanitarian API where
+  the UN tracks the district; and a stated cross-check between the GHS-POP
+  count and the population the IPC analysis implies.
+
+### Fixed
+- Cloud and rain animations stuttered: clouds re-uploaded whole images at
+  every step (now one atlas texture), and rain switched frames instantly
+  (now an eased cross-fade every frame).
+
 ## [0.2.0-alpha.19] - 2026-10-26
 
 ### Added

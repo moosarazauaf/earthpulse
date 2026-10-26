@@ -75,7 +75,11 @@ the same overview; **☆ Save** keeps it in My places (<kbd>M</kbd>) together wi
 your recent analyses, and **Print report** saves the overview as a PDF. Saved
 places are watched: when EarthPulse opens it tells you about hazard news,
 earthquakes or alerts near any of them. The overview also shows the rain of
-the last days against normal, and says when an unusually wet week falls on
+the last days against normal, how many people live in the area (GHS-POP
+2020), and official figures to check against: World Bank country statistics,
+IPC food-insecurity analyses and WFP rainfall anomalies from the UN's
+Humanitarian API, with the population cross-checked where both exist. It
+also says when an unusually wet week falls on
 steep ground, the conditions in which landslides happen, and today's air
 quality (US AQI, PM2.5, PM10, NO₂, ozone) with how many of the past seven days
 were above the WHO PM2.5 guideline.

@@ -85,6 +85,10 @@ as an index and does not call a rise in it "urban expansion".
 | City list for air quality | GeoNames cities15000: the 300 most populous cities and every national capital (`scripts/make-cities.ts`) | CC BY 4.0, credit GeoNames |
 | District outlines | FAO GAUL 2024 second-level units (45,523 districts), from the GeoParquet copy on Source Cooperative (`nlebovits/gaul-l2-admin`), simplified to about 500 m by `scripts/make-districts.py` | CC BY 4.0, credit FAO. Not an official depiction of borders. GAUL 2015, the edition in Earth Engine's `FAO/GAUL/2015`, forbids redistribution and is not used |
 | Population density | NASA SEDAC Gridded Population of the World v4, 2020, about 1 km, through NASA GIBS (`GPW_Population_Density_2020`) | Public domain map tiles; credit CIESIN / NASA SEDAC. Census counts spread evenly within census units, so detail varies by country |
+| People in an area | GHS-POP 2020, European Commission JRC, 3 arc-seconds (about 90 m), from the public COG on Source Cooperative (`cboettig/population`) | CC BY 4.0, credit European Commission JRC. Modelled; can undercount scattered rural homes |
+| Country figures | World Bank Indicators API: SP.POP.TOTL, SP.URB.TOTL.IN.ZS, NY.GDP.PCAP.CD, SI.POV.DDAY | CC BY 4.0, credit World Bank |
+| Food insecurity | IPC analyses (Phase 3+, current) through UN OCHA's Humanitarian API (HDX HAPI) | Per the IPC and HDX terms; credit IPC and OCHA. Only places the UN tracks |
+| Rainfall anomaly | WFP CHIRPS monthly rainfall anomaly per district through HDX HAPI | Per HDX terms; credit WFP and CHC/UCSB |
 | Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is

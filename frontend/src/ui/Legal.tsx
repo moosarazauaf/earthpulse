@@ -52,7 +52,8 @@ function LegalContent({ page }: { page: LegalPage }) {
             <li><strong>USGS / GDACS</strong> — {t("legal.privacy.sections.thirdParty.items.usgs")}</li>
             <li><strong>Microsoft Planetary Computer</strong> — {t("legal.privacy.sections.thirdParty.items.pc")}</li>
             <li><strong>Open-Meteo</strong> — {t("legal.privacy.sections.thirdParty.items.meteo")}</li>
-            <li><strong>NASA, Copernicus, EUMETSAT, AWS Terrain Tiles</strong> — {t("legal.privacy.sections.thirdParty.items.layers")}</li>
+            <li><strong>NASA, Copernicus, EUMETSAT, AWS Terrain Tiles, Source Cooperative</strong> — {t("legal.privacy.sections.thirdParty.items.layers")}</li>
+            <li><strong>World Bank, UN OCHA Humanitarian API</strong> — {t("legal.privacy.sections.thirdParty.items.official")}</li>
             <li><strong>GitHub Pages</strong> — {t("legal.privacy.sections.thirdParty.items.github")}</li>
           </ul>
           <p>{t("legal.privacy.sections.thirdParty.text2")}</p>

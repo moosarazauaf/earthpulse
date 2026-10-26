@@ -8,7 +8,7 @@ import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
 import type { CoverRequest, CoverResult } from "./cover";
 import type { PopulationRequest, PopulationResult } from "./population";
 
-export const SOFTWARE_VERSION = "0.2.0-alpha.19";
+export const SOFTWARE_VERSION = "0.2.0-alpha.20";
 export type Quality = "fast" | "balanced" | "detailed";
 
 export interface DeviceProfile {
