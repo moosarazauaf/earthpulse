@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "../app/store";
+import { ANALYTICS_ON } from "../app/analytics";
 import { useT } from "../i18n";
 
 type LegalPage = "privacy" | "cookies" | "terms";
@@ -29,7 +30,7 @@ function LegalContent({ page }: { page: LegalPage }) {
             <li>{t("legal.privacy.sections.data.items.location")}</li>
             <li>{t("legal.privacy.sections.data.items.preferences")}</li>
           </ul>
-          <p>{t("legal.privacy.sections.data.text2")}</p>
+          <p>{t(ANALYTICS_ON ? "legal.privacy.sections.data.analytics" : "legal.privacy.sections.data.text2")}</p>
         </section>
 
         <section>
@@ -108,7 +109,7 @@ function LegalContent({ page }: { page: LegalPage }) {
 
         <section>
           <h3>{t("legal.cookies.sections.how.title")}</h3>
-          <p>{t("legal.cookies.sections.how.text")}</p>
+          <p>{t(ANALYTICS_ON ? "legal.cookies.sections.how.analytics" : "legal.cookies.sections.how.text")}</p>
         </section>
 
         <section>

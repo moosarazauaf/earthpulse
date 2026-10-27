@@ -5,6 +5,12 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+### Added
+- Visit counting with Umami Cloud (cookie-free, Do Not Track respected,
+  live site only), switched on by setting the repository variable
+  `UMAMI_WEBSITE_ID`. The privacy and cookie pages describe it only when
+  it is on.
+
 ## [0.2.0-alpha.20] - 2026-10-26
 
 ### Added

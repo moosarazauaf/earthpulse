@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./App";
+import { startAnalytics } from "./app/analytics";
 
 declare global {
   interface Window {
@@ -21,6 +22,8 @@ window.CESIUM_BASE_URL = CESIUM_BASE_URL;
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   void navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js?cesium=${CESIUM_VERSION}`).catch(() => undefined);
 }
+
+startAnalytics();
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
