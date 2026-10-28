@@ -1,4 +1,5 @@
 /** Live hazards: what the news, agencies and forecasts say right now, in three tabs. */
+import { PeopleNear } from "./PeopleNear";
 import { useEffect, useState } from "react";
 
 import { useStore } from "../app/store";
@@ -160,6 +161,7 @@ function AlertsTab() {
         <div className="alert-detail">
           <strong>{selected.name}</strong>
           {selected.severity && <p>{selected.severity}</p>}
+          <PeopleNear lon={selected.lon} lat={selected.lat} km={selected.type === "EQ" || selected.type === "TC" ? 100 : 50} />
           <p className="muted">Reported by {selected.source || "GDACS"}.</p>
           <a className="button" href={selected.reportUrl} target="_blank" rel="noreferrer">Full report on GDACS</a>
         </div>

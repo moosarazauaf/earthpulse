@@ -148,6 +148,17 @@ export function squareAround(lon: number, lat: number, km: number): AoiGeometry 
   return rectangleAoi(round(lon - halfLon), round(Math.max(lat - halfLat, -89.9)), round(lon + halfLon), round(Math.min(lat + halfLat, 89.9)));
 }
 
+/** A circle of `km` radius around a point, as a polygon of `sides` vertices (degrees of longitude shrink with latitude). */
+export function circleAround(lon: number, lat: number, km: number, sides = 48): AoiGeometry {
+  const dLat = km / 111.32;
+  const dLon = dLat / Math.max(Math.cos((lat * Math.PI) / 180), 0.05);
+  const ring = Array.from({ length: sides + 1 }, (_, i) => {
+    const a = (2 * Math.PI * (i % sides)) / sides;
+    return [lon + dLon * Math.cos(a), Math.max(-89.9, Math.min(89.9, lat + dLat * Math.sin(a)))];
+  });
+  return { type: "Polygon", coordinates: [ring] };
+}
+
 /** "31.52° N, 74.35° E" */
 export function formatLatLon(lat: number, lon: number): string {
   return `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lon).toFixed(2)}° ${lon >= 0 ? "E" : "W"}`;

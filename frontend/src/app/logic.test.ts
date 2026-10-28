@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   FIRST_YEAR,
+  circleAround,
   clampYear,
   currentYear,
   datasetForArea,
@@ -143,5 +144,17 @@ describe("imagery for an area", () => {
     expect(datasetForArea(squareAround(74.3, 31.5, 60))).toBe("landsat");
     // Longitude degrees shrink towards the poles: 1° by 0.2° at 60° N is about 56 km by 22 km.
     expect(datasetForArea(rectangleAoi(10, 60, 11, 60.2))).toBe("landsat");
+  });
+});
+
+describe("circle around a point", () => {
+  it("is a closed ring with every vertex the right distance away", () => {
+    const ring = (circleAround(74.3, 31.5, 50).coordinates as number[][][])[0]!;
+    expect(ring).toHaveLength(49);
+    expect(ring[0]).toEqual(ring[48]);
+    for (const [lon, lat] of ring) {
+      const dx = (lon! - 74.3) * 111.32 * Math.cos((31.5 * Math.PI) / 180), dy = (lat! - 31.5) * 111.32;
+      expect(Math.hypot(dx, dy)).toBeCloseTo(50, 0);
+    }
   });
 });
