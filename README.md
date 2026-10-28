@@ -130,8 +130,10 @@ spectral indices, with a timeline and a swipe, blink or blend comparison.
 **FloodLens** maps flood extent from Sentinel-1, which sees through cloud. It
 picks one radar orbit that covers your area in every window, separates water
 that was already there, chooses the water threshold from the data, and reports
-flooded cropland and built-up land, recession, and how much the answer moves if
-the threshold is off by 1 dB.
+flooded cropland and built-up land, how many people live on the newly flooded
+land, recession, and how much the answer moves if the threshold is off by 1 dB.
+Burn maps count the people on burned land the same way, and each disaster
+alert in Live says how many people live within 50 to 100 km of it.
 
 <img src="docs/media/flood.jpg" alt="FloodLens result for the Indus at Layyah, 2022: newly flooded land in red beside the river channel in blue, with flooded area, land cover and threshold sensitivity in the side panel" width="100%">
 

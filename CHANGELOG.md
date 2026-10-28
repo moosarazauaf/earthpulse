@@ -5,7 +5,16 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.21] - 2026-10-28
+
 ### Added
+- **People affected** in flood and fire results: how many people live on
+  the land mapped as newly flooded or burned, out of everyone in the area
+  (GHS-POP 2020 sampled against the result's own map). Layyah, August 2022:
+  about 6,170 people on newly flooded land.
+- **People near an alert** in Live: how many live within 100 km of an
+  earthquake or cyclone alert (50 km for other kinds). Cyclone Arnab:
+  about 11.2 million.
 - Visit counting with Umami Cloud (cookie-free, Do Not Track respected,
   live site only), switched on by setting the repository variable
   `UMAMI_WEBSITE_ID`. The privacy and cookie pages describe it only when
