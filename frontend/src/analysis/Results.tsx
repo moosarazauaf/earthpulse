@@ -10,6 +10,7 @@ import { shareUrl } from "../ui/TopBar";
 import { downloadBlob, downloadText } from "./download";
 import { rasterReadme, rasterToGeoTiff } from "./geotiffExport";
 import { SeverityTable } from "./FirePanel";
+import { PeopleAffected } from "./PeopleAffected";
 import { ShareRunButton } from "./SharedRun";
 import { ChangeHistogram, SeriesChart } from "./charts";
 import { resultCsv } from "./csv";
@@ -152,6 +153,7 @@ export function ChangeResults({ result }: { result: ChangeResult }) {
     <div className="results">
       <ResultHeader result={result} />
       <SeverityTable result={result} />
+      {result.summary.severity && <PeopleAffected result={result} atMost={-0.1} what="land that burned" />}
       <section>
         <h3>What changed here</h3>
         <p className="muted">{period(result.request.before)} compared with {period(result.request.after)}</p>

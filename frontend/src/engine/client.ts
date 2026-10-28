@@ -6,7 +6,7 @@ import type { AnalysisResult, Overlay } from "../app/types";
 import type { Progress } from "./common";
 import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
 import type { CoverRequest, CoverResult } from "./cover";
-import type { PopulationRequest, PopulationResult } from "./population";
+import type { ExposureRequest, ExposureResult, PopulationRequest, PopulationResult } from "./population";
 
 export const SOFTWARE_VERSION = "0.2.0-alpha.20";
 export type Quality = "fast" | "balanced" | "detailed";
@@ -109,22 +109,27 @@ export function runInBrowser(job: WorkerRequest, device: DeviceProfile, onProgre
 }
 
 /** Land cover for the area overview: a quick worker job outside the analysis queue, so it never replaces a result. */
-/** People in an area (GHS-POP 2020), read in a worker so the globe stays smooth. */
-export function populationInBrowser(request: PopulationRequest): { promise: Promise<PopulationResult>; cancel: () => void } {
+/** A count read in its own worker so the globe stays smooth; the result has no map, so it is passed through as is. */
+function countJob<T>(job: WorkerRequest): { promise: Promise<T>; cancel: () => void } {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
-  const promise = new Promise<PopulationResult>((resolve, reject) => {
+  const promise = new Promise<T>((resolve, reject) => {
     worker.onmessage = (event: MessageEvent<WorkerMessage>) => {
       const message = event.data;
       if (message.type === "progress") return;
       worker.terminate();
       if (message.type === "error") reject(new Error(message.message));
-      else resolve(message.result as unknown as PopulationResult);
+      else resolve(message.result as unknown as T);
     };
     worker.onerror = () => { worker.terminate(); reject(new Error("The population grid could not be read.")); };
   });
-  worker.postMessage({ kind: "population", request } satisfies WorkerRequest);
+  worker.postMessage(job);
   return { promise, cancel: () => worker.terminate() };
 }
+
+/** People in an area (GHS-POP 2020). */
+export const populationInBrowser = (request: PopulationRequest) => countJob<PopulationResult>({ kind: "population", request });
+/** People on the land an analysis marked as affected. */
+export const exposureInBrowser = (request: ExposureRequest) => countJob<ExposureResult>({ kind: "exposure", request });
 
 export function landCoverInBrowser(request: CoverRequest): { promise: Promise<{ shares: CoverResult["shares"]; resolution: number; overlay: Overlay }>; cancel: () => void } {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });

@@ -9,6 +9,7 @@ import { STORED_FLOOD } from "../demo/stored";
 import { AreaStep } from "./AnalysisForm";
 import { DeviceStep, useDevice } from "./DeviceStep";
 import { BackscatterHistogram } from "./charts";
+import { PeopleAffected } from "./PeopleAffected";
 import { Exports, ResultHeader } from "./Results";
 
 const MAX_LISTED_REGIONS = 8;
@@ -138,6 +139,8 @@ export function FloodResults({ result }: { result: FloodResult }) {
         <BackscatterHistogram edges={result.histogram.binEdges} counts={result.histogram.counts}
           threshold={summary.thresholdDb} />
       </section>
+
+      <PeopleAffected result={result} equals={3} what="newly flooded land" />
 
       {landCover && (
         <section>

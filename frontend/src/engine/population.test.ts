@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { AoiGeometry } from "../app/types";
-import { countInside, formatPeople, levelFor } from "./population";
+import { transformer } from "./geo";
+import { affectedBy, countInside, formatPeople, levelFor } from "./population";
 
 describe("population count", () => {
   it("reads full detail for small areas and coarser overviews for large ones", () => {
@@ -25,5 +26,24 @@ describe("population count", () => {
     expect(formatPeople(8_589_538)).toBe("about 8.59 million people");
     expect(formatPeople(12_345)).toBe("about 12,300 people");
     expect(formatPeople(0.2)).toBe("almost no one");
+  });
+});
+
+describe("people on affected land", () => {
+  // A two-cell UTM raster (zone 43 N) with its first cell centred on 74.3° E, 31.5° N.
+  const [x, y] = transformer(4326, 32643)(74.3, 31.5);
+  const raster = { data: [3, -0.5], epsg: 32643, west: x - 50, north: y + 50, res: 100, width: 2, height: 1 };
+
+  it("finds the raster cell under a longitude and latitude", () => {
+    const flooded = affectedBy(raster, 3);
+    expect(flooded(74.3, 31.5)).toBe(true);
+    expect(flooded(74.301, 31.5)).toBe(false); // about 95 m east: the second cell
+    expect(flooded(74.4, 31.5)).toBe(false); // off the raster
+  });
+
+  it("can count values at or below a limit, as for a burn-ratio drop", () => {
+    const burned = affectedBy(raster, undefined, -0.1);
+    expect(burned(74.301, 31.5)).toBe(true);
+    expect(burned(74.3, 31.5)).toBe(false);
   });
 });
