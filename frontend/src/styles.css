@@ -511,3 +511,55 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 /* ---- population legend (GIBS GPWv4 colour map) --------------------------------- */
 .pop-legend { height: 8px; border-radius: 2px; background: linear-gradient(90deg, rgb(255,242,209), rgb(252,147,63) 33.3%, rgb(240,59,32) 66.7%, rgb(189,0,38)); }
 .pop-scale { display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px; }
+
+/* ---- clean, minimal pass ---------------------------------------------------------
+   Sentence-case headings in the text face (monospace stays for numbers), softer corners,
+   quieter borders and more room. Layout and behaviour are unchanged. */
+:root {
+  --panel: rgba(12, 17, 21, 0.82);
+  --line: rgba(160, 200, 205, 0.1);
+  --line-strong: rgba(160, 200, 205, 0.22);
+  --radius: 10px;
+}
+.grid-overlay { display: none; }
+button, .button, input[type="number"], input[type="search"], select, .window input { border-radius: 8px; }
+button, .button { border-color: var(--line-strong); transition: background 0.15s, border-color 0.15s; }
+button:hover:not(:disabled), .button:hover { background: rgba(255, 255, 255, 0.07); border-color: var(--line-strong); }
+button.primary:hover:not(:disabled) { background: #74ddd3; border-color: #74ddd3; }
+button.ghost { border-color: transparent; }
+button.ghost:hover:not(:disabled) { border-color: transparent; }
+button.link { text-decoration: none; }
+button.link:hover { text-decoration: underline; background: none; }
+.seg button, .options button { border-radius: 8px; }
+
+.topbar { background: rgba(8, 12, 15, 0.72); border-bottom-color: var(--line); gap: 12px; }
+.brand em { display: none; }
+.brand strong { letter-spacing: 0.14em; font-size: 13px; }
+.brand svg { width: 26px; height: 26px; }
+.topbar nav button { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--muted); border-radius: 8px; padding: 6px 10px; }
+.topbar nav button:hover { color: var(--text); }
+.topbar nav button.on { color: var(--text); background: rgba(255, 255, 255, 0.08); border-color: transparent; }
+.topbar .reset .label { display: none; }
+.search input[type="search"] { background: rgba(255, 255, 255, 0.06); border-color: transparent; }
+.search input[type="search"]:focus { border-color: var(--line-strong); }
+.search .results { border-radius: var(--radius); top: 40px; }
+
+.panel { border-radius: 14px; border-color: var(--line); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35); }
+.panel-toggle { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; padding: 12px 14px; border-bottom-color: var(--line); }
+.panel-body { padding: 2px 14px 14px; }
+.panel-body section, .form section { gap: 10px; padding: 14px 0; }
+.panel h3 { text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--text); }
+.field > span, .eyebrow, .window legend { text-transform: none; letter-spacing: 0; font-size: 12px; }
+.kind { border-radius: 999px; padding: 3px 7px; font-size: 9px; }
+.stat { border-radius: var(--radius); border-top-width: 1px; padding: 10px; background: rgba(255, 255, 255, 0.02); }
+
+.timeline { border-top-color: var(--line); }
+.year { font: 600 20px var(--sans); }
+
+.intro, .area-prompt, .district-card { border-radius: 16px; box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45); }
+.intro { border-color: var(--line-strong); }
+.intro .eyebrow { color: var(--muted); }
+.notice { border-radius: var(--radius); }
+.chips button { border-radius: 999px; }
+.story-kind, .weight, .level { text-transform: none; letter-spacing: 0; }
+.weight { font: 500 10px/1.25 var(--sans); }
