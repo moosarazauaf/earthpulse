@@ -41,13 +41,13 @@ const ESRI_CREDIT = "Basemap: Esri, Maxar, Earthstar Geographics, and the GIS Us
 /** Seconds for a new imagery layer to fade in over the one it replaces. */
 const FADE_SECONDS = 0.6;
 const HOME = { lon: 60, lat: 22, height: 2.2e7 };
-const AOI_COLOR = Color.fromCssColorString("#5fd0c5");
-const DISTRICT_COLOR = Color.fromCssColorString("#f5b83d");
-const LOSS_COLOR = Color.fromCssColorString("#ff8a5c");
-const GAIN_COLOR = Color.fromCssColorString("#7bd88f");
+const AOI_COLOR = Color.fromCssColorString("#a3b18a");
+const DISTRICT_COLOR = Color.fromCssColorString("#d9a441");
+const LOSS_COLOR = Color.fromCssColorString("#d0703f");
+const GAIN_COLOR = Color.fromCssColorString("#8db85a");
 const ALERT_RED = Color.fromCssColorString("#ff5a5a");
 const ALERT_ORANGE = Color.fromCssColorString("#ffa53c");
-const QUAKE_COLOR = Color.fromCssColorString("#d9a6ff");
+const QUAKE_COLOR = Color.fromCssColorString("#c4abdc");
 
 const BLANK_TILE = document.createElement("canvas");
 BLANK_TILE.width = BLANK_TILE.height = 1;
@@ -115,8 +115,8 @@ export class Globe {
       maximumRenderTimeChange: Infinity,
     });
     const { scene } = this.viewer;
-    scene.backgroundColor = Color.fromCssColorString("#080c0f");
-    scene.globe.baseColor = Color.fromCssColorString("#0d1418");
+    scene.backgroundColor = Color.fromCssColorString("#14120e");
+    scene.globe.baseColor = Color.fromCssColorString("#1c1915");
     scene.globe.showGroundAtmosphere = true;
     if (scene.skyAtmosphere) scene.skyAtmosphere.show = true;
     scene.fog.enabled = true;

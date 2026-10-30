@@ -5,8 +5,8 @@
   --bg: #080c0f;
   --panel: rgba(13, 19, 23, 0.86);
   --panel-solid: #0e1519;
-  --line: rgba(160, 200, 205, 0.16);
-  --line-strong: rgba(160, 200, 205, 0.32);
+  --line: rgba(214, 200, 170, 0.16);
+  --line-strong: rgba(214, 200, 170, 0.32);
   --text: #e8eef0;
   --muted: #94a5ab;
   --cyan: #5fd0c5;
@@ -51,7 +51,7 @@ button, .button {
 }
 button:hover:not(:disabled), .button:hover { border-color: var(--cyan); }
 button:disabled { opacity: 0.4; cursor: not-allowed; }
-button.primary { background: var(--cyan); border-color: var(--cyan); color: #06201d; font-weight: 600; }
+button.primary { background: var(--cyan); border-color: var(--cyan); color: #1b1d14; font-weight: 600; }
 button.ghost { background: transparent; }
 button.link { background: none; border: 0; padding: 0; color: var(--cyan); text-decoration: underline; }
 input[type="number"], input[type="search"], select {
@@ -63,7 +63,7 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .seg button, .options button { flex: 1 1 auto; padding: 5px 8px; font-size: 12px; }
 .options button { flex: 1 1 30%; }
 .seg button.on, .options button.on, nav button.on, .regions button.on {
-  border-color: var(--cyan); background: rgba(95, 208, 197, 0.14); color: #fff;
+  border-color: var(--cyan); background: rgba(163, 177, 138, 0.14); color: #fff;
 }
 .check { display: flex; gap: 8px; align-items: center; cursor: pointer; }
 .slider { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 8px; color: var(--muted); }
@@ -85,7 +85,7 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .topbar {
   position: absolute; top: 0; left: 0; right: 0; height: var(--top); z-index: 5;
   display: flex; align-items: center; gap: 16px; padding: 0 14px;
-  background: linear-gradient(rgba(8, 12, 15, 0.92), rgba(8, 12, 15, 0.6)); border-bottom: 1px solid var(--line);
+  background: linear-gradient(rgba(20, 18, 14, 0.92), rgba(20, 18, 14, 0.6)); border-bottom: 1px solid var(--line);
   backdrop-filter: blur(8px);
 }
 .brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; padding: 0; text-align: left; }
@@ -175,12 +175,12 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .facts div { display: grid; grid-template-columns: 118px 1fr; gap: 8px; }
 .facts dt { color: var(--muted); font-size: 12px; }
 .facts dd { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
-blockquote { margin: 0; padding: 8px 10px; border-left: 2px solid var(--cyan); background: rgba(95, 208, 197, 0.07); }
+blockquote { margin: 0; padding: 8px 10px; border-left: 2px solid var(--cyan); background: rgba(163, 177, 138, 0.07); }
 .scenes { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 6px; }
 .scenes code { display: block; font: 11px var(--mono); overflow-wrap: anywhere; }
 .scenes span { color: var(--muted); font-size: 11px; }
 details > summary { cursor: pointer; }
-.code { max-height: 260px; overflow: auto; background: #05080a; border: 1px solid var(--line); border-radius: 4px; padding: 8px; font: 11px/1.5 var(--mono); white-space: pre; margin: 0; }
+.code { max-height: 260px; overflow: auto; background: #0f0d0a; border: 1px solid var(--line); border-radius: 4px; padding: 8px; font: 11px/1.5 var(--mono); white-space: pre; margin: 0; }
 
 .progress ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .progress li { display: flex; align-items: center; gap: 8px; color: var(--muted); }
@@ -189,7 +189,7 @@ details > summary { cursor: pointer; }
 .progress li.done i { background: var(--green); border-color: var(--green); }
 .progress li.now { color: var(--cyan); }
 .progress li.now i { background: var(--cyan); border-color: var(--cyan); animation: pulse 1.2s ease-in-out infinite; }
-@keyframes pulse { 50% { box-shadow: 0 0 0 5px rgba(95, 208, 197, 0.2); } }
+@keyframes pulse { 50% { box-shadow: 0 0 0 5px rgba(163, 177, 138, 0.2); } }
 
 /* ---- charts ---------------------------------------------------------------- */
 .chart { margin: 0; }
@@ -216,7 +216,7 @@ details > summary { cursor: pointer; }
 /* ---- timeline -------------------------------------------------------------- */
 .timeline {
   position: absolute; left: 0; right: 0; bottom: 0; height: var(--bottom); z-index: 5; padding: 8px 14px;
-  display: grid; gap: 4px; background: linear-gradient(rgba(8, 12, 15, 0.6), rgba(8, 12, 15, 0.94));
+  display: grid; gap: 4px; background: linear-gradient(rgba(20, 18, 14, 0.6), rgba(20, 18, 14, 0.94));
   border-top: 1px solid var(--line); backdrop-filter: blur(8px);
 }
 .timeline-main { display: grid; grid-template-columns: auto auto 1fr; gap: 12px; align-items: center; }
@@ -241,7 +241,7 @@ details > summary { cursor: pointer; }
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 30px; height: 30px; border-radius: 50%;
   background: var(--amber); color: #201400; display: grid; place-items: center; font-size: 15px;
 }
-.swipe-label { position: absolute; top: 14px; font: 600 13px var(--mono); background: rgba(8, 12, 15, 0.8); padding: 3px 8px; border-radius: 3px; border: 1px solid var(--amber); }
+.swipe-label { position: absolute; top: 14px; font: 600 13px var(--mono); background: rgba(20, 18, 14, 0.8); padding: 3px 8px; border-radius: 3px; border: 1px solid var(--amber); }
 .swipe-label.left { right: 18px; }
 .swipe-label.right { left: 18px; }
 
@@ -350,10 +350,10 @@ details > summary { cursor: pointer; }
 .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); margin: -4px 0 4px; }
 .tabs button { flex: 1 1 auto; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 8px 6px; font-size: 12px; color: var(--muted); }
 .tabs button.on { color: var(--text); border-bottom-color: var(--cyan); }
-.tabs .count { margin-left: 6px; font: 600 10px/1 var(--mono); padding: 2px 5px; border-radius: 8px; background: rgba(95, 208, 197, 0.15); color: var(--cyan); }
+.tabs .count { margin-left: 6px; font: 600 10px/1 var(--mono); padding: 2px 5px; border-radius: 8px; background: rgba(163, 177, 138, 0.15); color: var(--cyan); }
 .chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .chips button { padding: 3px 9px; font-size: 12px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px; }
-.chips button.on { border-color: var(--cyan); background: rgba(95, 208, 197, 0.12); }
+.chips button.on { border-color: var(--cyan); background: rgba(163, 177, 138, 0.12); }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; flex: none; vertical-align: baseline; }
 .stories, .headlines, .feeds { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .story-row { width: 100%; text-align: left; display: grid; gap: 3px; }
@@ -361,7 +361,7 @@ details > summary { cursor: pointer; }
 .story-row em, .story-kind { font-style: normal; font-size: 11px; color: var(--muted); }
 .story-kind { display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: 0.06em; }
 .tag { display: inline-block; font: 600 10px/1 var(--mono); padding: 2px 5px; border-radius: 3px; border: 1px solid var(--line-strong); margin-left: 4px; }
-.tag.ok { color: var(--green); border-color: rgba(123, 216, 143, 0.45); }
+.tag.ok { color: var(--green); border-color: rgba(141, 184, 90, 0.45); }
 .story-title { font-size: 16px; font-weight: 600; }
 .back { justify-self: start; text-decoration: none; }
 .evidence { font-size: 12px; border-left: 2px solid var(--line-strong); padding-left: 8px; }
@@ -470,7 +470,7 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 .matrix-wrap { overflow-x: auto; }
 .table.matrix td, .table.matrix th { text-align: center; font-family: var(--mono); font-size: 11px; padding: 3px 5px; }
 .table.matrix th[scope="row"] { text-align: left; font-family: var(--sans); }
-.table.matrix td.diag { background: rgba(123, 216, 143, 0.18); font-weight: 700; }
+.table.matrix td.diag { background: rgba(141, 184, 90, 0.18); font-weight: 700; }
 .table.matrix td.off { color: var(--orange); }
 .table.matrix caption { caption-side: bottom; text-align: left; padding-top: 4px; }
 .draw-samples { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 8px; }
@@ -517,22 +517,22 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
    quieter borders and more room. Layout and behaviour are unchanged. */
 :root {
   --panel: rgba(12, 17, 21, 0.82);
-  --line: rgba(160, 200, 205, 0.1);
-  --line-strong: rgba(160, 200, 205, 0.22);
+  --line: rgba(214, 200, 170, 0.1);
+  --line-strong: rgba(214, 200, 170, 0.22);
   --radius: 10px;
 }
 .grid-overlay { display: none; }
 button, .button, input[type="number"], input[type="search"], select, .window input { border-radius: 8px; }
 button, .button { border-color: var(--line-strong); transition: background 0.15s, border-color 0.15s; }
 button:hover:not(:disabled), .button:hover { background: rgba(255, 255, 255, 0.07); border-color: var(--line-strong); }
-button.primary:hover:not(:disabled) { background: #74ddd3; border-color: #74ddd3; }
+button.primary:hover:not(:disabled) { background: #b8c49f; border-color: #b8c49f; }
 button.ghost { border-color: transparent; }
 button.ghost:hover:not(:disabled) { border-color: transparent; }
 button.link { text-decoration: none; }
 button.link:hover { text-decoration: underline; background: none; }
 .seg button, .options button { border-radius: 8px; }
 
-.topbar { background: rgba(8, 12, 15, 0.72); border-bottom-color: var(--line); gap: 12px; }
+.topbar { background: rgba(20, 18, 14, 0.72); border-bottom-color: var(--line); gap: 12px; }
 .brand em { display: none; }
 .brand strong { letter-spacing: 0.14em; font-size: 13px; }
 .brand svg { width: 26px; height: 26px; }
@@ -563,3 +563,51 @@ button.link:hover { text-decoration: underline; background: none; }
 .chips button { border-radius: 999px; }
 .story-kind, .weight, .level { text-transform: none; letter-spacing: 0; }
 .weight { font: 500 10px/1.25 var(--sans); }
+
+/* ---- golden-ratio system, earth palette -----------------------------------------
+   Sizes follow the Fibonacci sequence (each about 1.618 times the one before):
+   text 13 / 21 / 34, spacing 5 / 8 / 13 / 21 / 34, corners 8 / 13, bars 55 / 89.
+   Colours are earth tones; each still carries one meaning (see the top of this file):
+   leaf green = vegetation / increase, terracotta = decrease, slate = water,
+   ochre = change and drafts, sage = selection, heather = model or synthetic. */
+:root {
+  --bg: #14120e;
+  --panel: rgba(28, 25, 20, 0.86);
+  --panel-solid: #1c1915;
+  --line: rgba(214, 200, 170, 0.1);
+  --line-strong: rgba(214, 200, 170, 0.22);
+  --text: #ede6d8;
+  --muted: #a99f8c;
+  --cyan: #a3b18a;
+  --green: #8db85a;
+  --amber: #d9a441;
+  --orange: #d0703f;
+  --blue: #6a9ab0;
+  --violet: #ab95c2;
+  --red: #c4543a;
+  --sans: "Inter Variable", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono: "Inter Variable", "Inter", "Segoe UI", system-ui, sans-serif;
+  --code: "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, monospace;
+  --s1: 5px; --s2: 8px; --s3: 13px; --s4: 21px; --s5: 34px;
+  --radius: 8px; --radius-lg: 13px;
+  --top: 55px;
+  --bottom: 89px;
+}
+/* Tabular figures keep numbers aligned without a monospace face; code keeps one. */
+body { font-feature-settings: "tnum" 1, "cv11" 1; line-height: 1.55; letter-spacing: -0.003em; }
+.code, .scenes code, .legal-content code, kbd { font-family: var(--code); }
+button, .button { padding: var(--s1) var(--s3); border-radius: var(--radius); }
+.panel, .intro, .area-prompt, .district-card { border-radius: var(--radius-lg); }
+.panel-toggle { padding: var(--s3); }
+.panel-body { padding: 0 var(--s3) var(--s3); }
+.panel-body section, .form section { gap: var(--s2); padding: var(--s3) 0; }
+.panel h2 { font-size: 21px; letter-spacing: -0.01em; }
+.panel h3 { font-size: 13px; font-weight: 600; }
+.intro { padding: var(--s4) var(--s5); }
+.intro h1 { font-size: clamp(21px, 4vw, 34px); letter-spacing: -0.02em; }
+.year { font-size: 21px; font-weight: 600; }
+.stat { padding: var(--s2) var(--s3); }
+.stat strong { font: 600 21px var(--sans); letter-spacing: -0.01em; }
+.topbar { gap: var(--s3); padding: 0 var(--s3); background: rgba(20, 18, 14, 0.78); }
+.brand strong { font-weight: 700; }
+button.primary { color: #1b1d14; }

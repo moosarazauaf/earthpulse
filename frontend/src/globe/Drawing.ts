@@ -18,7 +18,7 @@ import type { DrawTool } from "../app/store";
 import type { AoiGeometry } from "../app/types";
 import type { Globe } from "./Globe";
 
-const DRAFT = Color.fromCssColorString("#f2b84b");
+const DRAFT = Color.fromCssColorString("#d9a441");
 const MIN_POLYGON_VERTICES = 3;
 
 type LonLat = [number, number];
