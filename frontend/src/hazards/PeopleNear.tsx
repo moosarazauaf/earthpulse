@@ -5,7 +5,7 @@ import { circleAround } from "../app/logic";
 import { populationInBrowser } from "../engine/client";
 import { formatPeople } from "../engine/population";
 
-export function PeopleNear({ lon, lat, km }: { lon: number; lat: number; km: number }) {
+export function PeopleNear({ lon, lat, km, source = "GDACS" }: { lon: number; lat: number; km: number; source?: string }) {
   const [people, setPeople] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -18,5 +18,5 @@ export function PeopleNear({ lon, lat, km }: { lon: number; lat: number; km: num
   if (error) return <p className="muted">People nearby could not be counted: {error}</p>;
   return people === null
     ? <p className="muted" role="status">Counting the people nearby…</p>
-    : <p><strong>{people >= 1 ? formatPeople(people).replace(/^a/, "A") : "Almost no one"}</strong> live within {km} km of the reported location <span className="muted">(GHS-POP 2020; GDACS places an event at one point, so the people affected can lie elsewhere).</span></p>;
+    : <p><strong>{people >= 1 ? formatPeople(people).replace(/^a/, "A") : "Almost no one"}</strong> {people >= 1 ? "live" : "lives"} within {km} km of the reported location <span className="muted">(GHS-POP 2020; {source} places an event at one point, so the people affected can lie elsewhere).</span></p>;
 }

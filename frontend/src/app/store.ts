@@ -88,6 +88,8 @@ interface State {
   alerts: Alert[] | null;
   alertsError: string | null;
   selectedAlert: Alert | null;
+  /** The earthquake clicked on the globe. */
+  selectedQuake: Quake | null;
   /** Ids of the hazard map layers switched on. */
   hazardLayers: string[];
   loadAlerts: () => Promise<void>;
@@ -276,6 +278,7 @@ export const useStore = create<State>((set, get) => {
     alerts: null,
     alertsError: null,
     selectedAlert: null,
+    selectedQuake: null,
     // Fire detections cover the globe in crop-burning dots; they are one click away, not the default.
     hazardLayers: [],
     quakes: null,

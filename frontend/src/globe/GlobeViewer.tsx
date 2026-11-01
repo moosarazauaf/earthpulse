@@ -64,6 +64,10 @@ export function GlobeViewer() {
           state.set({ selectedAlert: state.alerts?.find((a) => `alert:${a.id}` === id) ?? null, mode: "live", liveTab: "alerts" });
           return;
         }
+        if (id?.startsWith("quake:")) {
+          state.set({ selectedQuake: state.quakes?.find((q) => `quake:${q.id}` === id) ?? null });
+          return;
+        }
         if (id?.startsWith("air:")) {
           const c = state.cityAir?.[Number(id.slice(4))];
           if (c) state.set({ notice: `${c.name}, ${c.country}: US AQI ${c.usAqi}, ${aqiBand(c.usAqi).label}. PM2.5 ${Math.round(c.pm25)} µg/m³ at ${c.time.slice(11, 16)} UTC (CAMS model, about 40 km across).` });

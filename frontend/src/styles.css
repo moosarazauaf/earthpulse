@@ -611,3 +611,20 @@ button, .button { padding: var(--s1) var(--s3); border-radius: var(--radius); }
 .topbar { gap: var(--s3); padding: 0 var(--s3); background: rgba(20, 18, 14, 0.78); }
 .brand strong { font-weight: 700; }
 button.primary { color: #1b1d14; }
+
+.quake-card { border-color: var(--violet); }
+.quake-card .button { justify-self: start; }
+/* On a phone the opening card shows the three choices as short buttons, so the globe stays in view. */
+@media (max-width: 800px) {
+  .intro { padding: var(--s3) var(--s4); top: auto; }
+  .intro .eyebrow, .cards span, .intro .examples:first-of-type { display: none; }
+  .cards { grid-template-columns: 1fr; gap: var(--s1); }
+  .cards button { padding: var(--s2) var(--s3); }
+}
+/* Grid items default to their content's width; let the timeline shrink to a phone screen. */
+.timeline-main > *, .timeline > * { min-width: 0; }
+@media (max-width: 800px) { .timeline-main { grid-template-columns: auto minmax(0, 1fr); } }
+@media (max-width: 800px) { .credit-corner { white-space: normal; margin: 0; text-align: left; } }
+/* On a phone the timeline stacks its rows (year, track, compare, footer); give the bar, and
+   everything that keeps clear of it, that real height so the footer links stay on screen. */
+@media (max-width: 800px) { :root { --bottom: 210px; } }
