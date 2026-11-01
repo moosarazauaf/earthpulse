@@ -5,6 +5,22 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.22] - 2026-11-01
+
+### Added
+- Earthquakes in Live can be clicked: magnitude, place, depth, age, the
+  USGS PAGER damage estimate, tsunami flag, people within 100 km and a link
+  to the USGS event page.
+
+### Changed
+- Golden-ratio proportions (Fibonacci sizes), Inter with tabular figures,
+  and an earth-tone palette across the page and the globe.
+
+### Fixed
+- On phones the timeline pushed the page wider than the screen and the
+  footer links fell below it; the opening card now fits with the globe in
+  view.
+
 ## [0.2.0-alpha.21] - 2026-10-28
 
 ### Added
