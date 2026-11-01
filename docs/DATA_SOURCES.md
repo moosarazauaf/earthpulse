@@ -89,6 +89,7 @@ as an index and does not call a rise in it "urban expansion".
 | Country figures | World Bank Indicators API: SP.POP.TOTL, SP.URB.TOTL.IN.ZS, NY.GDP.PCAP.CD, SI.POV.DDAY | CC BY 4.0, credit World Bank |
 | Food insecurity | IPC analyses (Phase 3+, current) through UN OCHA's Humanitarian API (HDX HAPI) | Per the IPC and HDX terms; credit IPC and OCHA. Only places the UN tracks |
 | Rainfall anomaly | WFP CHIRPS monthly rainfall anomaly per district through HDX HAPI | Per HDX terms; credit WFP and CHC/UCSB |
+| Satellites live and next passes (G) | CelesTrak two-line orbital elements (Earth-resources group, plus Sentinel-1C), propagated with SGP4 by satellite.js | Public data; credit CelesTrak. A pass means the place is inside the swath (in daylight for optical satellites), not that an image was taken |
 | Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is

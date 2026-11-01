@@ -93,7 +93,10 @@ looping through the past 24 hours on a layer above the globe; fly down to an
 area and you pass through it. **Rain** (<kbd>W</kbd>) is NASA's half-hourly
 IMERG rain and snow rate for the last 3 hours it has published. **Air
 quality** (<kbd>Q</kbd>) colours 476 major cities by their US AQI right now
-and lists the five worst. **Population density** shows NASA SEDAC's 2020
+and lists the five worst. **Satellites, live** (<kbd>G</kbd>) shows where Landsat 8 and 9, Sentinel-2A, 2B and 2C
+and Sentinel-1A and 1C are right now, with their orbits, and the area overview
+says when each next passes over your area; **Day and night now** shades the
+night side in real time. **Population density** shows NASA SEDAC's 2020
 Gridded Population of the World, so you can see who lives near a flood or a
 fire. Choosing an area also picks the imagery that suits
 it: Sentinel-2 at 10 m for areas up to 40 km across, Landsat beyond that.

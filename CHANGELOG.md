@@ -5,6 +5,17 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.23] - 2026-11-01
+
+### Added
+- **Satellites, live** (G): Landsat 8 and 9, Sentinel-2A, 2B and 2C and
+  Sentinel-1A and 1C at their true height with the next 90 minutes of
+  orbit, from CelesTrak elements propagated in the browser (satellite.js).
+- **Next satellite passes** in the area overview: when each satellite next
+  has the area inside its swath, in daylight for the optical ones. Lahore:
+  Sentinel-2 at about 10:47 local solar time, Landsat at about 10:33.
+- **Day and night now**: real-time night shading, off by default.
+
 ## [0.2.0-alpha.22] - 2026-11-01
 
 ### Added
