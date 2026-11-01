@@ -11,6 +11,7 @@ import { deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } 
 import { type PopulationResult, formatPeople } from "../engine/population";
 import { type CountryFacts, type FoodSecurity, type RainAnomaly, fetchCountryFacts, fetchFoodSecurity, fetchRainAnomaly } from "./official";
 import { type District, districtAt } from "./districts";
+import { type Satellite, fetchSatellites, nextPasses } from "../globe/satellites";
 import { WORLDCOVER } from "../engine/cover";
 import { projectAoi } from "../engine/geo";
 import { corroborate } from "../news/corroborate";
@@ -88,6 +89,7 @@ function Overview() {
       <TerrainSection />
       <People />
       <Official lat={lat} lon={lon} />
+      <Passes lat={lat} lon={lon} />
       <RecentRain lat={lat} lon={lon} />
       <Air lat={lat} lon={lon} />
       <Climate lat={lat} lon={lon} />
@@ -267,6 +269,49 @@ function People() {
           </p>
         </>
       )}
+    </section>
+  );
+}
+
+// ---- satellite passes ----------------------------------------------------------------------------
+
+/** When each Landsat and Sentinel satellite next passes over the area's centre, soonest first. */
+function Passes({ lat, lon }: { lat: number; lon: number }) {
+  const t = useT();
+  const set = useStore((s) => s.set);
+  const [passes, setPasses] = useState<{ sat: Satellite; when: Date | null }[] | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    setPasses(null);
+    setError(false);
+    fetchSatellites()
+      .then((sats) => nextPasses(sats, lon, lat, controller.signal))
+      .then((p) => { if (!controller.signal.aborted) setPasses(p.sort((a, b) => (a.when?.getTime() ?? Infinity) - (b.when?.getTime() ?? Infinity))); },
+        () => { if (!controller.signal.aborted) setError(true); });
+    return () => controller.abort();
+  }, [lat, lon]);
+  const when = (d: Date) => `${d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}, ${d.toISOString().slice(11, 16)} UTC`;
+  const inDays = (d: Date) => { const h = (d.getTime() - Date.now()) / 3_600_000; return h < 24 ? `in ${Math.max(1, Math.round(h))} h` : `in ${Math.round(h / 24)} days`; };
+  return (
+    <section>
+      <header className="row"><h3>{t("area.passes")}</h3><button className="link" onClick={() => set({ satellitesOn: true })}>Show them live</button></header>
+      {error && <p className="note">Satellite orbits could not be loaded from CelesTrak.</p>}
+      {!passes && !error && <p className="muted" role="status">Working out the next passes…</p>}
+      {passes && (
+        <ul className="facts-list">
+          {passes.map(({ sat, when: d }) => (
+            <li key={sat.norad}>
+              <span className="swatch" style={{ background: sat.colour }} aria-hidden="true" /> <strong>{sat.name}</strong>{" "}
+              {d ? <>{when(d)} <span className="muted">({inDays(d)})</span></> : <span className="muted">no pass in the next 16 days</span>}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="muted">
+        When the area&apos;s centre lies inside each satellite&apos;s swath (in daylight, for Landsat and Sentinel-2), from CelesTrak orbits.
+        Whether a picture is taken depends on the mission&apos;s plan, and clouds can hide the ground.
+      </p>
     </section>
   );
 }

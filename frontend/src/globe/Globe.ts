@@ -5,9 +5,11 @@
 import {
   Cartesian2,
   Cartesian3,
+  JulianDate,
   Cartographic,
   Color,
   ColorMaterialProperty,
+  ConstantPositionProperty,
   ConstantProperty,
   Entity,
   GeoJsonDataSource,
@@ -30,6 +32,8 @@ import { absolute } from "../app/api";
 import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } from "../app/types";
 import { CloudShell } from "./clouds";
 import { rainBlend, rainTileUrl } from "./rain";
+import { type Satellite, positionAt, track } from "./satellites";
+import type { SatRec } from "satellite.js";
 import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
 
 const ESRI_IMAGERY =
@@ -150,6 +154,7 @@ export class Globe {
   }
 
   destroy() {
+    window.clearInterval(this.satTimer);
     this.clouds.destroy();
     if (!this.viewer.isDestroyed()) this.viewer.destroy();
   }
@@ -319,6 +324,56 @@ export class Globe {
   private population: ImageryLayer | null = null;
 
   /** NASA SEDAC population density (GPWv4, 2020) through GIBS, under the place names. */
+  private satEntities: Entity[] = [];
+  private satTimer = 0;
+
+  /**
+   * Earth-observation satellites at their true height, each with the next
+   * 90 minutes of its orbit, moved every two seconds; null removes them.
+   */
+  setSatellites(sats: { sat: Satellite; rec: SatRec }[] | null) {
+    window.clearInterval(this.satTimer);
+    for (const entity of this.satEntities) this.viewer.entities.remove(entity);
+    this.satEntities = [];
+    if (!sats?.length) { this.render(); return; }
+    const place = (p: { lon: number; lat: number; heightKm?: number }) => Cartesian3.fromDegrees(p.lon, p.lat, (p.heightKm ?? 705) * 1000);
+    const orbit = (rec: SatRec, now: Date) => track(rec, now, 90, 60).map((p) => place({ ...p, heightKm: positionAt(rec, now)?.heightKm }));
+    // Entities are made once and then moved: Cesium builds line geometry in the background, so
+    // remaking them every tick would delete each orbit before it was ever drawn.
+    const start = new Date();
+    const live = sats.map(({ sat, rec }) => {
+      const colour = Color.fromCssColorString(sat.colour);
+      const dot = this.viewer.entities.add({
+        position: place(positionAt(rec, start) ?? { lon: 0, lat: 0 }),
+        point: { pixelSize: 7, color: colour, outlineColor: Color.BLACK.withAlpha(0.6), outlineWidth: 1 },
+        label: { text: sat.name, font: "11px Inter Variable, sans-serif", fillColor: colour, pixelOffset: new Cartesian2(0, -14), showBackground: true, backgroundColor: Color.fromCssColorString("#14120e").withAlpha(0.7) },
+      });
+      const line = this.viewer.entities.add({ polyline: { positions: orbit(rec, start), width: 1.8, material: colour.withAlpha(0.75), arcType: 0 } });
+      this.satEntities.push(dot, line);
+      return { rec, dot, line };
+    });
+    let ticks = 0;
+    this.satTimer = window.setInterval(() => {
+      const now = new Date();
+      ticks += 1;
+      for (const { rec, dot, line } of live) {
+        const at = positionAt(rec, now);
+        if (at) dot.position = new ConstantPositionProperty(place(at));
+        if (ticks % 30 === 0 && line.polyline) line.polyline.positions = new ConstantProperty(orbit(rec, now));
+      }
+      this.render();
+    }, 2000);
+    this.render();
+  }
+
+  /** Real-time day and night shading from the sun's position. */
+  setDayNight(on: boolean) {
+    this.viewer.scene.globe.enableLighting = on;
+    this.viewer.clock.currentTime = JulianDate.now();
+    this.viewer.clock.shouldAnimate = on;
+    this.render();
+  }
+
   setPopulation(on: boolean) {
     if (on && !this.population) {
       this.population = new ImageryLayer(new UrlTemplateImageryProvider({

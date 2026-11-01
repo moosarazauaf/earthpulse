@@ -1,7 +1,7 @@
 {
   "name": "earthpulse-frontend",
   "private": true,
-  "version": "0.2.0-alpha.22",
+  "version": "0.2.0-alpha.23",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -19,6 +19,7 @@
     "proj4": "^2.22.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
+    "satellite.js": "^5.0.0",
     "shpjs": "^6.2.0",
     "zustand": "^5.0.15"
   },

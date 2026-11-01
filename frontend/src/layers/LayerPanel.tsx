@@ -169,6 +169,20 @@ export function LayerPanel() {
             </label>
             {s.airOn && <AirHotspots />}
             <label className="check">
+              <input type="checkbox" checked={s.satellitesOn} onChange={(e) => s.set({ satellitesOn: e.target.checked })} />
+              <span>Landsat and Sentinel satellites, live <kbd>G</kbd></span>
+            </label>
+            {s.satellitesOn && (
+              <p className="muted">
+                Where Landsat 8 and 9 (green), Sentinel-2A, 2B and 2C (ochre) and Sentinel-1A and 1C (blue) are now, at their true height,
+                with the next 90 minutes of orbit. Orbits from CelesTrak; open an area to see when each next passes over it.
+              </p>
+            )}
+            <label className="check">
+              <input type="checkbox" checked={s.dayNightOn} onChange={(e) => s.set({ dayNightOn: e.target.checked })} />
+              <span>Day and night now</span>
+            </label>
+            <label className="check">
               <input type="checkbox" checked={s.populationOn} onChange={(e) => s.set({ populationOn: e.target.checked })} />
               <span>Population density, 2020</span>
             </label>

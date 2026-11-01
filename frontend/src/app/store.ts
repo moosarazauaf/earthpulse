@@ -69,6 +69,9 @@ interface State {
   rainOn: boolean;
   /** Population density layer (GPWv4 2020). */
   populationOn: boolean;
+  /** Live Earth-observation satellites, and real-time day and night shading. */
+  satellitesOn: boolean;
+  dayNightOn: boolean;
   rainTime: string | null;
   layerInfo: ImageryLayerInfo | null;
   compareInfo: ImageryLayerInfo | null;
@@ -256,6 +259,8 @@ export const useStore = create<State>((set, get) => {
     cloudInfo: null,
     rainOn: false,
     populationOn: false,
+    satellitesOn: false,
+    dayNightOn: false,
     rainTime: null,
     layerInfo: null,
     compareInfo: null,

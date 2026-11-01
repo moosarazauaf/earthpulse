@@ -10,6 +10,7 @@ import { type Detection, type ImageryLayerInfo, type LayeredResult, type MappedR
 import { newsMarkers } from "../news/corroborate";
 import { aqiBand } from "../area/air";
 import { latestRainTime, rainTimes } from "./rain";
+import { fetchSatellites } from "./satellites";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -129,6 +130,16 @@ export function GlobeViewer() {
   useEffect(() => instance?.setPrimaryAlpha(s.imageryOpacity), [s.imageryOpacity]);
   useEffect(() => instance?.setLabels(s.labelsVisible), [s.labelsVisible]);
   useEffect(() => instance?.setPopulation(s.populationOn), [s.populationOn]);
+  useEffect(() => instance?.setDayNight(s.dayNightOn), [s.dayNightOn]);
+  useEffect(() => {
+    if (!s.satellitesOn) { instance?.setSatellites(null); return; }
+    let stale = false;
+    fetchSatellites().then(
+      (sats) => { if (!stale) instance?.setSatellites(sats); },
+      () => { if (!stale) useStore.getState().set({ satellitesOn: false, notice: "Satellite orbits could not be loaded from CelesTrak." }); },
+    );
+    return () => { stale = true; };
+  }, [s.satellitesOn]);
   useEffect(() => instance?.setClouds(s.cloudsOn, (time, loaded) => useStore.getState().set({ cloudInfo: time || loaded ? { time, loaded } : null })), [s.cloudsOn]);
 
   // Comparison imagery.
