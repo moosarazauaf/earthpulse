@@ -5,6 +5,14 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.24] - 2026-11-02
+
+### Added
+- **Views** (V): night vision, a thermal look and mono as filters over the
+  globe, by brightness only and labelled as not a measurement.
+- **Readout**: UTC time, the latitude and longitude under the pointer, and
+  camera height.
+
 ## [0.2.0-alpha.23] - 2026-11-01
 
 ### Added
