@@ -194,7 +194,7 @@ heat maps as GeoTIFF for QGIS or ArcGIS; and change and burn analyses also as
 a Google Earth Engine script that repeats them with the same scenes. **Methods text** copies a
 ready-to-paste methods paragraph and reference list for any result, written
 from its record: data, method, formula, cloud mask, scene dates, grid and
-limits. The measuring tool (<kbd>D</kbd>) gives distances and areas on the ground.
+limits. The measuring tool (<kbd>D</kbd>) gives distances and areas on the ground, and an elevation profile along any line you draw.
 
 ### ⌨️ Keyboard first
 <kbd>L</kbd> Live, <kbd>E</kbd> Explore, <kbd>A</kbd> Analyse here, <kbd>M</kbd> My places, <kbd>D</kbd> measure, <kbd>R</kbd>/<kbd>P</kbd> draw, <kbd>U</kbd> upload,
