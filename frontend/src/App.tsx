@@ -4,6 +4,7 @@ import { AreaPrompt } from "./analysis/AreaPrompt";
 import { SharedRunCard } from "./analysis/SharedRun";
 import { DistrictCard } from "./ui/DistrictCard";
 import { QuakeCard } from "./hazards/QuakeCard";
+import { Readout } from "./ui/Readout";
 import { ContextPanel } from "./analysis/ContextPanel";
 import { decodeView } from "./app/logic";
 import { decodeRun, modeForRun } from "./app/shareRun";
@@ -68,6 +69,7 @@ export function App() {
       <SharedRunCard />
       <DistrictCard />
       <QuakeCard />
+      <Readout />
       <StoryCaption />
       <Notice />
       <ToolHint />

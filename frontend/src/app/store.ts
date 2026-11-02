@@ -72,6 +72,9 @@ interface State {
   /** Live Earth-observation satellites, and real-time day and night shading. */
   satellitesOn: boolean;
   dayNightOn: boolean;
+  /** Post-process look over the globe, and the time and position readout. */
+  viewMode: "standard" | "night" | "thermal" | "mono";
+  readoutOn: boolean;
   rainTime: string | null;
   layerInfo: ImageryLayerInfo | null;
   compareInfo: ImageryLayerInfo | null;
@@ -261,6 +264,8 @@ export const useStore = create<State>((set, get) => {
     populationOn: false,
     satellitesOn: false,
     dayNightOn: false,
+    viewMode: "standard",
+    readoutOn: false,
     rainTime: null,
     layerInfo: null,
     compareInfo: null,

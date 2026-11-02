@@ -7,6 +7,7 @@ import { useStore } from "../app/store";
 import { type Overlay, type RenderId, hasLayers } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 import { aqiBand } from "../area/air";
+import { VIEW_MODES } from "../globe/viewModes";
 import { getGlobe } from "../globe/GlobeViewer";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
@@ -178,6 +179,19 @@ export function LayerPanel() {
                 with the next 90 minutes of orbit. Orbits from CelesTrak; open an area to see when each next passes over it.
               </p>
             )}
+            <div className="field">
+              <span>View <kbd>V</kbd></span>
+              <div className="seg" role="radiogroup" aria-label="View">
+                {VIEW_MODES.map((m) => (
+                  <button key={m.id} role="radio" aria-checked={s.viewMode === m.id} className={s.viewMode === m.id ? "on" : ""} onClick={() => s.set({ viewMode: m.id })}>{m.label}</button>
+                ))}
+              </div>
+              {s.viewMode !== "standard" && <p className="muted">A filter over the globe by brightness, to see patterns; not a measurement. The thermal look is not temperature.</p>}
+            </div>
+            <label className="check">
+              <input type="checkbox" checked={s.readoutOn} onChange={(e) => s.set({ readoutOn: e.target.checked })} />
+              <span>Readout: time, pointer position and height</span>
+            </label>
             <label className="check">
               <input type="checkbox" checked={s.dayNightOn} onChange={(e) => s.set({ dayNightOn: e.target.checked })} />
               <span>Day and night now</span>

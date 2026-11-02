@@ -131,6 +131,7 @@ export function GlobeViewer() {
   useEffect(() => instance?.setLabels(s.labelsVisible), [s.labelsVisible]);
   useEffect(() => instance?.setPopulation(s.populationOn), [s.populationOn]);
   useEffect(() => instance?.setDayNight(s.dayNightOn), [s.dayNightOn]);
+  useEffect(() => instance?.setViewMode(s.viewMode), [s.viewMode]);
   useEffect(() => {
     if (!s.satellitesOn) { instance?.setSatellites(null); return; }
     let stale = false;

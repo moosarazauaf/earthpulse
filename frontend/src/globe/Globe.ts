@@ -17,8 +17,11 @@ import {
   Ion,
   Math as CesiumMath,
   PolygonHierarchy,
+  PostProcessStage,
   PolylineGraphics,
   Rectangle,
+  ScreenSpaceEventHandler,
+  ScreenSpaceEventType,
   SingleTileImageryProvider,
   SplitDirection,
   Terrain,
@@ -33,6 +36,7 @@ import type { AoiGeometry, Detection, ImageryLayerInfo, MappedResult, Overlay } 
 import { CloudShell } from "./clouds";
 import { rainBlend, rainTileUrl } from "./rain";
 import { type Satellite, positionAt, track } from "./satellites";
+import { SHADERS, type ViewMode } from "./viewModes";
 import type { SatRec } from "satellite.js";
 import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
 
@@ -154,6 +158,7 @@ export class Globe {
   }
 
   destroy() {
+    this.cursorHandler?.destroy();
     window.clearInterval(this.satTimer);
     this.clouds.destroy();
     if (!this.viewer.isDestroyed()) this.viewer.destroy();
@@ -367,6 +372,36 @@ export class Globe {
   }
 
   /** Real-time day and night shading from the sun's position. */
+  private viewStage: PostProcessStage | null = null;
+
+  /** A post-process look over the scene; "standard" removes it. */
+  setViewMode(mode: ViewMode) {
+    const stages = this.viewer.scene.postProcessStages;
+    if (this.viewStage) stages.remove(this.viewStage);
+    this.viewStage = mode === "standard" ? null : new PostProcessStage({ fragmentShader: SHADERS[mode] });
+    if (this.viewStage) stages.add(this.viewStage);
+    this.render();
+  }
+
+  private cursorHandler: ScreenSpaceEventHandler | null = null;
+
+  /** Calls back with the longitude and latitude under the pointer (null off the globe) and the camera height; null stops. */
+  onCursor(callback: ((at: { lon: number; lat: number } | null, heightM: number) => void) | null) {
+    this.cursorHandler?.destroy();
+    this.cursorHandler = null;
+    if (!callback) return;
+    const { scene, camera } = this.viewer;
+    const report = (position?: Cartesian2) => {
+      const hit = position ? camera.pickEllipsoid(position, scene.globe.ellipsoid) : undefined;
+      const c = hit ? Cartographic.fromCartesian(hit) : null;
+      callback(c ? { lon: CesiumMath.toDegrees(c.longitude), lat: CesiumMath.toDegrees(c.latitude) } : null, Cartographic.fromCartesian(camera.positionWC).height);
+    };
+    this.cursorHandler = new ScreenSpaceEventHandler(scene.canvas);
+    this.cursorHandler.setInputAction((e: { endPosition: Cartesian2 }) => report(e.endPosition), ScreenSpaceEventType.MOUSE_MOVE);
+    this.cursorHandler.setInputAction(() => report(), ScreenSpaceEventType.WHEEL);
+    report();
+  }
+
   setDayNight(on: boolean) {
     this.viewer.scene.globe.enableLighting = on;
     this.viewer.clock.currentTime = JulianDate.now();
