@@ -5,6 +5,14 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.25] - 2026-11-02
+
+### Added
+- **Elevation profile** along the measuring line (D): a cross-section of
+  ground height from AWS Terrain Tiles, with lowest and highest point and
+  total climb and descent. Islamabad to Murree: 518 m to 2,093 m over
+  40.3 km.
+
 ## [0.2.0-alpha.24] - 2026-11-02
 
 ### Added
