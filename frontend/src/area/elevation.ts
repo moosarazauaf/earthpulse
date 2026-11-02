@@ -116,7 +116,7 @@ export function terrainStats(heights: Float32Array, width: number, height: numbe
   };
 }
 
-async function readTile(z: number, x: number, y: number, signal?: AbortSignal): Promise<Float32Array> {
+export async function readTile(z: number, x: number, y: number, signal?: AbortSignal): Promise<Float32Array> {
   const response = await fetch(`${TILES}/${z}/${x}/${y}.png`, { signal });
   if (!response.ok) throw new Error("Elevation tiles could not be read.");
   const bitmap = await createImageBitmap(await response.blob());

@@ -637,3 +637,10 @@ button.primary { color: #1b1d14; }
 }
 .readout span:first-child { color: var(--text); }
 @media (max-width: 800px) { .readout { display: none; } }
+
+/* ---- elevation profile ------------------------------------------------------------------ */
+.profile { display: grid; gap: var(--s1); margin-top: var(--s2); }
+.profile svg { width: 100%; max-width: 420px; }
+.profile .area { fill: rgba(141, 184, 90, 0.18); }
+.profile .line { fill: none; stroke: var(--green); stroke-width: 1.5; }
+.profile text { fill: var(--muted); font-size: 9px; }

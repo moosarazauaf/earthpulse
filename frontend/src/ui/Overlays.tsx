@@ -1,4 +1,5 @@
 /** Things that sit above the globe for a moment: the opening, story captions, notices, the sources sheet. */
+import { ElevationProfile } from "../area/ElevationProfile";
 import { useEffect, useRef, useState } from "react";
 
 import { HOSTED } from "../app/api";
@@ -151,6 +152,7 @@ export function ToolHint() {
   const measure = useStore((s) => s.measure);
   const sampleClass = useStore((s) => s.sampleClass);
   const set = useStore((s) => s.set);
+  const [profileOf, setProfileOf] = useState<[number, number][] | null>(null);
   if (tool === "measure" || measure.length > 0) {
     const area = enclosedKm2(measure);
     return (
@@ -159,7 +161,10 @@ export function ToolHint() {
           ? "Click points on the globe to measure. Double-click or Enter to finish, Esc to clear."
           : <>Distance <strong>{formatKm(pathKm(measure))}</strong>{area !== null && <> · enclosed area <strong>{formatKm2(area)}</strong></>}
             {tool === "measure" ? " · double-click or Enter to finish" : ""}</>}
-        {" "}<button className="link" onClick={() => set({ measure: [], drawTool: "none" })}>Clear</button>
+        {" "}<button className="link" onClick={() => { set({ measure: [], drawTool: "none" }); setProfileOf(null); }}>Clear</button>
+        {tool !== "measure" && measure.length >= 2 && (profileOf === measure
+          ? <ElevationProfile points={measure} />
+          : <>{" · "}<button className="link" onClick={() => setProfileOf(measure)}>Show elevation profile</button></>)}
       </div>
     );
   }
