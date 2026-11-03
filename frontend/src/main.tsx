@@ -6,6 +6,8 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "./App";
 import { startAnalytics } from "./app/analytics";
+import { useStore } from "./app/store";
+import { topicForPath } from "./app/topics";
 
 declare global {
   interface Window {
@@ -25,6 +27,9 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
 }
 
 startAnalytics();
+// A topic page (/wind-map/ and so on) opens with its layer already on.
+const topic = topicForPath(window.location.pathname);
+if (topic) useStore.getState().set({ introOpen: false, ...topic.preset });
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>
