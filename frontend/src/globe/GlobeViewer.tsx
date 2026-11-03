@@ -205,7 +205,12 @@ export function GlobeViewer() {
   const live = s.mode === "live";
   useEffect(() => instance?.setHazardLayers(live ? s.hazardLayers : []), [live, s.hazardLayers]);
   useEffect(() => instance?.setAlerts(live ? s.alerts ?? [] : [], s.selectedAlert?.id ?? null), [live, s.alerts, s.selectedAlert]);
-  useEffect(() => instance?.setQuakes(live && s.quakesOn ? s.quakes ?? [] : []), [live, s.quakesOn, s.quakes]);
+  const replay = s.quakeReplay;
+  const shownQuakes = (s.quakes ?? []).filter((q) => replay === null || Date.parse(q.time) <= replay);
+  // During a replay the markers are rebuilt only when another earthquake comes in, not on every tick.
+  useEffect(() => instance?.setQuakes(live && s.quakesOn ? shownQuakes : []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [live, s.quakesOn, s.quakes, shownQuakes.length]);
   useEffect(() => {
     const set = useStore.getState().set;
     if (!s.rainOn) {

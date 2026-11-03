@@ -1,5 +1,6 @@
 /** Live hazards: what the news, agencies and forecasts say right now, in three tabs. */
 import { PeopleNear } from "./PeopleNear";
+import { QuakeReplay } from "./QuakeReplay";
 import { useEffect, useState } from "react";
 
 import { useStore } from "../app/store";
@@ -107,6 +108,7 @@ function LayersTab() {
               {" "}Magnitudes are revised as more stations report.
             </p>
           )}
+          {quakesOn && quakes && quakes.length > 0 && <QuakeReplay />}
         </li>
       </ul>
       <p className="muted">No open landslide forecast could be connected yet; landslides appear only through the news.</p>

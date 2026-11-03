@@ -106,6 +106,8 @@ interface State {
   /** Earthquakes of the past week; null until loaded, shown when `quakesOn`. */
   quakes: Quake[] | null;
   quakesOn: boolean;
+  /** While the week is being replayed, the moment reached (ms since 1970); earthquakes after it are hidden. */
+  quakeReplay: number | null;
   /** Air quality now at major cities; null until loaded, shown on the globe while `airOn`. */
   cityAir: CityAir[] | null;
   /** The GAUL district of the place last picked in search, outlined on the globe. */
@@ -300,6 +302,7 @@ export const useStore = create<State>((set, get) => {
     hazardLayers: [],
     quakes: null,
     quakesOn: false,
+    quakeReplay: null,
     cityAir: null,
     district: null,
     airOn: false,
