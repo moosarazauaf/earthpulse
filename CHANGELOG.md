@@ -5,6 +5,18 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.26] - 2026-11-03
+
+### Added
+- **Surface wind now** (B): particles drifting with the 10 m wind from
+  Open-Meteo's forecast models on a 10° grid between 60° S and 70° N,
+  coloured by speed.
+- **Sea surface temperature**: the latest daily NASA JPL MUR analysis
+  through NASA GIBS, with a 0 to 32 °C legend.
+- **Replay the week** of earthquakes (Live, Map layers): the past seven days
+  of M4.5+ events appear on the globe in the order they struck, over about
+  15 seconds.
+
 ## [0.2.0-alpha.25] - 2026-11-02
 
 ### Added

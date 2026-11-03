@@ -234,9 +234,10 @@ the optional Python backend.
 | Impact Observatory annual land cover | 10 m | 2017 | UrbanEye |
 | GDACS, NASA FIRMS, GloFAS, GWIS, USGS | varies | live | Live view |
 | News RSS feeds + GeoNames gazetteer | headline | hourly | Hazard news |
-| Open-Meteo (forecast models, ERA5) | ~10–25 km | 1991 | Weather and climate context |
+| Open-Meteo (forecast models, ERA5) | ~10–25 km | 1991 | Weather, climate context, wind layer |
 | Landsat Collection 2 surface temperature | 100 m (as 30 m) | 1984 | HeatWatch |
 | AWS Terrain Tiles (SRTM, GMTED2010) | ~30 m | static | Terrain in the area overview |
+| NASA JPL MUR sea surface temperature | ~1 km (shown at 2 km) | daily | Sea temperature layer |
 
 All of it is open and keyless. Licences and attribution are in
 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
