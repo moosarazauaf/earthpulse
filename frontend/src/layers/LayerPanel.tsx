@@ -8,6 +8,7 @@ import { type Overlay, type RenderId, hasLayers } from "../app/types";
 import { KindBadge } from "../ui/KindBadge";
 import { aqiBand } from "../area/air";
 import { VIEW_MODES } from "../globe/viewModes";
+import { EARTH_LAYERS, earthLayer } from "../globe/earthToday";
 import { getGlobe } from "../globe/GlobeViewer";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
@@ -33,6 +34,7 @@ const OVERLAY_LABELS: Record<string, string> = {
 
 export function LayerPanel() {
   const s = useStore();
+  const earth = earthLayer(s.earthLayer);
   // Closed at first so a newcomer sees the globe, not imagery settings; it opens on its
   // own the first time Explore is chosen on a wide screen, where the imagery is the point.
   const [open, setOpen] = useState(false);
@@ -220,20 +222,22 @@ export function LayerPanel() {
                 </p>
               </div>
             )}
-            <label className="check">
-              <input type="checkbox" checked={s.seaTempOn} onChange={(e) => s.set({ seaTempOn: e.target.checked })} />
-              <span>Sea surface temperature, latest day</span>
-            </label>
-            {s.seaTempOn && (
-              <div className="muted">
-                <div className="pop-legend sst-legend" aria-hidden="true" />
-                <div className="pop-scale"><span>0</span><span>8</span><span>16</span><span>24</span><span>32+ °C</span></div>
-                <p>
-                  NASA JPL Multi-scale Ultra-high Resolution (MUR) analysis, a day or two behind: satellite and buoy readings blended
-                  into a gap-free map, so cloudy spots are filled in by the model. Shown here at about 2 km.
-                </p>
+            <div className="field">
+              <span>Earth today, from NASA</span>
+              <div className="seg" role="radiogroup" aria-label="Earth today">
+                {[{ id: null, label: "Off" }, ...EARTH_LAYERS].map((l) => (
+                  <button key={l.id ?? "off"} role="radio" aria-checked={s.earthLayer === l.id} className={s.earthLayer === l.id ? "on" : ""}
+                    onClick={() => s.set({ earthLayer: l.id })}>{l.label}</button>
+                ))}
               </div>
-            )}
+              {earth && (
+                <div className="muted">
+                  <div className="pop-legend" style={{ background: `linear-gradient(90deg, ${earth.stops})` }} aria-hidden="true" />
+                  <div className="pop-scale">{earth.scale.map((v) => <span key={v}>{v}</span>)}</div>
+                  <p>{earth.note}</p>
+                </div>
+              )}
+            </div>
             <label className="check">
               <input type="checkbox" checked={s.rainOn} onChange={(e) => s.set({ rainOn: e.target.checked })} />
               <span>Rain, past 3 hours <kbd>W</kbd></span>

@@ -510,7 +510,6 @@ a.story-row { display: grid; gap: 3px; padding: 6px 8px; border: 1px solid var(-
 
 /* ---- population legend (GIBS GPWv4 colour map) --------------------------------- */
 .pop-legend { height: 8px; border-radius: 2px; background: linear-gradient(90deg, rgb(255,242,209), rgb(252,147,63) 33.3%, rgb(240,59,32) 66.7%, rgb(189,0,38)); }
-.sst-legend { background: linear-gradient(90deg, rgb(43,0,26), rgb(94,8,105) 16.7%, rgb(32,57,133) 33.3%, rgb(47,166,242) 50%, rgb(229,246,0) 66.7%, rgb(238,87,0) 83.3%, rgb(107,2,0)); }
 .pop-scale { display: flex; justify-content: space-between; font-size: 11px; margin-top: 2px; }
 
 /* ---- clean, minimal pass ---------------------------------------------------------

@@ -39,6 +39,7 @@ import { rainBlend, rainTileUrl } from "./rain";
 import { type Satellite, positionAt, track } from "./satellites";
 import { SHADERS, type ViewMode } from "./viewModes";
 import { type WindField, advect, speedColour } from "./wind";
+import { EARTH_LAYERS } from "./earthToday";
 import type { SatRec } from "satellite.js";
 
 const WIND_PARTICLES = 4000;
@@ -463,11 +464,11 @@ export class Globe {
   }
 
   /** A NASA GIBS layer (latest date, 2 km tiles) under the place names, made on first use. */
-  private setGibs(id: string, on: boolean, credit: string, alpha: number) {
+  private setGibs(id: string, on: boolean, credit: string, alpha: number, level = 7) {
     if (on && !this.gibs.has(id)) {
       const layer = new ImageryLayer(new UrlTemplateImageryProvider({
-        url: `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${id}/default/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png`,
-        maximumLevel: 7,
+        url: `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${id}/default/default/GoogleMapsCompatible_Level${level}/{z}/{y}/{x}.png`,
+        maximumLevel: level,
         credit,
       }), { alpha });
       this.viewer.imageryLayers.add(layer, this.viewer.imageryLayers.indexOf(this.labels));
@@ -481,8 +482,10 @@ export class Globe {
   /** NASA SEDAC population density (GPWv4, 2020). */
   setPopulation(on: boolean) { this.setGibs("GPW_Population_Density_2020", on, "NASA SEDAC GPWv4 via GIBS", 0.7); }
 
-  /** Sea surface temperature, latest daily MUR analysis (NASA JPL). */
-  setSeaTemp(on: boolean) { this.setGibs("GHRSST_L4_MUR_Sea_Surface_Temperature", on, "NASA JPL MUR SST via GIBS", 0.85); }
+  /** One of the daily NASA environment layers by id; null hides them all. */
+  setEarthLayer(id: string | null) {
+    for (const l of EARTH_LAYERS) this.setGibs(l.gibs, l.id === id, l.credit, 0.85, l.level);
+  }
 
   private rainLayers: ImageryLayer[] = [];
   private rainTimes: string[] = [];

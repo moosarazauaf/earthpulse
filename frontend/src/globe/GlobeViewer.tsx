@@ -131,7 +131,7 @@ export function GlobeViewer() {
   useEffect(() => instance?.setPrimaryAlpha(s.imageryOpacity), [s.imageryOpacity]);
   useEffect(() => instance?.setLabels(s.labelsVisible), [s.labelsVisible]);
   useEffect(() => instance?.setPopulation(s.populationOn), [s.populationOn]);
-  useEffect(() => instance?.setSeaTemp(s.seaTempOn), [s.seaTempOn]);
+  useEffect(() => instance?.setEarthLayer(s.earthLayer), [s.earthLayer]);
   useEffect(() => instance?.setDayNight(s.dayNightOn), [s.dayNightOn]);
   useEffect(() => instance?.setViewMode(s.viewMode), [s.viewMode]);
   useEffect(() => {
