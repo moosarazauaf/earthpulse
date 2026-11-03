@@ -5,6 +5,20 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.27] - 2026-11-03
+
+### Added
+- **Earth today, from NASA** (Layers panel): vegetation (MODIS NDVI, 8-day),
+  soil moisture (SMAP Level 4), smoke and dust (MODIS aerosol optical depth)
+  and ozone (OMPS total column), alongside sea temperature, one at a time,
+  each with a legend sampled from NASA's colour map.
+- **A page per map** for search engines: /wind-map/, /soil-moisture-map/,
+  /earthquake-map/ and eleven more, each with its own title, description and
+  text, opening the app with that layer on; all listed in sitemap.xml.
+
+### Changed
+- Sea surface temperature moved into Earth today.
+
 ## [0.2.0-alpha.26] - 2026-11-03
 
 ### Added

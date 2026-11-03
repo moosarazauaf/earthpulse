@@ -237,7 +237,8 @@ the optional Python backend.
 | Open-Meteo (forecast models, ERA5) | ~10–25 km | 1991 | Weather, climate context, wind layer |
 | Landsat Collection 2 surface temperature | 100 m (as 30 m) | 1984 | HeatWatch |
 | AWS Terrain Tiles (SRTM, GMTED2010) | ~30 m | static | Terrain in the area overview |
-| NASA JPL MUR sea surface temperature | ~1 km (shown at 2 km) | daily | Sea temperature layer |
+| NASA JPL MUR sea surface temperature | ~1 km (shown at 2 km) | daily | Earth today: sea temperature |
+| NASA MODIS NDVI and aerosol, SMAP soil moisture, OMPS ozone (GIBS) | 250 m to 50 km | daily / 8-day | Earth today layers |
 
 All of it is open and keyless. Licences and attribution are in
 [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).

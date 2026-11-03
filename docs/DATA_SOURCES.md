@@ -92,6 +92,10 @@ as an index and does not call a rise in it "urban expansion".
 | Satellites live and next passes (G) | CelesTrak two-line orbital elements (Earth-resources group, plus Sentinel-1C), propagated with SGP4 by satellite.js | Public data; credit CelesTrak. A pass means the place is inside the swath (in daylight for optical satellites), not that an image was taken |
 | Surface wind (B) | Open-Meteo forecast API, current 10 m wind speed and direction at 504 points on a 10° grid (60° S to 70° N), interpolated between points | CC BY 4.0, credit Open-Meteo. Shows large weather systems, not local gusts |
 | Sea surface temperature | NASA JPL GHRSST Level 4 MUR analysis, daily, through NASA GIBS (`GHRSST_L4_MUR_Sea_Surface_Temperature`) | Public domain map tiles; credit NASA JPL / PO.DAAC. Gaps under cloud are filled by the analysis |
+| Earth today: vegetation | NASA MODIS Terra NDVI, rolling 8-day, about 250 m, through NASA GIBS (`MODIS_Terra_NDVI_8Day`) | Public domain map tiles; credit NASA LP DAAC / GIBS |
+| Earth today: soil moisture | NASA SMAP Level 4 analysed surface soil moisture, about 9 km, through NASA GIBS (`SMAP_L4_Analyzed_Surface_Soil_Moisture`) | Public domain; credit NASA GMAO / NSIDC. Model value-added, not a direct measurement everywhere |
+| Earth today: smoke and dust | NASA MODIS Aqua and Terra combined value-added aerosol optical depth, daily, through NASA GIBS (`MODIS_Combined_Value_Added_AOD`) | Public domain; credit NASA LAADS / GIBS. Whole-column haze, not ground-level air quality |
+| Earth today: ozone | NASA OMPS on Suomi NPP total column ozone, daily, through NASA GIBS (`OMPS_Ozone_Total_Column`) | Public domain; credit NASA GES DISC / GIBS |
 | Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is
