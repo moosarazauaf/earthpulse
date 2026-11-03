@@ -179,6 +179,16 @@ export function LayerPanel() {
                 with the next 90 minutes of orbit. Orbits from CelesTrak; open an area to see when each next passes over it.
               </p>
             )}
+            <label className="check">
+              <input type="checkbox" checked={s.windOn} onChange={(e) => s.set({ windOn: e.target.checked })} />
+              <span>Surface wind now <kbd>B</kbd></span>
+            </label>
+            {s.windOn && (
+              <p className="muted">
+                {s.windTime ? `Wind 10 m above the ground at ${s.windTime.slice(11)} UTC` : "Loading the wind…"}: slate under 4 m/s, sage to 8, ochre to 13,
+                terracotta above. Open-Meteo forecast models on a 10° grid between 60° S and 70° N, so it shows the big weather systems, not local gusts.
+              </p>
+            )}
             <div className="field">
               <span>View <kbd>V</kbd></span>
               <div className="seg" role="radiogroup" aria-label="View">

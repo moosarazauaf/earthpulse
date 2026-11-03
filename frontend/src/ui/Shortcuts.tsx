@@ -27,7 +27,7 @@ export const SHORTCUTS: { group: string; keys: [string, string][] }[] = [
   },
   {
     group: "Globe and time",
-    keys: [["/", "Search for a place or coordinates"], ["H", "Back to the whole Earth"], ["← →", "Previous or next year"], ["Space", "Play or pause the years"], ["C", "Compare with another year"], ["K", "Clouds on or off"], ["Q", "Air quality at major cities"], ["W", "Rain over the past 3 hours"], ["G", "Landsat and Sentinel satellites, live"], ["V", "Next view: standard, night vision, thermal look, mono"], ["S", "Copy a link to this view"], ["?", "This list"]],
+    keys: [["/", "Search for a place or coordinates"], ["H", "Back to the whole Earth"], ["← →", "Previous or next year"], ["Space", "Play or pause the years"], ["C", "Compare with another year"], ["K", "Clouds on or off"], ["Q", "Air quality at major cities"], ["W", "Rain over the past 3 hours"], ["G", "Landsat and Sentinel satellites, live"], ["B", "Surface wind now"], ["V", "Next view: standard, night vision, thermal look, mono"], ["S", "Copy a link to this view"], ["?", "This list"]],
   },
 ];
 
@@ -87,6 +87,7 @@ export function useShortcuts() {
       else if (key === "q") s.set({ airOn: !s.airOn });
       else if (key === "w") s.set({ rainOn: !s.rainOn });
       else if (key === "g") s.set({ satellitesOn: !s.satellitesOn });
+      else if (key === "b") s.set({ windOn: !s.windOn });
       else if (key === "v") s.set({ viewMode: nextMode(s.viewMode) });
       else if (key === "s" && event.shiftKey) s.saveCurrentPlace();
       else if (key === "s") {

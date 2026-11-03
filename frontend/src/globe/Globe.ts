@@ -17,6 +17,7 @@ import {
   Ion,
   Math as CesiumMath,
   PolygonHierarchy,
+  PointPrimitiveCollection,
   PostProcessStage,
   PolylineGraphics,
   Rectangle,
@@ -37,7 +38,25 @@ import { CloudShell } from "./clouds";
 import { rainBlend, rainTileUrl } from "./rain";
 import { type Satellite, positionAt, track } from "./satellites";
 import { SHADERS, type ViewMode } from "./viewModes";
+import { type WindField, advect, speedColour } from "./wind";
 import type { SatRec } from "satellite.js";
+
+const WIND_PARTICLES = 4000;
+/** Frames a particle lives before it starts again elsewhere, so the flow never bunches up in calm spots. */
+const WIND_LIFE = 180;
+const WIND_HEIGHT = 3000;
+const scratchWind = new Cartesian3();
+const windPalette = new Map<string, Color>();
+const WIND_COLOURS = (speed: number) => {
+  const css = speedColour(speed);
+  if (!windPalette.has(css)) windPalette.set(css, Color.fromCssColorString(css).withAlpha(0.85));
+  return windPalette.get(css)!;
+};
+/** A random place within the wind grid, even over the sphere's area, at a random point in its life. */
+const windSpawn = () => {
+  const lo = Math.sin((-60 * Math.PI) / 180), hi = Math.sin((70 * Math.PI) / 180);
+  return { lon: Math.random() * 360 - 180, lat: (Math.asin(lo + Math.random() * (hi - lo)) * 180) / Math.PI, age: Math.floor(Math.random() * WIND_LIFE) };
+};
 import { type Alert, HAZARD_LAYERS, type Quake, wmsParameters } from "../hazards/sources";
 
 const ESRI_IMAGERY =
@@ -160,6 +179,7 @@ export class Globe {
   destroy() {
     this.cursorHandler?.destroy();
     window.clearInterval(this.satTimer);
+    this.setWind(null);
     this.clouds.destroy();
     if (!this.viewer.isDestroyed()) this.viewer.destroy();
   }
@@ -287,6 +307,7 @@ export class Globe {
     }
     if (this.clouds.step()) busy = true;
     if (this.stepRain()) busy = true;
+    if (this.stepWind()) busy = true;
     if (busy) this.render();
   }
 
@@ -369,6 +390,39 @@ export class Globe {
       this.render();
     }, 2000);
     this.render();
+  }
+
+  private wind: { field: WindField; points: PointPrimitiveCollection; parts: { lon: number; lat: number; age: number }[] } | null = null;
+  private readonly windMoves = !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+  /** Particles drifting with the surface wind, coloured by speed; null removes them. */
+  setWind(field: WindField | null) {
+    if (this.wind) this.viewer.scene.primitives.remove(this.wind.points);
+    this.wind = null;
+    if (field) {
+      const points = this.viewer.scene.primitives.add(new PointPrimitiveCollection()) as PointPrimitiveCollection;
+      const parts = Array.from({ length: WIND_PARTICLES }, () => {
+        const p = windSpawn();
+        points.add({ position: Cartesian3.fromDegrees(p.lon, p.lat, WIND_HEIGHT), pixelSize: 2, color: Color.TRANSPARENT });
+        return p;
+      });
+      this.wind = { field, points, parts };
+    }
+    this.render();
+  }
+
+  private stepWind(): boolean {
+    if (!this.wind) return false;
+    const { field, points, parts } = this.wind;
+    parts.forEach((p, i) => {
+      const next = this.windMoves && p.age < WIND_LIFE ? advect(field, p.lon, p.lat) : null;
+      if (this.windMoves && !next) Object.assign(p, windSpawn());
+      const point = points.get(i);
+      if (next) { p.lon = next.lon; p.lat = next.lat; p.age += 1; point.color = WIND_COLOURS(next.speed); }
+      else if (!this.windMoves) point.color = WIND_COLOURS(advect(field, p.lon, p.lat)?.speed ?? 0);
+      point.position = Cartesian3.fromDegrees(p.lon, p.lat, WIND_HEIGHT, undefined, scratchWind);
+    });
+    return this.windMoves;
   }
 
   /** Real-time day and night shading from the sun's position. */

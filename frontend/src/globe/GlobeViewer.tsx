@@ -11,6 +11,7 @@ import { newsMarkers } from "../news/corroborate";
 import { aqiBand } from "../area/air";
 import { latestRainTime, rainTimes } from "./rain";
 import { fetchSatellites } from "./satellites";
+import { fetchWind } from "./wind";
 import { Drawing } from "./Drawing";
 import { Globe, geometryBounds } from "./Globe";
 
@@ -141,6 +142,15 @@ export function GlobeViewer() {
     );
     return () => { stale = true; };
   }, [s.satellitesOn]);
+  useEffect(() => {
+    if (!s.windOn) { instance?.setWind(null); useStore.getState().set({ windTime: null }); return; }
+    let stale = false;
+    fetchWind().then(
+      (field) => { if (!stale) { instance?.setWind(field); useStore.getState().set({ windTime: field.time }); } },
+      () => { if (!stale) useStore.getState().set({ windOn: false, notice: "Wind could not be loaded from Open-Meteo." }); },
+    );
+    return () => { stale = true; };
+  }, [s.windOn]);
   useEffect(() => instance?.setClouds(s.cloudsOn, (time, loaded) => useStore.getState().set({ cloudInfo: time || loaded ? { time, loaded } : null })), [s.cloudsOn]);
 
   // Comparison imagery.

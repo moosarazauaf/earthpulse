@@ -71,6 +71,9 @@ interface State {
   populationOn: boolean;
   /** Live Earth-observation satellites, and real-time day and night shading. */
   satellitesOn: boolean;
+  windOn: boolean;
+  /** When the wind shown was measured (UTC, from Open-Meteo), once loaded. */
+  windTime: string | null;
   dayNightOn: boolean;
   /** Post-process look over the globe, and the time and position readout. */
   viewMode: "standard" | "night" | "thermal" | "mono";
@@ -263,6 +266,8 @@ export const useStore = create<State>((set, get) => {
     rainOn: false,
     populationOn: false,
     satellitesOn: false,
+    windOn: false,
+    windTime: null,
     dayNightOn: false,
     viewMode: "standard",
     readoutOn: false,
