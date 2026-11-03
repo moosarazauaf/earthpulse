@@ -221,6 +221,20 @@ export function LayerPanel() {
               </div>
             )}
             <label className="check">
+              <input type="checkbox" checked={s.seaTempOn} onChange={(e) => s.set({ seaTempOn: e.target.checked })} />
+              <span>Sea surface temperature, latest day</span>
+            </label>
+            {s.seaTempOn && (
+              <div className="muted">
+                <div className="pop-legend sst-legend" aria-hidden="true" />
+                <div className="pop-scale"><span>0</span><span>8</span><span>16</span><span>24</span><span>32+ °C</span></div>
+                <p>
+                  NASA JPL Multi-scale Ultra-high Resolution (MUR) analysis, a day or two behind: satellite and buoy readings blended
+                  into a gap-free map, so cloudy spots are filled in by the model. Shown here at about 2 km.
+                </p>
+              </div>
+            )}
+            <label className="check">
               <input type="checkbox" checked={s.rainOn} onChange={(e) => s.set({ rainOn: e.target.checked })} />
               <span>Rain, past 3 hours <kbd>W</kbd></span>
             </label>

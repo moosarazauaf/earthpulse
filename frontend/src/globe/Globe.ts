@@ -347,9 +347,8 @@ export class Globe {
     }
   }
 
-  private population: ImageryLayer | null = null;
+  private gibs = new Map<string, ImageryLayer>();
 
-  /** NASA SEDAC population density (GPWv4, 2020) through GIBS, under the place names. */
   private satEntities: Entity[] = [];
   private satTimer = 0;
 
@@ -463,18 +462,27 @@ export class Globe {
     this.render();
   }
 
-  setPopulation(on: boolean) {
-    if (on && !this.population) {
-      this.population = new ImageryLayer(new UrlTemplateImageryProvider({
-        url: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/GPW_Population_Density_2020/default/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png",
+  /** A NASA GIBS layer (latest date, 2 km tiles) under the place names, made on first use. */
+  private setGibs(id: string, on: boolean, credit: string, alpha: number) {
+    if (on && !this.gibs.has(id)) {
+      const layer = new ImageryLayer(new UrlTemplateImageryProvider({
+        url: `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${id}/default/default/GoogleMapsCompatible_Level7/{z}/{y}/{x}.png`,
         maximumLevel: 7,
-        credit: "NASA SEDAC GPWv4 via GIBS",
-      }), { alpha: 0.7 });
-      this.viewer.imageryLayers.add(this.population, this.viewer.imageryLayers.indexOf(this.labels));
+        credit,
+      }), { alpha });
+      this.viewer.imageryLayers.add(layer, this.viewer.imageryLayers.indexOf(this.labels));
+      this.gibs.set(id, layer);
     }
-    if (this.population) this.population.show = on;
+    const layer = this.gibs.get(id);
+    if (layer) layer.show = on;
     this.render();
   }
+
+  /** NASA SEDAC population density (GPWv4, 2020). */
+  setPopulation(on: boolean) { this.setGibs("GPW_Population_Density_2020", on, "NASA SEDAC GPWv4 via GIBS", 0.7); }
+
+  /** Sea surface temperature, latest daily MUR analysis (NASA JPL). */
+  setSeaTemp(on: boolean) { this.setGibs("GHRSST_L4_MUR_Sea_Surface_Temperature", on, "NASA JPL MUR SST via GIBS", 0.85); }
 
   private rainLayers: ImageryLayer[] = [];
   private rainTimes: string[] = [];
