@@ -97,6 +97,8 @@ as an index and does not call a rise in it "urban expansion".
 | Earth today: smoke and dust | NASA MODIS Aqua and Terra combined value-added aerosol optical depth, daily, through NASA GIBS (`MODIS_Combined_Value_Added_AOD`) | Public domain; credit NASA LAADS / GIBS. Whole-column haze, not ground-level air quality |
 | Earth today: ozone | NASA OMPS on Suomi NPP total column ozone, daily, through NASA GIBS (`OMPS_Ozone_Total_Column`) | Public domain; credit NASA GES DISC / GIBS |
 | Next 7 days and pass cloud | Open-Meteo forecast API (daily rain, temperature, feels-like, gusts, FAO-56 reference evapotranspiration; hourly cloud cover) and the Open-Meteo air quality API (CAMS forecast, hourly US AQI, 5 days) | CC BY 4.0, credit Open-Meteo and Copernicus CAMS. Model forecasts for one grid cell; not official warnings |
+| Water since 1984 | JRC Global Surface Water occurrence 1984 to 2021, 30 m, from the public tiles (`storage.googleapis.com/global-surface-water/tiles2021/occurrence`) | Free to use with credit: EC JRC / Google (Pekel et al., 2016, Nature). Occurrence is read back from the tile colours; floods between images or under cloud are missed |
+| Solar power | Open-Meteo historical weather API: ERA5 daily shortwave radiation, the last ten full years | CC BY 4.0, credit Open-Meteo and Copernicus C3S. Panel output as sunshine × 0.85, a planning rule of thumb |
 | Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is

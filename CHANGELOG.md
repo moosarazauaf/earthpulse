@@ -5,6 +5,19 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.29] - 2026-11-04
+
+### Added
+- **Water since 1984** in the area overview: the share of the area that has
+  been under water at least once, most of the time, or only sometimes, read
+  from JRC Global Surface Water; floodplain ground is flagged before
+  building or buying. Also a map layer in the Layers panel.
+- **Solar power**: kWh a year per kW of panels from ten years of ERA5
+  sunshine, by month, with the weakest month to size batteries for.
+- **Cleanest air hours**: in the 7-day outlook, the cleanest 3 waking hours
+  of the next day and the worst hour when the air is poor, or a plain
+  statement when there is no clean window.
+
 ## [0.2.0-alpha.28] - 2026-11-04
 
 ### Added
