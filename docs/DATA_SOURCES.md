@@ -96,6 +96,7 @@ as an index and does not call a rise in it "urban expansion".
 | Earth today: soil moisture | NASA SMAP Level 4 analysed surface soil moisture, about 9 km, through NASA GIBS (`SMAP_L4_Analyzed_Surface_Soil_Moisture`) | Public domain; credit NASA GMAO / NSIDC. Model value-added, not a direct measurement everywhere |
 | Earth today: smoke and dust | NASA MODIS Aqua and Terra combined value-added aerosol optical depth, daily, through NASA GIBS (`MODIS_Combined_Value_Added_AOD`) | Public domain; credit NASA LAADS / GIBS. Whole-column haze, not ground-level air quality |
 | Earth today: ozone | NASA OMPS on Suomi NPP total column ozone, daily, through NASA GIBS (`OMPS_Ozone_Total_Column`) | Public domain; credit NASA GES DISC / GIBS |
+| Next 7 days and pass cloud | Open-Meteo forecast API (daily rain, temperature, feels-like, gusts, FAO-56 reference evapotranspiration; hourly cloud cover) and the Open-Meteo air quality API (CAMS forecast, hourly US AQI, 5 days) | CC BY 4.0, credit Open-Meteo and Copernicus CAMS. Model forecasts for one grid cell; not official warnings |
 | Rain and snow (W) | NASA GPM IMERG near-real-time precipitation rate, half-hourly, about 10 km, through NASA GIBS | Public domain; credit NASA GIBS / GPM |
 
 The basemap is a mosaic of many acquisition dates. It gives context and is

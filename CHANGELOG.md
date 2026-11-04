@@ -5,6 +5,22 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.28] - 2026-11-04
+
+### Added
+- **Next 7 days** in the area overview: warnings when the forecast crosses
+  heavy rain (50 mm a day), dangerous heat (feels like 39 °C), frost, gales
+  (62 km/h) or unhealthy air (US AQI 150), a day-by-day table, and the
+  week's rain against FAO reference evaporation, for planning irrigation.
+- **Cloud forecast at each satellite pass**: whether the next Landsat or
+  Sentinel-2 image is likely to be clear, within 7 days; Sentinel-1 radar
+  marked as seeing through cloud.
+- **Save map image** (I): the view as a PNG with title, scale bar, north
+  arrow, legend and data credits, ready for a report.
+
+### Fixed
+- "in 1 days" in the satellite passes.
+
 ## [0.2.0-alpha.27] - 2026-11-03
 
 ### Added
