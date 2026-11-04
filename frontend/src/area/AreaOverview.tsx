@@ -26,7 +26,7 @@ import { type AirQuality, WHO_PM25_DAY, aqiBand, fetchAir } from "./air";
 import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
-import { type OutlookDay, dayName, fetchOutlook, warnings, waterBalance } from "./outlook";
+import { type CloudHours, type OutlookDay, cloudAt, cloudWords, dayName, fetchCloudHours, fetchOutlook, warnings, waterBalance } from "./outlook";
 
 const SIZES = [2, 5, 10, 25] as const;
 const NEWS_KM = 150;
@@ -277,16 +277,26 @@ function People() {
 
 // ---- satellite passes ----------------------------------------------------------------------------
 
+/** Whether the ground should be visible at a pass: radar always; optical by the cloud forecast. */
+function PassSky({ optical, cover }: { optical: boolean; cover: number | null }) {
+  if (!optical) return <span className="pass-sky">· radar, sees through cloud</span>;
+  if (cover === null) return null;
+  return <span className={`pass-sky ${cover < 20 ? "clear" : cover < 60 ? "" : "cloudy"}`}>· {cloudWords(cover)}, {Math.round(cover)}% cloud forecast</span>;
+}
+
 /** When each Landsat and Sentinel satellite next passes over the area's centre, soonest first. */
 function Passes({ lat, lon }: { lat: number; lon: number }) {
   const t = useT();
   const set = useStore((s) => s.set);
   const [passes, setPasses] = useState<{ sat: Satellite; when: Date | null }[] | null>(null);
   const [error, setError] = useState(false);
+  const [clouds, setClouds] = useState<CloudHours | null>(null);
   useEffect(() => {
     const controller = new AbortController();
     setPasses(null);
     setError(false);
+    setClouds(null);
+    fetchCloudHours(lat, lon, controller.signal).then(setClouds, () => undefined);
     fetchSatellites()
       .then((sats) => nextPasses(sats, lon, lat, controller.signal))
       .then((p) => { if (!controller.signal.aborted) setPasses(p.sort((a, b) => (a.when?.getTime() ?? Infinity) - (b.when?.getTime() ?? Infinity))); },
@@ -294,7 +304,7 @@ function Passes({ lat, lon }: { lat: number; lon: number }) {
     return () => controller.abort();
   }, [lat, lon]);
   const when = (d: Date) => `${d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}, ${d.toISOString().slice(11, 16)} UTC`;
-  const inDays = (d: Date) => { const h = (d.getTime() - Date.now()) / 3_600_000; return h < 24 ? `in ${Math.max(1, Math.round(h))} h` : `in ${Math.round(h / 24)} days`; };
+  const inDays = (d: Date) => { const h = (d.getTime() - Date.now()) / 3_600_000; return h < 24 ? `in ${Math.max(1, Math.round(h))} h` : `in ${Math.round(h / 24)} day${Math.round(h / 24) === 1 ? "" : "s"}`; };
   return (
     <section>
       <header className="row"><h3>{t("area.passes")}</h3><button className="link" onClick={() => set({ satellitesOn: true })}>Show them live</button></header>
@@ -305,14 +315,15 @@ function Passes({ lat, lon }: { lat: number; lon: number }) {
           {passes.map(({ sat, when: d }) => (
             <li key={sat.norad}>
               <span className="swatch" style={{ background: sat.colour }} aria-hidden="true" /> <strong>{sat.name}</strong>{" "}
-              {d ? <>{when(d)} <span className="muted">({inDays(d)})</span></> : <span className="muted">no pass in the next 16 days</span>}
+              {d ? <>{when(d)} <span className="muted">({inDays(d)})</span> <PassSky optical={sat.optical} cover={clouds && cloudAt(clouds, d)} /></> : <span className="muted">no pass in the next 16 days</span>}
             </li>
           ))}
         </ul>
       )}
       <p className="muted">
         When the area&apos;s centre lies inside each satellite&apos;s swath (in daylight, for Landsat and Sentinel-2), from CelesTrak orbits.
-        Whether a picture is taken depends on the mission&apos;s plan, and clouds can hide the ground.
+        Whether a picture is taken depends on the mission&apos;s plan. Cloud is Open-Meteo&apos;s forecast for that hour, within 7 days;
+        cloud forecasts more than a few days ahead are rough.
       </p>
     </section>
   );

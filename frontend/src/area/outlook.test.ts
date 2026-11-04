@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type OutlookDay, list, parseOutlook, warnings, waterBalance } from "./outlook";
+import { type OutlookDay, cloudAt, list, parseOutlook, warnings, waterBalance } from "./outlook";
 
 const day = (date: string, o: Partial<OutlookDay> = {}): OutlookDay => ({ date, rain: 0, tmax: 25, tmin: 12, feels: 25, gust: 20, et0: 3, aqi: 50, ...o });
 
@@ -29,6 +29,13 @@ describe("7-day outlook", () => {
   it("writes runs of three or more days as a range", () => {
     expect(list(["2026-11-04", "2026-11-05", "2026-11-06", "2026-11-09"])).toBe("Wed, Nov 4 to Fri, Nov 6, Mon, Nov 9");
     expect(list(["2026-11-04", "2026-11-05"])).toBe("Wed, Nov 4, Thu, Nov 5");
+  });
+
+  it("reads the cloud forecast in the hour nearest a pass", () => {
+    const hours = { time: ["2026-11-04T05:00", "2026-11-04T06:00"], cover: [10, 80] };
+    expect(cloudAt(hours, new Date("2026-11-04T05:20:00Z"))).toBe(10);
+    expect(cloudAt(hours, new Date("2026-11-04T05:40:00Z"))).toBe(80);
+    expect(cloudAt(hours, new Date("2026-11-20T05:00:00Z"))).toBeNull();
   });
 
   it("adds rain and subtracts evaporation", () => {

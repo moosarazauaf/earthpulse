@@ -105,3 +105,20 @@ export async function fetchOutlook(lat: number, lon: number, signal?: AbortSigna
   if (!days.length) throw new Error("No forecast for this place.");
   return days;
 }
+
+export interface CloudHours { time: string[]; cover: (number | null)[] }
+
+/** Hourly cloud cover (%) for the next 7 days, in UTC. */
+export async function fetchCloudHours(lat: number, lon: number, signal?: AbortSignal): Promise<CloudHours> {
+  const body = (await getJson(`${FORECAST}?latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&hourly=cloud_cover&forecast_days=7`, signal)) as { hourly?: { time?: string[]; cloud_cover?: unknown[] } };
+  return { time: body.hourly?.time ?? [], cover: (body.hourly?.cloud_cover ?? []).map(num) };
+}
+
+/** Forecast cloud cover (%) in the hour nearest a moment; null when it is outside the forecast. */
+export function cloudAt(hours: CloudHours, when: Date): number | null {
+  const key = new Date(Math.round(when.getTime() / 3_600_000) * 3_600_000).toISOString().slice(0, 13);
+  const i = hours.time.findIndex((t) => t.slice(0, 13) === key);
+  return i < 0 ? null : hours.cover[i] ?? null;
+}
+
+export const cloudWords = (pct: number) => (pct < 20 ? "clear" : pct < 60 ? "partly cloudy" : "cloudy");
