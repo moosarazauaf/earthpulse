@@ -26,6 +26,7 @@ import { type AirQuality, WHO_PM25_DAY, aqiBand, fetchAir } from "./air";
 import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
+import { type OutlookDay, dayName, fetchOutlook, warnings, waterBalance } from "./outlook";
 
 const SIZES = [2, 5, 10, 25] as const;
 const NEWS_KM = 150;
@@ -85,6 +86,7 @@ function Overview() {
         )}
       </section>
       <QuickRuns />
+      <Outlook lat={lat} lon={lon} />
       <LandCover />
       <TerrainSection />
       <People />
@@ -462,6 +464,59 @@ function RecentRain({ lat, lon }: { lat: number; lon: number }) {
             </p>
           )}
           <p className="muted">Recent days from Open-Meteo's weather models, the baseline from ERA5; one grid cell, so local storms can be missed.</p>
+        </>
+      )}
+    </section>
+  );
+}
+
+/** The next 7 days: threshold warnings, a day-by-day table and whether the ground will dry out. */
+function Outlook({ lat, lon }: { lat: number; lon: number }) {
+  const [days, setDays] = useState<OutlookDay[] | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    setDays(null);
+    setError(false);
+    fetchOutlook(lat, lon, controller.signal).then(setDays, () => { if (!controller.signal.aborted) setError(true); });
+    return () => controller.abort();
+  }, [lat, lon]);
+  const warns = days ? warnings(days) : [];
+  const balance = days ? waterBalance(days) : 0;
+  return (
+    <section>
+      <header className="row"><h3>Next 7 days</h3><KindBadge kind="MODELED" /></header>
+      {error && <p className="note">The forecast could not be loaded.</p>}
+      {!days && !error && <p className="muted" role="status">Reading the forecast…</p>}
+      {days && (
+        <>
+          {warns.length ? warns.map((w) => <p key={w.kind} className="note">{w.text}</p>)
+            : <p>No heavy rain, dangerous heat, frost, gales or unhealthy air in the forecast.</p>}
+          <table className="table outlook">
+            <thead><tr><th>Day</th><th>Rain</th><th>High / low</th><th>Gusts</th><th>Air</th></tr></thead>
+            <tbody>
+              {days.map((d) => (
+                <tr key={d.date}>
+                  <td>{dayName(d.date)}</td>
+                  <td>{d.rain >= 0.5 ? `${Math.round(d.rain)} mm` : "–"}</td>
+                  <td>{Math.round(d.tmax)}° / {Math.round(d.tmin)}°</td>
+                  <td>{Math.round(d.gust)} km/h</td>
+                  <td>{d.aqi === null ? "" : d.aqi}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p>
+            {balance < 0 && days.every((d) => d.rain < 0.5)
+              ? `No rain expected, while a watered field would lose about ${Math.round(-balance)} mm to evaporation: unirrigated soil dries out.`
+              : balance < 0
+              ? `Rain covers ${Math.round(100 * days.reduce((s, d) => s + d.rain, 0) / Math.max(days.reduce((s, d) => s + d.et0, 0), 0.1))}% of what a watered field would lose to evaporation this week: about ${Math.round(-balance)} mm short, so unirrigated soil dries out.`
+              : `Rain exceeds evaporation by about ${Math.round(balance)} mm this week, so the ground stays wet or gets wetter.`}
+          </p>
+          <p className="muted">
+            Open-Meteo's weather models and the CAMS air quality forecast (US AQI, daily worst hour, 5 days) for one grid cell. Warning lines: rain 50 mm a day,
+            feels-like 39 °C, frost 0 °C, gusts 62 km/h, AQI 150. Evaporation is the FAO reference for grass. Not an official warning; follow your weather service.
+          </p>
         </>
       )}
     </section>

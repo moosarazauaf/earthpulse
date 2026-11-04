@@ -164,6 +164,8 @@ input[type="checkbox"] { accent-color: var(--cyan); }
 .stat span, .stat em { font-size: 11px; color: var(--muted); font-style: normal; }
 .stat strong { font: 600 20px var(--mono); }
 .table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.outlook td, .outlook th { padding: 3px 4px; text-align: right; font-variant-numeric: tabular-nums; }
+.outlook td:first-child, .outlook th:first-child { text-align: left; }
 .table th, .table td { text-align: right; padding: 4px 2px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-weight: 400; }
 .table th:first-child { text-align: left; font-family: var(--sans); }
 .table thead th { color: var(--muted); font-size: 11px; }
