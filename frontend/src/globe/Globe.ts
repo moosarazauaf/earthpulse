@@ -246,6 +246,32 @@ export class Globe {
     });
   }
 
+  /**
+   * The globe as drawn now, for a map figure: a PNG data URL, metres per image
+   * pixel across the centre (null when the centre is off the globe), the
+   * camera heading (radians) and the credits of the layers on show.
+   */
+  snapshot(): { image: string; width: number; height: number; metresPerPixel: number | null; heading: number; credits: string[] } {
+    const { scene, camera, canvas } = this.viewer;
+    // The drawing buffer is only readable in the same task as the frame that drew it.
+    this.viewer.render();
+    const image = canvas.toDataURL("image/png");
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const a = camera.pickEllipsoid(new Cartesian2(w / 2 - 50, h / 2), scene.globe.ellipsoid);
+    const b = camera.pickEllipsoid(new Cartesian2(w / 2 + 50, h / 2), scene.globe.ellipsoid);
+    const metresPerCssPixel = a && b ? Cartesian3.distance(a, b) / 100 : null;
+    const credits: string[] = [];
+    for (let i = 0; i < this.viewer.imageryLayers.length; i += 1) {
+      const layer = this.viewer.imageryLayers.get(i);
+      const html = layer.show && layer.alpha > 0 ? layer.imageryProvider?.credit?.html : undefined;
+      const text = html?.replace(/<[^>]*>/g, "").trim();
+      if (text && !credits.includes(text)) credits.push(text);
+    }
+    if (this.wind) credits.push("Wind: Open-Meteo");
+    if (this.quakeEntities.length) credits.push("Earthquakes: USGS");
+    return { image, width: canvas.width, height: canvas.height, metresPerPixel: metresPerCssPixel && metresPerCssPixel * (w / canvas.width), heading: camera.heading, credits };
+  }
+
   cameraView(): { lon: number; lat: number; height: number } {
     const position = Cartographic.fromCartesian(this.viewer.camera.position);
     return {

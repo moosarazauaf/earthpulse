@@ -9,6 +9,7 @@ import { KindBadge } from "../ui/KindBadge";
 import { aqiBand } from "../area/air";
 import { VIEW_MODES } from "../globe/viewModes";
 import { EARTH_LAYERS, earthLayer } from "../globe/earthToday";
+import { saveFigure } from "../ui/saveFigure";
 import { getGlobe } from "../globe/GlobeViewer";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
@@ -256,6 +257,7 @@ export function LayerPanel() {
                   : "Loading the latest cloud map from EUMETSAT…"}
               </p>
             )}
+            <button className="link" onClick={() => void saveFigure()} title="A PNG of this view with title, scale bar, north arrow, legend and credits, for a report (I)">Save map image <kbd>I</kbd></button>
             <button className="link" onClick={() => s.set({ sourcesOpen: true })}>Data sources</button>
           </section>
         </div>
