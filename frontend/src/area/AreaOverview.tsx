@@ -26,7 +26,9 @@ import { type AirQuality, WHO_PM25_DAY, aqiBand, fetchAir } from "./air";
 import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
-import { type CloudHours, type OutlookDay, cloudAt, cloudWords, dayName, fetchCloudHours, fetchOutlook, warnings, waterBalance } from "./outlook";
+import { type WaterHistory as WaterShares, fetchWaterHistory } from "./waterHistory";
+import { type SolarProfile, YIELD_FACTOR, fetchSolar } from "./solar";
+import { type CloudHours, type OutlookDay, cleanestWindow, cloudAt, cloudWords, dayName, fetchCloudHours, fetchOutlook, warnings, waterBalance } from "./outlook";
 
 const SIZES = [2, 5, 10, 25] as const;
 const NEWS_KM = 150;
@@ -89,12 +91,14 @@ function Overview() {
       <Outlook lat={lat} lon={lon} />
       <LandCover />
       <TerrainSection />
+      <WaterHistorySection />
       <People />
       <Official lat={lat} lon={lon} />
       <Passes lat={lat} lon={lon} />
       <RecentRain lat={lat} lon={lon} />
       <Air lat={lat} lon={lon} />
       <Climate lat={lat} lon={lon} />
+      <Solar lat={lat} lon={lon} />
       <Nearby lat={lat} lon={lon} />
     </>
   );
@@ -187,6 +191,50 @@ function LandCover() {
 }
 
 // ---- terrain ---------------------------------------------------------------------------------
+
+/** Share of the area that has been under water at least once since 1984, from JRC Global Surface Water. */
+function WaterHistorySection() {
+  const aoi = useStore((s) => s.aoi)!;
+  const on = useStore((s) => s.waterHistoryOn);
+  const set = useStore((s) => s.set);
+  const [shares, setShares] = useState<WaterShares | null | undefined>(undefined);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    setShares(undefined);
+    setError(false);
+    fetchWaterHistory(aoi.geometry, controller.signal).then(setShares, () => { if (!controller.signal.aborted) setError(true); });
+    return () => controller.abort();
+  }, [aoi]);
+  const pct = (v: number) => (v > 0 && v < 0.005 ? "under 1%" : `${Math.round(v * 100)}%`);
+  return (
+    <section>
+      <header className="row"><h3>Water since 1984</h3><KindBadge kind="DERIVED" /></header>
+      {error && <p className="note">The water history could not be read.</p>}
+      {shares === undefined && !error && <p className="muted" role="status">Reading 38 years of water…</p>}
+      {shares === null && <p className="muted">No water history for this area.</p>}
+      {shares && (
+        <>
+          <p>
+            {shares.ever === 0 ? "No surface water was seen here in any Landsat image from 1984 to 2021."
+              : `${pct(shares.ever)} of the area has been under water at least once since 1984: ${pct(shares.often)} is water most of the time (rivers, lakes, reservoirs) and ${pct(shares.sometimes)} only sometimes.`}
+          </p>
+          {shares.sometimes >= 0.01 && (
+            <p className="note">
+              Ground that is water only sometimes is floodplain, seasonal wetland or a river that moves. It has flooded before and can again:
+              check it before building or buying.
+            </p>
+          )}
+          <button className="link" onClick={() => set({ waterHistoryOn: !on })}>{on ? "Hide" : "Show"} where on the map</button>
+          <p className="muted">
+            JRC Global Surface Water (European Commission and Google), every Landsat image 1984 to 2021 at 30 m. Floods that came and went between
+            images, and those under cloud, are missed, so this is a lower bound.
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
 
 function TerrainSection() {
   const t = useT();
@@ -484,12 +532,13 @@ function RecentRain({ lat, lon }: { lat: number; lon: number }) {
 /** The next 7 days: threshold warnings, a day-by-day table and whether the ground will dry out. */
 function Outlook({ lat, lon }: { lat: number; lon: number }) {
   const [days, setDays] = useState<OutlookDay[] | null>(null);
+  const [airWindow, setAirWindow] = useState<ReturnType<typeof cleanestWindow>>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     setDays(null);
     setError(false);
-    fetchOutlook(lat, lon, controller.signal).then(setDays, () => { if (!controller.signal.aborted) setError(true); });
+    fetchOutlook(lat, lon, controller.signal).then((o) => { setDays(o.days); setAirWindow(o.air); }, () => { if (!controller.signal.aborted) setError(true); });
     return () => controller.abort();
   }, [lat, lon]);
   const warns = days ? warnings(days) : [];
@@ -503,6 +552,17 @@ function Outlook({ lat, lon }: { lat: number; lon: number }) {
         <>
           {warns.length ? warns.map((w) => <p key={w.kind} className="note">{w.text}</p>)
             : <p>No heavy rain, dangerous heat, frost, gales or unhealthy air in the forecast.</p>}
+          {airWindow && airWindow.worst.aqi > 100 && (
+            // A window only helps when it is clearly cleaner than the worst of the day.
+            airWindow.aqi <= airWindow.worst.aqi * 0.75 ? (
+              <p>
+                Cleanest air in the next 24 hours: {airWindow.start.slice(11, 16)} to {airWindow.end} (US AQI about {airWindow.aqi});
+                worst around {airWindow.worst.time.slice(11, 16)} (AQI {airWindow.worst.aqi}). Plan time outdoors, exercise and airing rooms for the clean hours.
+              </p>
+            ) : (
+              <p>No clean window in the next 24 hours: US AQI stays between {airWindow.aqi} and {airWindow.worst.aqi} through the day. Keep windows shut and outdoor time short.</p>
+            )
+          )}
           <table className="table outlook">
             <thead><tr><th>Day</th><th>Rain</th><th>High / low</th><th>Gusts</th><th>Air</th></tr></thead>
             <tbody>
@@ -527,6 +587,47 @@ function Outlook({ lat, lon }: { lat: number; lon: number }) {
           <p className="muted">
             Open-Meteo's weather models and the CAMS air quality forecast (US AQI, daily worst hour, 5 days) for one grid cell. Warning lines: rain 50 mm a day,
             feels-like 39 °C, frost 0 °C, gusts 62 km/h, AQI 150. Evaporation is the FAO reference for grass. Not an official warning; follow your weather service.
+          </p>
+        </>
+      )}
+    </section>
+  );
+}
+
+/** Electricity from solar panels here, from ten years of sunshine. */
+function Solar({ lat, lon }: { lat: number; lon: number }) {
+  const [solar, setSolar] = useState<SolarProfile | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController();
+    setSolar(null);
+    setError(false);
+    fetchSolar(lat, lon, controller.signal).then(setSolar, () => { if (!controller.signal.aborted) setError(true); });
+    return () => controller.abort();
+  }, [lat, lon]);
+  const kwh = (v: number) => Math.round(v).toLocaleString("en");
+  const best = solar ? solar.months.indexOf(Math.max(...solar.months)) : 0;
+  const worst = solar ? solar.months.indexOf(Math.min(...solar.months)) : 0;
+  const month = (m: number) => new Date(Date.UTC(2020, m, 15)).toLocaleDateString("en", { month: "long", timeZone: "UTC" });
+  return (
+    <section>
+      <header className="row"><h3>Solar power</h3><KindBadge kind="ESTIMATED" /></header>
+      {error && <p className="note">The sunshine record could not be loaded.</p>}
+      {!solar && !error && <p className="muted" role="status">Reading ten years of sunshine…</p>}
+      {solar && (
+        <>
+          <div className="stat">
+            <span>Each kW of panels makes about</span>
+            <strong>{kwh(solar.yearlyPerKw)} kWh a year</strong>
+            <em>about {kwh(solar.yearlyPerKw / 12)} kWh a month; a 5 kW home system about {kwh((solar.yearlyPerKw * 5) / 12)} kWh a month</em>
+          </div>
+          <p>
+            Most in {month(best)} ({(solar.months[best]! * YIELD_FACTOR).toFixed(1)} kWh per kW a day), least in {month(worst)} ({(solar.months[worst]! * YIELD_FACTOR).toFixed(1)}).
+            Size batteries and expectations for {month(worst)}.
+          </p>
+          <p className="muted">
+            ERA5 sunshine at the ground, {solar.years}, through Open-Meteo, about 25 km across. Output assumes panels tilted towards the equator,
+            unshaded, after typical heat, dust and inverter losses (sunshine × {YIELD_FACTOR}). A rule of thumb for planning; an installer&apos;s site survey decides.
           </p>
         </>
       )}

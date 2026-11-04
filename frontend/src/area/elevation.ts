@@ -33,7 +33,7 @@ export function latToTileY(lat: number, z: number): number {
   const rad = (lat * Math.PI) / 180;
   return ((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * 2 ** z;
 }
-function tileYToLat(y: number, z: number): number {
+export function tileYToLat(y: number, z: number): number {
   const n = Math.PI - (2 * Math.PI * y) / 2 ** z;
   return (180 / Math.PI) * Math.atan(Math.sinh(n));
 }
@@ -116,9 +116,10 @@ export function terrainStats(heights: Float32Array, width: number, height: numbe
   };
 }
 
-export async function readTile(z: number, x: number, y: number, signal?: AbortSignal): Promise<Float32Array> {
-  const response = await fetch(`${TILES}/${z}/${x}/${y}.png`, { signal });
-  if (!response.ok) throw new Error("Elevation tiles could not be read.");
+/** The RGBA pixels of a 256-pixel map tile. */
+export async function readPixels(url: string, signal?: AbortSignal): Promise<Uint8ClampedArray> {
+  const response = await fetch(url, { signal });
+  if (!response.ok) throw Object.assign(new Error("Map tiles could not be read."), { status: response.status });
   const bitmap = await createImageBitmap(await response.blob());
   // Older Safari has no 2D OffscreenCanvas; a detached canvas element does the same job.
   const canvas: OffscreenCanvas | HTMLCanvasElement = typeof OffscreenCanvas !== "undefined"
@@ -126,7 +127,11 @@ export async function readTile(z: number, x: number, y: number, signal?: AbortSi
     : Object.assign(document.createElement("canvas"), { width: TILE, height: TILE });
   const context = canvas.getContext("2d") as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
   context.drawImage(bitmap, 0, 0);
-  const { data } = context.getImageData(0, 0, TILE, TILE);
+  return context.getImageData(0, 0, TILE, TILE).data;
+}
+
+export async function readTile(z: number, x: number, y: number, signal?: AbortSignal): Promise<Float32Array> {
+  const data = await readPixels(`${TILES}/${z}/${x}/${y}.png`, signal);
   const out = new Float32Array(TILE * TILE);
   for (let i = 0; i < out.length; i += 1) out[i] = decodeTerrarium(data[i * 4]!, data[i * 4 + 1]!, data[i * 4 + 2]!);
   return out;

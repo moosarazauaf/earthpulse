@@ -40,6 +40,7 @@ import { type Satellite, positionAt, track } from "./satellites";
 import { SHADERS, type ViewMode } from "./viewModes";
 import { type WindField, advect, speedColour } from "./wind";
 import { EARTH_LAYERS } from "./earthToday";
+import { WATER_TILES } from "../area/waterHistory";
 import type { SatRec } from "satellite.js";
 
 const WIND_PARTICLES = 4000;
@@ -507,6 +508,22 @@ export class Globe {
 
   /** NASA SEDAC population density (GPWv4, 2020). */
   setPopulation(on: boolean) { this.setGibs("GPW_Population_Density_2020", on, "NASA SEDAC GPWv4 via GIBS", 0.7); }
+
+  private waterHistory: ImageryLayer | null = null;
+
+  /** Where surface water has been seen since 1984 (JRC Global Surface Water occurrence), under the place names. */
+  setWaterHistory(on: boolean) {
+    if (on && !this.waterHistory) {
+      this.waterHistory = new ImageryLayer(new UrlTemplateImageryProvider({
+        url: `${WATER_TILES}/{z}/{x}/{y}.png`,
+        maximumLevel: 12,
+        credit: "Surface water 1984-2021: EC JRC / Google",
+      }));
+      this.viewer.imageryLayers.add(this.waterHistory, this.viewer.imageryLayers.indexOf(this.labels));
+    }
+    if (this.waterHistory) this.waterHistory.show = on;
+    this.render();
+  }
 
   /** One of the daily NASA environment layers by id; null hides them all. */
   setEarthLayer(id: string | null) {

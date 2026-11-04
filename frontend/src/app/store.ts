@@ -71,6 +71,8 @@ interface State {
   populationOn: boolean;
   /** The NASA daily environment layer shown (see globe/earthToday.ts), or null. */
   earthLayer: string | null;
+  /** JRC Global Surface Water occurrence, 1984 to 2021. */
+  waterHistoryOn: boolean;
   /** Live Earth-observation satellites, and real-time day and night shading. */
   satellitesOn: boolean;
   windOn: boolean;
@@ -270,6 +272,7 @@ export const useStore = create<State>((set, get) => {
     rainOn: false,
     populationOn: false,
     earthLayer: null,
+    waterHistoryOn: false,
     satellitesOn: false,
     windOn: false,
     windTime: null,

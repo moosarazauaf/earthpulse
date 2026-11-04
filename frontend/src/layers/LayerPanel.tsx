@@ -213,6 +213,17 @@ export function LayerPanel() {
               <input type="checkbox" checked={s.populationOn} onChange={(e) => s.set({ populationOn: e.target.checked })} />
               <span>Population density, 2020</span>
             </label>
+            <label className="check">
+              <input type="checkbox" checked={s.waterHistoryOn} onChange={(e) => s.set({ waterHistoryOn: e.target.checked })} />
+              <span>Water since 1984: rivers, lakes and past floods</span>
+            </label>
+            {s.waterHistoryOn && (
+              <div className="muted">
+                <div className="pop-legend" style={{ background: "linear-gradient(90deg, rgba(255,0,0,0.25), rgb(128,0,128), rgb(0,0,255))" }} aria-hidden="true" />
+                <div className="pop-scale"><span>Water rarely</span><span>Always</span></div>
+                <p>How often each 30 m spot was water in Landsat images, 1984 to 2021 (JRC Global Surface Water). Red: occasional, such as past floods; blue: permanent.</p>
+              </div>
+            )}
             {s.populationOn && (
               <div className="muted">
                 <div className="pop-legend" aria-hidden="true" />

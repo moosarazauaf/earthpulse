@@ -132,6 +132,7 @@ export function GlobeViewer() {
   useEffect(() => instance?.setLabels(s.labelsVisible), [s.labelsVisible]);
   useEffect(() => instance?.setPopulation(s.populationOn), [s.populationOn]);
   useEffect(() => instance?.setEarthLayer(s.earthLayer), [s.earthLayer]);
+  useEffect(() => instance?.setWaterHistory(s.waterHistoryOn), [s.waterHistoryOn]);
   useEffect(() => instance?.setDayNight(s.dayNightOn), [s.dayNightOn]);
   useEffect(() => instance?.setViewMode(s.viewMode), [s.viewMode]);
   useEffect(() => {

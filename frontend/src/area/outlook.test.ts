@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { type OutlookDay, cloudAt, list, parseOutlook, warnings, waterBalance } from "./outlook";
+import { type OutlookDay, cleanestWindow, cloudAt, list, parseAirHours, parseOutlook, warnings, waterBalance } from "./outlook";
 
 const day = (date: string, o: Partial<OutlookDay> = {}): OutlookDay => ({ date, rain: 0, tmax: 25, tmin: 12, feels: 25, gust: 20, et0: 3, aqi: 50, ...o });
 
@@ -36,6 +36,18 @@ describe("7-day outlook", () => {
     expect(cloudAt(hours, new Date("2026-11-04T05:20:00Z"))).toBe(10);
     expect(cloudAt(hours, new Date("2026-11-04T05:40:00Z"))).toBe(80);
     expect(cloudAt(hours, new Date("2026-11-20T05:00:00Z"))).toBeNull();
+  });
+
+  it("finds the cleanest 3 waking hours in the next day, and the worst hour", () => {
+    const hours = Array.from({ length: 30 }, (_, i) => {
+      const h = (i + 4) % 24, d = i + 4 < 24 ? "04" : "05";
+      return { time: `2026-11-${d}T${String(h).padStart(2, "0")}:00`, aqi: h >= 13 && h <= 15 ? 90 : h === 2 ? 40 : h === 20 ? 250 : 180 };
+    });
+    const w = cleanestWindow(hours, "2026-11-04T05")!;
+    expect(w).toMatchObject({ start: "2026-11-04T13:00", end: "16:00", aqi: 90 });
+    expect(w.worst).toEqual({ time: "2026-11-04T20:00", aqi: 250 });
+    expect(cleanestWindow([], "2026-11-04T05")).toBeNull();
+    expect(parseAirHours({ utc_offset_seconds: 18000, hourly: { time: ["a"], us_aqi: [null] } }, Date.UTC(2026, 10, 4, 0)).now).toBe("2026-11-04T05");
   });
 
   it("adds rain and subtracts evaporation", () => {

@@ -94,7 +94,36 @@ export function warnings(days: OutlookDay[]): Warning[] {
 /** Rain minus reference evaporation over the period (mm): negative means the ground dries out. */
 export const waterBalance = (days: OutlookDay[]) => days.reduce((s, d) => s + d.rain - d.et0, 0);
 
-export async function fetchOutlook(lat: number, lon: number, signal?: AbortSignal): Promise<OutlookDay[]> {
+export interface AirHour { time: string; aqi: number }
+
+/** Hourly US AQI in local time, with "now" as a local "YYYY-MM-DDTHH" from the reply's UTC offset. */
+export function parseAirHours(air: unknown, nowMs = Date.now()): { hours: AirHour[]; now: string } {
+  const body = air as { utc_offset_seconds?: number; hourly?: { time?: string[]; us_aqi?: unknown[] } } | null;
+  const hours: AirHour[] = [];
+  body?.hourly?.time?.forEach((time, i) => { const aqi = num(body.hourly?.us_aqi?.[i]); if (aqi !== null) hours.push({ time, aqi }); });
+  return { hours, now: new Date(nowMs + (body?.utc_offset_seconds ?? 0) * 1000).toISOString().slice(0, 13) };
+}
+
+/**
+ * The cleanest `span` hours of daylight-ish waking time (6:00 to 21:00 local)
+ * in the next 24 hours, and the worst hour, to plan time outdoors around.
+ */
+export function cleanestWindow(hours: AirHour[], now: string, span = 3): { start: string; end: string; aqi: number; worst: AirHour } | null {
+  const next = hours.filter((h) => h.time.slice(0, 13) >= now).slice(0, 24);
+  if (next.length < span) return null;
+  let best: { start: string; end: string; aqi: number } | null = null;
+  for (let i = 0; i + span <= next.length; i += 1) {
+    const run = next.slice(i, i + span);
+    const first = Number(run[0]!.time.slice(11, 13)), last = Number(run.at(-1)!.time.slice(11, 13));
+    if (first < 6 || last > 20 || last < first) continue;
+    const aqi = Math.round(run.reduce((sum, h) => sum + h.aqi, 0) / span);
+    if (!best || aqi < best.aqi) best = { start: run[0]!.time, end: `${String(last + 1).padStart(2, "0")}:00`, aqi };
+  }
+  const worst = next.reduce((w, h) => (h.aqi > w.aqi ? h : w));
+  return best && { ...best, worst };
+}
+
+export async function fetchOutlook(lat: number, lon: number, signal?: AbortSignal): Promise<{ days: OutlookDay[]; air: ReturnType<typeof cleanestWindow> }> {
   const where = `latitude=${lat.toFixed(3)}&longitude=${lon.toFixed(3)}&timezone=auto`;
   const [weather, air] = await Promise.all([
     getJson(`${FORECAST}?${where}&daily=precipitation_sum,temperature_2m_max,temperature_2m_min,apparent_temperature_max,wind_gusts_10m_max,et0_fao_evapotranspiration&forecast_days=7`, signal),
@@ -103,7 +132,8 @@ export async function fetchOutlook(lat: number, lon: number, signal?: AbortSigna
   ]);
   const days = parseOutlook(weather, air);
   if (!days.length) throw new Error("No forecast for this place.");
-  return days;
+  const { hours, now } = parseAirHours(air);
+  return { days, air: cleanestWindow(hours, now) };
 }
 
 export interface CloudHours { time: string[]; cover: (number | null)[] }
