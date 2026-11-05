@@ -19,7 +19,7 @@ import { geometryBounds } from "../globe/Globe";
 import { getGlobe } from "../globe/GlobeViewer";
 import { isS1Script, lintGeeScript } from "./geeLint";
 import { type Finding, checkFloodPlan } from "./s1checks";
-import { KINDS, askFromArgs, floodDates, num, str } from "./args";
+import { KINDS, askFromArgs, floodDates, honest, num, str } from "./args";
 
 const AGENT_URL = (import.meta.env.VITE_AGENT_URL as string | undefined) ?? "";
 /** True when the site was built with the model proxy's address. */
@@ -92,7 +92,8 @@ export const TOOLS = [
 ];
 
 const system = () => `You are the EarthPulse assistant inside a satellite map app. Today is ${new Date().toISOString().slice(0, 10)}.
-Use the tools to act; never invent numbers, dates of satellite passes or results. Call one tool per request unless the user asks for several things.
+Use the tools to act; never invent numbers, dates of satellite passes or results.
+plan_analysis only prepares a plan: never say a map, analysis or result has been made, generated or shows anything. Say the plan is ready and the user should check it and press Run. Call one tool per request unless the user asks for several things.
 For floods, give a flood window of 10 to 24 days around the peak when the date is known. Places: include the country.
 After the tools return, answer in at most three short plain sentences. Repeat any warning or error from the checks in plain words. If something is outside what the tools do, say so briefly.`;
 
@@ -107,8 +108,10 @@ async function planAnalysis(text: string, ask: Ask, dates: { start: string; end:
   const planned = await requestRun(text, ask, state.aoi, PIXEL_BUDGET[deviceProfile().recommended]);
   if ("error" in planned) return { result: JSON.stringify({ error: planned.error }) };
   const request = planned.run.request as Record<string, unknown> & { before?: Period; flood?: Period; after?: Period };
-  const notes = [...(planned.run.fromAsk?.notes ?? [])];
+  let notes = [...(planned.run.fromAsk?.notes ?? [])];
   if (ask.kind === "flood" && dates) {
+    // The exact window replaces the default one, so the default's note no longer applies.
+    notes = notes.filter((n) => !n.startsWith("No date given") && !n.startsWith("No year given") && !n.startsWith("No month given"));
     request.flood = dates;
     request.before = { start: addDays(dates.start, -75), end: addDays(dates.start, -15) };
     notes.push(`Flood window ${dates.start} to ${dates.end}; before it, 75 to 15 days earlier, from the same radar orbit.`);
@@ -129,7 +132,7 @@ async function planAnalysis(text: string, ask: Ask, dates: { start: string; end:
   const windows = ["before", "flood", "after"].filter((k) => request[k]).map((k) => `${k}: ${(request[k] as Period).start} to ${(request[k] as Period).end}`);
   const title = `${ask.kind === "flood" ? "Sentinel-1 flood mapping" : `${ask.kind[0]!.toUpperCase()}${ask.kind.slice(1)} analysis`}, ${planned.aoi.label}`;
   return {
-    result: JSON.stringify({ planned: title, windows, notes, checks: findings.map((f) => `${f.level}: ${f.text}`), next: "The plan is on screen; the user presses Run to start it." }),
+    result: JSON.stringify({ planned: title, windows, notes, checks: findings.map((f) => `${f.level}: ${f.text}`), status: "PLANNED, NOT RUN: no map or result exists yet. The user must press Run on screen to start it." }),
     card: { kind: "plan", title, lines: [...windows, ...notes], findings },
   };
 }
@@ -201,6 +204,7 @@ async function complete(messages: Message[], signal?: AbortSignal): Promise<Mess
 
 export interface Turn { text: string; cards: Card[]; history: Message[] }
 
+
 /** Rule-based answer: script check, the app's own request reader, or a place to open. */
 async function offline(text: string): Promise<{ text: string; cards: Card[] }> {
   const ask = interpret(text);
@@ -233,7 +237,7 @@ export async function ask(text: string, history: Message[], signal?: AbortSignal
     for (let round = 0; round < MAX_ROUNDS; round += 1) {
       const reply = await complete([{ role: "system", content: system() }, ...messages.slice(-16)], signal);
       messages.push(reply);
-      if (!reply.tool_calls?.length) return { text: reply.content?.trim() || "Done.", cards, history: messages };
+      if (!reply.tool_calls?.length) return { text: honest(reply.content?.trim() || "Done.", cards), cards, history: messages };
       for (const call of reply.tool_calls) {
         const r = await runTool(call.function.name, call.function.arguments, text);
         if (r.card) cards.push(r.card);

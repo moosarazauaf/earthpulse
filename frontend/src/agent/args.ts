@@ -33,3 +33,12 @@ export function floodDates(a: Record<string, unknown>, now = new Date()): { star
   if (!start || !end || !ISO.test(start) || !ISO.test(end) || Number.isNaN(Date.parse(start)) || Number.isNaN(Date.parse(end))) return null;
   return start <= end && start >= "2014-10-01" && start <= now.toISOString().slice(0, 10) ? { start, end } : null;
 }
+
+const CLAIMS_RESULT = /\b(has|have|was|were) been (generated|created|produced|mapped|completed|run)\b|\b(resulting|generated) map\b|\bmap (now )?shows\b|\bflooded area (is|was|covers)\b/i;
+
+/** A planned run has no result yet; a reply that says otherwise is replaced, whatever the model wrote. */
+export function honest(text: string, cards: { kind: string; findings: { level: string }[] }[]): string {
+  if (!cards.some((c) => c.kind === "plan") || !CLAIMS_RESULT.test(text)) return text;
+  const warn = cards.some((c) => c.findings.some((f) => f.level !== "ok"));
+  return `The plan is ready${warn ? "; read the checks below first" : ""}. Nothing has run yet: press Run in the side panel to map it.`;
+}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { askFromArgs, floodDates } from "./args";
+import { askFromArgs, floodDates, honest } from "./args";
 
 const now = new Date("2026-11-05T00:00:00Z");
 
@@ -9,6 +9,15 @@ describe("assistant tool arguments", () => {
     const ask = askFromArgs({ kind: "flood", place: "  Layyah, Pakistan ", years: [2022, 1900, 2022.5, 2030], months: [8, 13, 9], size_km: 500, lat: 31, lon: 999 }, now);
     expect(ask).toEqual({ kind: "flood", place: "Layyah, Pakistan", point: null, years: [2022], since: false, months: [8, 9], sizeKm: null, index: null });
     expect(askFromArgs({ kind: "delete_everything" }, now)).toBe("Unknown analysis kind.");
+  });
+
+  it("replaces a reply that claims a result when only a plan exists", () => {
+    const plan = [{ kind: "plan", findings: [{ level: "warn" }] }];
+    // What Nemotron actually replied on the live site before the guard.
+    const claimed = "Flood mapping for Layyah, Pakistan from 25 August to 5 September 2022 has been generated using Sentinel-1 radar data. The resulting map shows the flooded area.";
+    expect(honest(claimed, plan)).toBe("The plan is ready; read the checks below first. Nothing has run yet: press Run in the side panel to map it.");
+    expect(honest("The plan for Layyah is ready; press Run to start it.", plan)).toBe("The plan for Layyah is ready; press Run to start it.");
+    expect(honest(claimed, [])).toBe(claimed);
   });
 
   it("accepts an exact flood window only when it is real, ordered and in the Sentinel-1 era", () => {
