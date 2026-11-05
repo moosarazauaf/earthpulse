@@ -763,3 +763,28 @@ button.primary { color: #1b1d14; }
 }
 .panel[aria-label="Layers"] label.check:has(input:checked)::before { background: var(--cyan); border-color: var(--cyan); }
 .panel[aria-label="Layers"] label.check kbd { margin-left: auto; }
+
+/* ---- one look for every panel, matching Sentri: solid card, pixel-grid header band ---- */
+@media screen {
+  .panel {
+    background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 13px;
+    box-shadow: 0 8px 34px rgba(0, 0, 0, 0.5); backdrop-filter: none; overflow: hidden;
+  }
+  .panel-toggle {
+    padding: 13px; font-size: 16px; font-weight: 600; letter-spacing: 0.02em; border-bottom: 1px solid var(--line);
+    background:
+      linear-gradient(rgba(163, 177, 138, 0.05) 1px, transparent 1px) 0 0 / 6px 6px,
+      linear-gradient(90deg, rgba(163, 177, 138, 0.05) 1px, transparent 1px) 0 0 / 6px 6px,
+      linear-gradient(180deg, #1d1a14, #14120e);
+  }
+  .panel.collapsed .panel-toggle { border-bottom: 0; }
+  .panel-toggle:hover:not(:disabled) { border-color: var(--line); color: var(--cyan); }
+}
+
+/* Sentri never covers a side panel: with one open on the right, the chat and its button sit to its left. */
+@media (min-width: 801px) {
+  .app:has(.panel.right:not(.collapsed)) .agent,
+  .app:has(.panel.right:not(.collapsed)) .sentri-launcher { right: calc(356px + 10px + 13px); }
+  /* Between the two side panels on smaller screens: narrower rather than on top of the Layers panel. */
+  .app:has(.panel.right:not(.collapsed)) .agent { width: max(280px, min(390px, calc(100vw - 356px - 23px - 312px - 23px))); }
+}
