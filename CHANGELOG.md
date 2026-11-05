@@ -5,6 +5,34 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.30] - 2026-11-05
+
+### Added
+- **Assistant** (Analyse, Ask the assistant): plain-language requests
+  become analyses, area overviews or map layers. A free NVIDIA Nemotron
+  model on OpenRouter chooses the tool; the app's own code builds the plan,
+  so dates, windows and numbers never come from the model. Its arguments
+  are range-checked before use. Without the proxy, a built-in reader
+  handles the same requests.
+- **Sentinel-1 plan checks** on the real archive before anything is
+  downloaded: mixed relative orbits and directions (with each orbit's
+  coverage), passes combined in the flood window, long flood windows, a
+  single baseline pass and long gaps. Layyah, August 2022: orbits 5, 71 and
+  173 found, orbit 5 used.
+- **Earth Engine script checker**: paste a Sentinel-1 flood script to have
+  it checked, in the browser, for a missing relative-orbit filter, mixed
+  orbit numbers, .mosaic() and long composites, a mean or median over the
+  flood period, a logarithm on data already in dB, and missing mode,
+  polarisation, speckle and before-after steps.
+- **agent-proxy/**: a Cloudflare Worker that holds the OpenRouter key,
+  answers only the EarthPulse origins, forwards to free models only and
+  limits each visitor to 20 requests a minute. Deploy steps in
+  docs/DEPLOY.md.
+
+### Fixed
+- The flood engine's orbit choice is now one shared function, so the checks
+  and the run always agree.
+
 ## [0.2.0-alpha.29] - 2026-11-04
 
 ### Added
