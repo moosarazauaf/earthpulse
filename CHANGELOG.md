@@ -5,6 +5,22 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.31] - 2026-11-05
+
+### Changed
+- The assistant is live, through the EarthPulse proxy on Cloudflare.
+- Its replies are now written by code from what the tools actually did and
+  found; the model only chooses the tools, and its own words are used only
+  when it calls none. One model request per message instead of two or three.
+
+### Fixed
+- On the live site the model reported a planned flood map as already
+  "generated", and invented a forecast for Multan ("air quality is
+  moderate") while the overview it had opened showed unhealthy air (US AQI
+  221). Both came from letting the model write about results it never saw.
+- An exact flood window no longer carries the "No date given" note of the
+  default window.
+
 ## [0.2.0-alpha.30] - 2026-11-05
 
 ### Added
