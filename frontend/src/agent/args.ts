@@ -42,3 +42,17 @@ export function honest(text: string, cards: { kind: string; findings: { level: s
   const warn = cards.some((c) => c.findings.some((f) => f.level !== "ok"));
   return `The plan is ready${warn ? "; read the checks below first" : ""}. Nothing has run yet: press Run in the side panel to map it.`;
 }
+
+/** What the assistant can run today, shown when it opens and when asked; keep in step with the tools. */
+export const CAN_RUN = [
+  "Flood mapping with Sentinel-1 radar (2014 on), checked for mixed orbits and compositing before it runs",
+  "Burn scars, vegetation change, surface water through the years, urban growth, tree cover loss, land surface temperature and index time series",
+  "Area overview of any place: 7-day forecast and warnings, air quality, solar power, water since 1984, climate, terrain, people and satellite passes",
+  "Map layers: wind, clouds, rain, air quality, earthquakes, satellites, population, sea temperature, vegetation, soil moisture, smoke and dust, ozone",
+  "Checking a Google Earth Engine Sentinel-1 flood script for mixed orbits, compositing and other mistakes",
+];
+export const COMING = "Still in progress: land cover classification, measuring and elevation profiles, map images and year-to-year comparisons by request. Until then they are in the Analyse menu and the toolbar.";
+
+const ASKS_ABILITIES = /^\s*(help|\?|what (can|do) you (do|run)|what are you|which analys[ie]s|what analys[ie]s|capabilities)\b/i;
+export const asksAbilities = (text: string) => ASKS_ABILITIES.test(text);
+export const abilitiesText = () => `I can run these now:\n${CAN_RUN.map((c) => `• ${c}`).join("\n")}\n\n${COMING}`;

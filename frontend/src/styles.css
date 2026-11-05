@@ -663,6 +663,8 @@ button.primary { color: #1b1d14; }
 .agent .msg p { margin: 0; white-space: pre-wrap; }
 .agent .msg.you { justify-self: end; max-width: 85%; background: rgba(163, 177, 138, 0.16); padding: 5px 8px; border-radius: 8px; }
 .agent .example { display: block; text-align: left; margin: 5px 0; }
+.agent .can-run { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12px; }
+.agent-log > .muted p { margin: 5px 0; }
 .agent-card { margin-top: 5px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 5px; font-size: 12px; }
 .findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
 .findings li span { display: inline-block; width: 1.2em; font-weight: 700; }

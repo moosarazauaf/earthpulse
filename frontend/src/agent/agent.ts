@@ -20,7 +20,7 @@ import { getGlobe } from "../globe/GlobeViewer";
 import { isS1Script, lintGeeScript } from "./geeLint";
 import { fetchOutlook, warnings } from "../area/outlook";
 import { type Finding, checkFloodPlan } from "./s1checks";
-import { KINDS, askFromArgs, floodDates, honest, num, str } from "./args";
+import { KINDS, abilitiesText, askFromArgs, asksAbilities, floodDates, honest, num, str } from "./args";
 
 const AGENT_URL = (import.meta.env.VITE_AGENT_URL as string | undefined) ?? "";
 /** True when the site was built with the model proxy's address. */
@@ -241,6 +241,7 @@ export async function ask(text: string, history: Message[], signal?: AbortSignal
     const r = checkScript(text);
     return { text: r.say, cards: [r.card!], history };
   }
+  if (asksAbilities(text)) return { text: abilitiesText(), cards: [], history };
   if (!agentOnline) return { ...(await offline(text)), history };
 
   const messages: Message[] = [...history, { role: "user", content: text.slice(0, 4000) }];

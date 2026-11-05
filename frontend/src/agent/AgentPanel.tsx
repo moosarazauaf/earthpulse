@@ -3,11 +3,13 @@ import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 
 
 import { useStore } from "../app/store";
 import { type Card, type Message, agentOnline, ask } from "./agent";
+import { CAN_RUN, COMING } from "./args";
 import type { Finding } from "./s1checks";
 
 interface Entry { who: "you" | "assistant"; text: string; cards?: Card[] }
 
 const EXAMPLES = [
+  "What can you do?",
   "Map the floods in Layyah, Pakistan, from 25 August to 5 September 2022",
   "What is the weather outlook for Multan?",
   "Show wind and sea temperature",
@@ -68,7 +70,10 @@ export function AgentPanel() {
       <div className="agent-log" aria-live="polite">
         {!entries.length && (
           <div className="muted">
-            <p>Ask for an analysis in plain words, or paste a Google Earth Engine Sentinel-1 script to check it for mixed orbits and compositing.</p>
+            <p>Ask in plain words, or paste a Google Earth Engine Sentinel-1 script to check it. Runnable so far:</p>
+            <ul className="can-run">{CAN_RUN.map((c) => <li key={c}>{c}</li>)}</ul>
+            <p>{COMING}</p>
+            <p>Try:</p>
             {EXAMPLES.map((x) => <button key={x} className="link example" onClick={() => void send(undefined, x)}>{x}</button>)}
           </div>
         )}

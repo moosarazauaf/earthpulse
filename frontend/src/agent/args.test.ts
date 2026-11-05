@@ -28,3 +28,15 @@ describe("assistant tool arguments", () => {
     expect(floodDates({ flood_start: "2022-13-40", flood_end: "2022-14-01" }, now)).toBeNull();
   });
 });
+
+describe("what the assistant says it can do", () => {
+  it("answers ability questions from the fixed list, not the model", async () => {
+    const { asksAbilities, abilitiesText, CAN_RUN } = await import("./args");
+    expect(asksAbilities("What can you do?")).toBe(true);
+    expect(asksAbilities("help")).toBe(true);
+    expect(asksAbilities("which analyses are there")).toBe(true);
+    expect(asksAbilities("floods in Layyah")).toBe(false);
+    expect(abilitiesText()).toContain(CAN_RUN[0]);
+    expect(abilitiesText()).toMatch(/Still in progress/);
+  });
+});
