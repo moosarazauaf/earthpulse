@@ -75,6 +75,10 @@ function AnalyseMenu() {
             <strong>{t("menu.overview")}</strong>
             <span>{t("menu.overviewDetail")} <kbd>O</kbd></span>
           </button>
+          <button className="overview-item" onClick={() => { set({ agentOpen: true, introOpen: false }); setOpen(false); }}>
+            <strong>Ask the assistant</strong>
+            <span>Plan an analysis in plain words, or check an Earth Engine flood script for mixed orbits and compositing</span>
+          </button>
           <AnalysisList onPick={(id) => { set({ mode: id }); setOpen(false); }} />
           <p className="muted">{t("menu.footer")}</p>
         </div>,

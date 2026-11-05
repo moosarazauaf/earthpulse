@@ -649,3 +649,26 @@ button.primary { color: #1b1d14; }
 .profile .area { fill: rgba(141, 184, 90, 0.18); }
 .profile .line { fill: none; stroke: var(--green); stroke-width: 1.5; }
 .profile text { fill: var(--muted); font-size: 9px; }
+
+/* ---- assistant ---- */
+.agent {
+  position: fixed; right: 13px; bottom: calc(var(--bottom, 89px) + 13px); z-index: 40;
+  width: min(380px, calc(100vw - 26px)); max-height: min(620px, calc(100vh - var(--bottom, 89px) - 89px));
+  display: grid; grid-template-rows: auto 1fr auto auto; gap: 8px; padding: 13px;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 13px; box-shadow: 0 8px 34px rgba(0, 0, 0, 0.5);
+}
+.agent h2 { font-size: 15px; margin: 0; }
+.agent header { justify-content: space-between; }
+.agent-log { overflow-y: auto; display: grid; gap: 8px; align-content: start; min-height: 89px; }
+.agent .msg p { margin: 0; white-space: pre-wrap; }
+.agent .msg.you { justify-self: end; max-width: 85%; background: rgba(163, 177, 138, 0.16); padding: 5px 8px; border-radius: 8px; }
+.agent .example { display: block; text-align: left; margin: 5px 0; }
+.agent-card { margin-top: 5px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 5px; font-size: 12px; }
+.findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.findings li span { display: inline-block; width: 1.2em; font-weight: 700; }
+.findings li.ok span { color: var(--green); }
+.findings li.warn span { color: var(--amber); }
+.findings li.error span { color: var(--red); }
+.agent form { display: grid; grid-template-columns: 1fr auto; gap: 5px; }
+.agent textarea { resize: vertical; font: inherit; font-size: 13px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); }
+.agent .small { font-size: 11px; margin: 0; }

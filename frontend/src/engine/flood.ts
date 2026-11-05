@@ -27,8 +27,8 @@ const FALLBACK_THRESHOLD_DB = -17;
 const MIN_SEPARABILITY = 0.7;
 const MIN_DROP_DB = 3;
 /** Passes per window. Each costs about 10 MB of download, so the browser uses fewer than the backend. */
-const MAX_PASSES = 2;
-const MIN_COVERAGE = 0.5;
+export const MAX_PASSES = 2;
+export const MIN_COVERAGE = 0.5;
 /**
  * Radar files downloaded at once. Each window read is about 10 MB, so many in
  * parallel would starve each other of bandwidth and time out together.
@@ -47,7 +47,7 @@ export interface BrowserFloodRequest extends FloodRequest {
   concurrency: number;
 }
 
-interface RadarScene {
+export interface RadarScene {
   id: string;
   datetime: string;
   platform: string;
@@ -165,6 +165,12 @@ export function orbitCoverage(windows: { orbit: number; footprint: number[][][] 
   return coverage;
 }
 
+/** The relative orbit the engine uses: the one covering most of the area in its worst window, if at least MIN_COVERAGE. */
+export function chooseOrbit(coverage: Record<number, number>): number | null {
+  const best = Object.entries(coverage).filter(([, c]) => c >= MIN_COVERAGE).sort((a, b) => b[1] - a[1])[0];
+  return best ? Number(best[0]) : null;
+}
+
 // ---- data access ---------------------------------------------------------------
 async function stac(body: object, signal?: AbortSignal) {
   const response = await fetch(STAC_SEARCH, { method: "POST", signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
@@ -172,7 +178,7 @@ async function stac(body: object, signal?: AbortSignal) {
   return ((await response.json()) as { features: { id: string; geometry: { type: string; coordinates: number[][][] }; properties: Record<string, unknown>; assets: Record<string, { href: string }> }[] }).features;
 }
 
-async function searchRadar(bbox: number[], start: string, end: string, signal?: AbortSignal): Promise<RadarScene[]> {
+export async function searchRadar(bbox: number[], start: string, end: string, signal?: AbortSignal): Promise<RadarScene[]> {
   const features = await stac({
     collections: [RADAR], bbox, datetime: `${start}T00:00:00Z/${end}T23:59:59Z`,
     sortby: [{ field: "properties.datetime", direction: "asc" }], limit: 100,
@@ -273,9 +279,8 @@ export async function runFlood(request: BrowserFloodRequest, hooks: EngineHooks)
     return scenes;
   }));
   const coverage = orbitCoverage(found, request.aoi);
-  const usable = Object.entries(coverage).filter(([, c]) => c >= MIN_COVERAGE).sort((a, b) => b[1] - a[1]);
-  if (!usable.length) throw new Error("No single Sentinel-1 orbit covers this area in every window. Widen the windows: the same orbit returns every 6 to 12 days.");
-  const orbit = Number((usable[0] as [string, number])[0]);
+  const orbit = chooseOrbit(coverage);
+  if (orbit === null) throw new Error("No single Sentinel-1 orbit covers this area in every window. Widen the windows: the same orbit returns every 6 to 12 days.");
 
   const perWindow = found.map((scenes) => {
     const days = [...new Set(scenes.filter((s) => s.orbit === orbit).map((s) => s.datetime.slice(0, 10)))].sort().slice(-MAX_PASSES);

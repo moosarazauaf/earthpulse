@@ -39,3 +39,16 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+  agent-proxy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: agent-proxy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # The tests need only vitest; installing wrangler (the deploy tool) would add minutes.
+      - run: npx --yes vitest@4 run

@@ -167,6 +167,8 @@ interface State {
   forgetPlace: (id: string) => void;
   openPlace: (place: SavedPlace) => void;
   placesOpen: boolean;
+  /** The assistant chat beside the globe. */
+  agentOpen: boolean;
   /** Start a one-click analysis of the current area. */
   runQuick: (info: QuickActionInfo, device: DeviceProfile) => void;
   loadCatalog: () => Promise<void>;
@@ -362,6 +364,7 @@ export const useStore = create<State>((set, get) => {
     places: loadPlaces(),
     recent: loadRecent(),
     placesOpen: false,
+    agentOpen: false,
     saveCurrentPlace: () => {
       const aoi = get().aoi;
       if (!aoi) return;

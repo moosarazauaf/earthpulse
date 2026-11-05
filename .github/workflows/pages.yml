@@ -74,6 +74,8 @@ jobs:
           VITE_API_BASE: ${{ vars.EARTHPULSE_API_BASE }}
           # Umami Cloud website ID (public, not a secret); visit counting stays off until it is set.
           VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          # Address of the assistant proxy (agent-proxy/, public, not a secret); the assistant uses its built-in reader until it is set.
+          VITE_AGENT_URL: ${{ vars.AGENT_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist

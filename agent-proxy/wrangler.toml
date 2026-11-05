@@ -1,0 +1,14 @@
+# EarthPulse assistant proxy. Deploy steps: docs/DEPLOY.md, "Assistant proxy".
+# The OpenRouter key is a secret (wrangler secret put OPENROUTER_API_KEY), never in this file.
+name = "earthpulse-agent"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# 20 requests a minute per visitor IP; one assistant turn makes 2 or 3.
+[[ratelimits]]
+name = "LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60

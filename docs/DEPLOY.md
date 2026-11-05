@@ -132,6 +132,39 @@ The backend only accepts browser requests from the origins listed in
 `EARTHPULSE_CORS_ORIGINS`. The Dockerfile sets it to
 `https://moosarazauaf.github.io`; change it there if the site moves.
 
+## Assistant proxy
+
+The assistant (Analyse → Ask the assistant) turns plain requests into
+analyses with a free model on OpenRouter. OpenRouter needs a key even for free
+models, and a key in a public site is a key anyone can take, so a small
+Cloudflare Worker in `agent-proxy/` holds it. The Worker answers only browsers
+on the EarthPulse origins, allows only the free models listed in
+`agent-proxy/src/index.js`, checks every request and limits each visitor to 20
+requests a minute. Without it the assistant still works with its built-in
+reader, and pasted Earth Engine scripts are always checked in the browser.
+
+1. Make a key at openrouter.ai (Keys). Free models cost nothing; without any
+   credit on the account OpenRouter allows about 50 free requests a day for
+   the whole key, and about 1,000 a day once the account has ever had 10 USD
+   of credit. One assistant turn makes two or three requests.
+2. With a free Cloudflare account, from `agent-proxy/`:
+
+   ```bash
+   npm install
+   npx wrangler login
+   npx wrangler secret put OPENROUTER_API_KEY
+   npx wrangler deploy
+   ```
+
+   The last command prints the address, such as
+   `https://earthpulse-agent.<your-subdomain>.workers.dev`.
+3. In the GitHub repository add the variable `AGENT_URL` with that address
+   (Settings → Secrets and variables → Actions → Variables), then re-run
+   "Deploy to GitHub Pages".
+
+To stop it, delete the variable and redeploy, or `npx wrangler delete`. To
+change the allowed sites, edit `ORIGINS` in `agent-proxy/src/index.js`.
+
 ## Limits to expect on a free host
 
 - Rate limiting is per client address and held in memory.

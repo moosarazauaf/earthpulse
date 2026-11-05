@@ -15,6 +15,7 @@ import { LayerPanel } from "./layers/LayerPanel";
 import { Timeline } from "./timeline/Timeline";
 import { DataSources, Intro, Notice, StoryCaption, ToolHint } from "./ui/Overlays";
 import { MyPlaces } from "./ui/MyPlaces";
+import { AgentPanel } from "./agent/AgentPanel";
 import { PanelBoundary } from "./ui/PanelBoundary";
 import { useWatchOnStart } from "./area/watch";
 import { ShortcutsCard, useShortcuts } from "./ui/Shortcuts";
@@ -77,6 +78,7 @@ export function App() {
       <DataSources />
       <ShortcutsCard />
       <MyPlaces />
+      <AgentPanel />
       <LegalPages />
     </main>
   );

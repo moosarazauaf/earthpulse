@@ -1,0 +1,13 @@
+{
+  "name": "earthpulse-agent-proxy",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.0",
+    "wrangler": "^4.0.0"
+  }
+}
