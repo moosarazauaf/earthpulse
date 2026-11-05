@@ -51,10 +51,10 @@ export const CAN_RUN = [
   "Area overview of any place: 7-day forecast and warnings, air quality, solar power, water since 1984, climate, terrain, people and satellite passes",
   "Map layers: wind, clouds, rain, air quality, earthquakes, satellites, population, sea temperature, vegetation, soil moisture, smoke and dust, ozone",
   "Land use and land cover (LULC) of any area: ESA WorldCover 2021, 10 m",
-  "Carbon stock in plants: above- and below-ground biomass carbon and CO2 equivalent (Harmonized Global Biomass, 2010)",
+  "Carbon stock in plants and soil, with uncertainty ranges and a chart: biomass (Harmonized Global Biomass, 2010) and soil organic carbon to 30 cm (SoilGrids 2.0)",
   "Checking a Google Earth Engine Sentinel-1 flood script for mixed orbits, compositing and other mistakes",
 ];
-export const COMING = "Still in progress: land cover classification with your own training samples, soil carbon, measuring and elevation profiles, map images and year-to-year comparisons by request. Until then they are in the Analyse menu and the toolbar.";
+export const COMING = "Still in progress: land cover classification with your own training samples, measuring and elevation profiles, map images and year-to-year comparisons by request. Until then they are in the Analyse menu and the toolbar.";
 
 const ASKS_ABILITIES = /^\s*(help|\?|what (can|do) you (do|run)|what are you|which analys[ie]s|what analys[ie]s|capabilities)\b/i;
 export const asksAbilities = (text: string) => ASKS_ABILITIES.test(text);

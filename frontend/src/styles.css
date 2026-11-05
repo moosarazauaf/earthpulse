@@ -802,3 +802,24 @@ button.primary { color: #1b1d14; }
   .app:has(.panel.right:not(.collapsed)) .sentri-launcher,
   .app:has(.panel.left:not(.collapsed)) .sentri-launcher { bottom: calc(var(--bottom) + 46vh + 21px); }
 }
+
+/* ---- publication figures ---- */
+.figure { position: relative; }
+.figure-tools { display: flex; gap: 8px; justify-content: flex-end; font-size: 11px; margin-top: 3px; }
+.figure-tools .link { font-size: 11px; padding: 0; }
+/* Sentri's charts are drawn in print colours on screen too, so what you see is what is saved. */
+.chart.bars svg { background: #fff; border-radius: 5px; padding: 3px; }
+/* The print theme, worn only while a figure is being saved (see ui/Figure.tsx). */
+.paper .axis { stroke: #333; }
+.paper .tick, .paper text { fill: #222; }
+.paper .tick.gap { fill: #a3521f; }
+.paper .threshold { stroke: #111; opacity: 1; }
+.paper .bar.neutral { fill: #9aa4a8; }
+.paper .bar.hot { fill: #9aa4a8; }
+.paper .dot { fill: #fff; }
+.paper .area { fill: rgba(90, 125, 58, 0.25); }
+.paper .profile .line, .paper.profile .line { stroke: #3d6b2a; }
+.paper rect { opacity: 1; }
+.climate-figure { margin: 0; }
+.paper .climate-chart text { fill: #222; }
+.paper .climate-chart rect { fill: #4f7fa0; }

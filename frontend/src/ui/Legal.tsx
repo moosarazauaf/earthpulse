@@ -53,7 +53,7 @@ function LegalContent({ page }: { page: LegalPage }) {
             <li><strong>USGS / GDACS</strong> — {t("legal.privacy.sections.thirdParty.items.usgs")}</li>
             <li><strong>Microsoft Planetary Computer</strong> — {t("legal.privacy.sections.thirdParty.items.pc")}</li>
             <li><strong>Open-Meteo</strong> — {t("legal.privacy.sections.thirdParty.items.meteo")}</li>
-            <li><strong>NASA, Copernicus, EUMETSAT, AWS Terrain Tiles, Source Cooperative, CelesTrak</strong> — {t("legal.privacy.sections.thirdParty.items.layers")}</li>
+            <li><strong>NASA, Copernicus, EUMETSAT, AWS Terrain Tiles, Source Cooperative, CelesTrak, ISRIC SoilGrids</strong> — {t("legal.privacy.sections.thirdParty.items.layers")}</li>
             <li><strong>World Bank, UN OCHA Humanitarian API</strong> — {t("legal.privacy.sections.thirdParty.items.official")}</li>
             <li><strong>OpenRouter (through the EarthPulse proxy on Cloudflare)</strong> — Only when you use the assistant, Sentri: the messages you type there, and the steps it takes, go to a free language model. Nothing is sent until you press Send.</li>
             <li><strong>GitHub Pages</strong> — {t("legal.privacy.sections.thirdParty.items.github")}</li>

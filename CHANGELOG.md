@@ -5,6 +5,26 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.34] - 2026-11-06
+
+### Added
+- **Soil carbon** in the carbon stock: organic carbon in the top 30 cm from
+  SoilGrids 2.0 (ISRIC, 250 m), with its 5% to 95% range, read from ISRIC's
+  coverage service for the area. Layyah (20 km square): 827,188 t, 21.9 t
+  C/ha, 192,000 t to 1.83 million t; identical to an independent rasterio
+  sum.
+- **Uncertainty** for plant carbon from the uncertainty layers published with
+  Harmonized Global Biomass: the cautious range adds pixel errors (Layyah
+  +/- 15,885 t; rasterio 15,743 t), with the range if errors were
+  independent beside it, counting each 300 m map pixel once.
+- **Publication figures**: every chart (change and backscatter histograms,
+  index and water series, climate, elevation profile, and Sentri's carbon and
+  land cover charts) saves as SVG or 300 dpi PNG at 160 mm, in a print style
+  with title and data source. Sentri's carbon chart has error bars.
+- **Publication maps**: Save map image (I) now makes a print layout: white
+  page, title, the view at twice screen resolution inside a neat line, latitude
+  and longitude ticks, a segmented scale bar, north arrow, legend and credits.
+
 ## [0.2.0-alpha.33] - 2026-11-06
 
 ### Added

@@ -252,15 +252,39 @@ export class Globe {
    * pixel across the centre (null when the centre is off the globe), the
    * camera heading (radians) and the credits of the layers on show.
    */
-  snapshot(): { image: string; width: number; height: number; metresPerPixel: number | null; heading: number; credits: string[] } {
+  snapshot(scale = 2): {
+    image: string; width: number; height: number; metresPerPixel: number | null; heading: number; credits: string[];
+    edges: Record<"top" | "bottom" | "left" | "right", ({ lon: number; lat: number } | null)[]>;
+  } {
     const { scene, camera, canvas } = this.viewer;
+    // Drawn at `scale` times the screen's resolution for print, then put back.
+    const previous = this.viewer.resolutionScale;
+    this.viewer.resolutionScale = previous * scale;
+    this.viewer.resize();
     // The drawing buffer is only readable in the same task as the frame that drew it.
     this.viewer.render();
     const image = canvas.toDataURL("image/png");
+    const width = canvas.width, height = canvas.height;
+    this.viewer.resolutionScale = previous;
+    this.viewer.resize();
+    this.render();
     const w = canvas.clientWidth, h = canvas.clientHeight;
-    const a = camera.pickEllipsoid(new Cartesian2(w / 2 - 50, h / 2), scene.globe.ellipsoid);
-    const b = camera.pickEllipsoid(new Cartesian2(w / 2 + 50, h / 2), scene.globe.ellipsoid);
-    const metresPerCssPixel = a && b ? Cartesian3.distance(a, b) / 100 : null;
+    const at = (x: number, y: number) => {
+      const hit = camera.pickEllipsoid(new Cartesian2(x, y), scene.globe.ellipsoid);
+      if (!hit) return null;
+      const c = Cartographic.fromCartesian(hit);
+      return { lon: CesiumMath.toDegrees(c.longitude), lat: CesiumMath.toDegrees(c.latitude) };
+    };
+    const a = at(w / 2 - 50, h / 2), b = at(w / 2 + 50, h / 2);
+    const pa = a && Cartesian3.fromDegrees(a.lon, a.lat), pb = b && Cartesian3.fromDegrees(b.lon, b.lat);
+    const metresPerCssPixel = pa && pb ? Cartesian3.distance(pa, pb) / 100 : null;
+    // Positions along each edge of the view, for the coordinate ticks around a printed map.
+    const N = 48;
+    const along = (f: (t: number) => [number, number]) => Array.from({ length: N + 1 }, (_, i) => at(...f(i / N)));
+    const edges = {
+      top: along((t) => [t * w, 1]), bottom: along((t) => [t * w, h - 1]),
+      left: along((t) => [1, t * h]), right: along((t) => [w - 1, t * h]),
+    };
     const credits: string[] = [];
     for (let i = 0; i < this.viewer.imageryLayers.length; i += 1) {
       const layer = this.viewer.imageryLayers.get(i);
@@ -270,7 +294,7 @@ export class Globe {
     }
     if (this.wind) credits.push("Wind: Open-Meteo");
     if (this.quakeEntities.length) credits.push("Earthquakes: USGS");
-    return { image, width: canvas.width, height: canvas.height, metresPerPixel: metresPerCssPixel && metresPerCssPixel * (w / canvas.width), heading: camera.heading, credits };
+    return { image, width, height, metresPerPixel: metresPerCssPixel && metresPerCssPixel * (w / width), heading: camera.heading, credits, edges };
   }
 
   cameraView(): { lon: number; lat: number; height: number } {

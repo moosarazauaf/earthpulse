@@ -15,6 +15,8 @@ import { type Ask, interpret } from "../ask/interpret";
 import { requestRun } from "../ask/request";
 import { carbonInBrowser, deviceProfile, landCoverInBrowser, PIXEL_BUDGET } from "../engine/client";
 import { CO2_PER_C } from "../engine/carbon";
+import { WORLDCOVER } from "../engine/cover";
+import type { BarChartSpec } from "../ui/Figure";
 import { EARTH_LAYERS } from "../globe/earthToday";
 import { geometryBounds } from "../globe/Globe";
 import { getGlobe } from "../globe/GlobeViewer";
@@ -34,7 +36,7 @@ export interface Message { role: "system" | "user" | "assistant" | "tool"; conte
 export type Card =
   | { kind: "plan"; title: string; lines: string[]; findings: Finding[] }
   | { kind: "checks"; title: string; findings: Finding[] }
-  | { kind: "facts"; title: string; lines: string[]; findings: Finding[] };
+  | { kind: "facts"; title: string; lines: string[]; findings: Finding[]; chart?: BarChartSpec };
 
 
 export const TOOLS = [
@@ -244,7 +246,14 @@ async function landCover(a: Record<string, unknown>): Promise<ToolResult> {
   return {
     result: JSON.stringify({ area: area.label, classes: lines }),
     say: `Land cover of ${area.label}: ${top.map((c) => `${c.name.toLowerCase()} ${Math.round(c.share * 100)}%`).join(", ")}. It is on the map and in the overview.`,
-    card: { kind: "facts", title: `Land use and land cover, ${area.label}`, lines: [...lines, `ESA WorldCover 2021, read at ${cover.resolution} m; about 77% overall accuracy, so small classes are rough.`], findings: [] },
+    card: {
+      kind: "facts", title: `Land use and land cover, ${area.label}`, lines: [...lines, `ESA WorldCover 2021, read at ${cover.resolution} m; about 77% overall accuracy, so small classes are rough.`], findings: [],
+      chart: {
+        title: `Land use and land cover, ${area.label}`, unit: "% of area", horizontal: true,
+        bars: cover.shares.filter((c) => c.share >= 0.005).map((c) => ({ label: c.name, value: c.share * 100, colour: `rgb(${(WORLDCOVER[c.code]?.colour ?? [128, 128, 128]).join(",")})` })),
+        source: `ESA WorldCover 2021 v200, 10 m (read at ${cover.resolution} m). Made with EarthPulse.`,
+      },
+    },
     next: ["Carbon stock here", "Urban growth here since 2000", "Tree cover loss here"],
   };
 }
@@ -252,19 +261,33 @@ async function landCover(a: Record<string, unknown>): Promise<ToolResult> {
 async function carbonStock(a: Record<string, unknown>): Promise<ToolResult> {
   const area = await areaFor(a);
   if (typeof area === "string") return failed(area);
-  const c = await carbonInBrowser({ aoi: area.geometry, maxPixels: PIXEL_BUDGET.fast }).promise;
-  if (!c.hectares) return failed(`The biomass map has no data over ${area.label} (open water, ice or outside its coverage).`);
+  const { biomass: b, soil } = await carbonInBrowser({ aoi: area.geometry, maxPixels: PIXEL_BUDGET.fast }).promise;
+  if (!b.hectares && !soil?.hectares) return failed(`Neither the biomass nor the soil map has data over ${area.label} (open water, ice or outside their coverage).`);
+  const pm = (v: number, u: number) => `${tonnes(v)} ± ${tonnes(u)}`;
+  const total = b.total + (soil?.total ?? 0);
   const lines = [
-    `Total: ${tonnes(c.total)} of carbon, about ${tonnes(c.total * CO2_PER_C)} of CO2 equivalent`,
-    `Above ground: ${tonnes(c.above)}; below ground (roots): ${tonnes(c.below)}`,
-    `Average ${c.meanDensity.toFixed(1)} t of carbon per hectare over ${ha(c.hectares)}`,
+    `Plants: ${pm(b.total, b.uncertainty)} of carbon (${b.meanDensity.toFixed(1)} t C/ha): above ground ${tonnes(b.above)}, roots ${tonnes(b.below)}`,
+    soil ? `Soil, top 30 cm: ${tonnes(soil.total)} of carbon (${soil.meanDensity.toFixed(1)} t C/ha), likely between ${tonnes(soil.low)} and ${tonnes(soil.high)}` : "Soil: SoilGrids could not be reached just now; ask again to add it",
+    `Together: about ${tonnes(total)} of carbon, ${tonnes(total * CO2_PER_C)} of CO2 equivalent`,
+  ];
+  const findings: Finding[] = [
+    { level: "ok", text: `Plant uncertainty ± ${tonnes(b.uncertainty)} adds every pixel's published uncertainty, as if all errors leaned the same way; if they were independent it would be ± ${tonnes(b.uncertaintyIndependent)}.` },
+    { level: "warn", text: "Plants as in 2010 (Harmonized Global Biomass, Spawn et al. 2020, 300 m); soil is SoilGrids 2.0 (Poggio et al. 2021, 250 m), modelled from soil profiles, and covers only the top 30 cm. Clearing or planting since 2010 is not reflected." },
   ];
   return {
     result: JSON.stringify({ area: area.label, lines }),
-    say: `${area.label} holds about ${tonnes(c.total)} of carbon in living plants (${tonnes(c.total * CO2_PER_C)} CO2 equivalent), ${c.meanDensity.toFixed(1)} t C per hectare on average.`,
+    say: `${area.label} holds about ${tonnes(total)} of carbon (${tonnes(total * CO2_PER_C)} CO2 equivalent): ${tonnes(b.total)} in plants${soil ? ` and ${tonnes(soil.total)} in the top 30 cm of soil` : ""}. Ranges and a chart below.`,
     card: {
-      kind: "facts", title: `Carbon stock in plants, ${area.label}`, lines,
-      findings: [{ level: "warn", text: "Biomass only, as it was in 2010: soil carbon is not included, and clearing or planting since then is not reflected. Harmonized Global Biomass (Spawn et al. 2020), 300 m." }],
+      kind: "facts", title: `Carbon stock, ${area.label}`, lines, findings,
+      chart: {
+        title: `Carbon stock, ${area.label}`, unit: "t C",
+        bars: [
+          { label: "Above ground", value: b.above, low: Math.max(0, b.above - b.uncertainty * (b.above / (b.total || 1))), high: b.above + b.uncertainty * (b.above / (b.total || 1)), colour: "#5a7d3a" },
+          { label: "Roots", value: b.below, low: Math.max(0, b.below - b.uncertainty * (b.below / (b.total || 1))), high: b.below + b.uncertainty * (b.below / (b.total || 1)), colour: "#8a6a3b" },
+          ...(soil ? [{ label: "Soil 0-30 cm", value: soil.total, low: soil.low, high: soil.high, colour: "#5b4636" }] : []),
+        ],
+        source: "Error bars: plants, published uncertainty added over pixels (shared between above ground and roots by their share); soil, 5% to 95% quantiles. Plants: Harmonized Global Biomass 2010 (Spawn et al. 2020). Soil: SoilGrids 2.0 (Poggio et al. 2021). Made with EarthPulse.",
+      },
     },
     next: ["Land cover here", "Tree cover loss here", "Vegetation change here 2010 to 2024"],
   };

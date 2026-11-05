@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { fetchProfile } from "./profile";
 import { formatKm } from "./measure";
+import { Figure } from "../ui/Figure";
 
 type Profile = NonNullable<Awaited<ReturnType<typeof fetchProfile>>>;
 const m = (v: number) => `${Math.round(v).toLocaleString("en")} m`;
@@ -26,7 +27,7 @@ export function ElevationProfile({ points }: { points: [number, number][] }) {
   const y = (h: number) => H - ((h - stats.min) / span) * (H - 6) - 3;
   const line = samples.map((s, i) => `${i ? "L" : "M"}${x(s.km).toFixed(1)},${y(heights[i]!).toFixed(1)}`).join(" ");
   return (
-    <div className="profile">
+    <Figure className="profile" title={`Ground height along a ${formatKm(total)} line`} source="AWS Terrain Tiles (SRTM and others, about 30 m at best; a surface model, so the tops of buildings and trees in cities and forests). Made with EarthPulse.">
       <svg viewBox={`0 0 ${W} ${H + 14}`} role="img"
         aria-label={`Ground height along the line: from ${m(heights[0]!)} to ${m(heights.at(-1)!)}, lowest ${m(stats.min)}, highest ${m(stats.max)}`}>
         <path className="area" d={`${line} L${W},${H} L0,${H} Z`} />
@@ -40,6 +41,6 @@ export function ElevationProfile({ points }: { points: [number, number][] }) {
         Lowest {m(stats.min)}, highest {m(stats.max)}; {m(stats.climb)} of climb and {m(stats.descent)} of descent along the way.
         AWS Terrain Tiles (SRTM and others, about 30 m at best; in cities and forests the tops of buildings and trees).
       </p>
-    </div>
+    </Figure>
   );
 }

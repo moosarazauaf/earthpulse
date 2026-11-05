@@ -26,6 +26,7 @@ import { type AirQuality, WHO_PM25_DAY, aqiBand, fetchAir } from "./air";
 import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
 import { AreaChoices } from "../analysis/AreaPrompt";
+import { Figure } from "../ui/Figure";
 import { type WaterHistory as WaterShares, fetchWaterHistory } from "./waterHistory";
 import { type SolarProfile, YIELD_FACTOR, fetchSolar } from "./solar";
 import { type CloudHours, type OutlookDay, cleanestWindow, cloudAt, cloudWords, dayName, fetchCloudHours, fetchOutlook, warnings, waterBalance } from "./outlook";
@@ -682,6 +683,8 @@ function ClimateChart({ months }: { months: ClimateProfile["months"] }) {
   const y = (t: number) => H - ((t - tLo) / Math.max(tHi - tLo, 1)) * H;
   const line = months.map((m, i) => `${i === 0 ? "M" : "L"}${(i + 0.5) * step},${y(m.tmax)}`).join(" ");
   return (
+    <Figure className="climate-figure" title="Average monthly rain and daily high temperature, 1991 to 2020"
+      source="Bars: rain (mm a month); line: average daily high (°C). ERA5 reanalysis through Open-Meteo, one grid cell of about 25 km. Made with EarthPulse.">
     <svg className="climate-chart" viewBox={`0 0 ${W} ${H + 14}`} role="img"
       aria-label="Average monthly rain as bars and average daily high temperature as a line, January to December">
       {months.map((m, i) => (
@@ -691,6 +694,7 @@ function ClimateChart({ months }: { months: ClimateProfile["months"] }) {
       {[...MONTHS].map((ch, i) => <text key={i} x={(i + 0.5) * step} y={H + 12} textAnchor="middle">{ch}</text>)}
       <text x="2" y="9">{Math.round(maxRain)} mm</text>
     </svg>
+    </Figure>
   );
 }
 

@@ -6,6 +6,7 @@ import { type Card, type Message, agentOnline, ask } from "./agent";
 import { CAN_RUN, COMING, pickExamples } from "./args";
 import type { Finding } from "./s1checks";
 import { type Mood, Sentri } from "./Sentri";
+import { BarChart } from "../ui/Figure";
 
 interface Entry { who: "you" | "sentri"; text: string; cards?: Card[]; warn?: boolean; next?: string[] }
 
@@ -155,6 +156,7 @@ export function AgentPanel() {
                 <div key={j} className="agent-card">
                   <strong>{c.title}</strong>
                   {c.kind !== "checks" && <ul className="facts-list">{c.lines.map((l) => <li key={l}>{l}</li>)}</ul>}
+                  {c.kind === "facts" && c.chart && <BarChart spec={c.chart} />}
                   {c.findings.length > 0 && <Findings findings={c.findings} />}
                   {c.kind === "plan" && <p className="muted">The plan is open in the side panel: check it, then press Run.</p>}
                 </div>
