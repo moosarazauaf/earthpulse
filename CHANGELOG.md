@@ -5,6 +5,22 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.32] - 2026-11-06
+
+### Added
+- **Sentri**, the assistant's new face: an original pixel-art satellite
+  (solar panels, radar dish, antenna light) drawn as crisp SVG squares in
+  the earth palette. It bobs and blinks when idle, flaps its panels and
+  sends radar waves while working, hops when an answer lands, and raises a
+  "!" when a check finds a problem. Motion is stepped for a pixel feel and
+  stops for visitors who ask for reduced motion.
+- A redesigned chat: Sentri and a live status in the header, avatars on
+  replies, example questions as chips, the runnable list folded away, a
+  pixel typing indicator, and an "Ask Sentri" button in the corner.
+
+### Fixed
+- Long code in check results no longer makes the chat scroll sideways.
+
 ## [0.2.0-alpha.31] - 2026-11-05
 
 ### Changed

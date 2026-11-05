@@ -650,27 +650,94 @@ button.primary { color: #1b1d14; }
 .profile .line { fill: none; stroke: var(--green); stroke-width: 1.5; }
 .profile text { fill: var(--muted); font-size: 9px; }
 
-/* ---- assistant ---- */
+/* ---- Sentri, the assistant ---- */
 .agent {
   position: fixed; right: 13px; bottom: calc(var(--bottom, 89px) + 13px); z-index: 40;
-  width: min(380px, calc(100vw - 26px)); max-height: min(620px, calc(100vh - var(--bottom, 89px) - 89px));
-  display: grid; grid-template-rows: auto 1fr auto auto; gap: 8px; padding: 13px;
+  width: min(390px, calc(100vw - 26px)); max-height: min(640px, calc(100vh - var(--bottom, 89px) - 89px));
+  display: grid; grid-template-rows: auto 1fr auto auto; gap: 8px; padding: 0 13px 13px;
   background: var(--panel-solid); border: 1px solid var(--line-strong); border-radius: 13px; box-shadow: 0 8px 34px rgba(0, 0, 0, 0.5);
+  overflow: hidden; animation: agent-in 0.28s steps(4) both;
 }
-.agent h2 { font-size: 15px; margin: 0; }
-.agent header { justify-content: space-between; }
-.agent-log { overflow-y: auto; display: grid; gap: 8px; align-content: start; min-height: 89px; }
+@keyframes agent-in { from { opacity: 0; transform: translateY(13px); } to { opacity: 1; transform: none; } }
+.agent-head {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px; margin: 0 -13px; padding: 8px 13px;
+  background:
+    linear-gradient(rgba(163, 177, 138, 0.05) 1px, transparent 1px) 0 0 / 6px 6px,
+    linear-gradient(90deg, rgba(163, 177, 138, 0.05) 1px, transparent 1px) 0 0 / 6px 6px,
+    linear-gradient(180deg, #1d1a14, #14120e);
+  border-bottom: 1px solid var(--line);
+}
+.agent-head h2 { font-size: 17px; margin: 0; letter-spacing: 0.04em; }
+.agent-status { margin: 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.agent-status .dot { width: 6px; height: 6px; background: var(--green); }
+.agent-status .dot.thinking { background: var(--amber); animation: dot-blink 0.6s steps(2) infinite; }
+.agent-status .dot.warn { background: var(--amber); }
+@keyframes dot-blink { 50% { opacity: 0.2; } }
+.agent-log { overflow-y: auto; overflow-x: hidden; display: grid; gap: 8px; align-content: start; min-height: 89px; }
+.agent .msg { display: flex; gap: 5px; align-items: flex-end; }
 .agent .msg p { margin: 0; white-space: pre-wrap; }
-.agent .msg.you { justify-self: end; max-width: 85%; background: rgba(163, 177, 138, 0.16); padding: 5px 8px; border-radius: 8px; }
-.agent .example { display: block; text-align: left; margin: 5px 0; }
-.agent .can-run { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12px; }
-.agent-log > .muted p { margin: 5px 0; }
-.agent-card { margin-top: 5px; padding: 8px; border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 5px; font-size: 12px; }
+.agent .msg .bubble { padding: 6px 9px; border-radius: 8px; display: grid; gap: 5px; max-width: 88%; min-width: 0; overflow-wrap: anywhere; }
+.agent .msg.sentri .bubble { background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); border-bottom-left-radius: 2px; }
+.agent .msg.you { justify-content: flex-end; }
+.agent .msg.you .bubble { background: rgba(163, 177, 138, 0.18); border-bottom-right-radius: 2px; }
+.agent .msg > .sentri { flex: none; }
+.agent-hello { display: grid; gap: 8px; font-size: 13px; }
+.agent-hello p { margin: 0; }
+.agent-hello summary { cursor: pointer; color: var(--cyan); font-size: 12px; }
+.agent .can-run { margin: 5px 0; padding-left: 18px; display: grid; gap: 3px; font-size: 12px; }
+.agent .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.agent .chip { font-size: 12px; padding: 4px 9px; border-radius: 13px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); text-align: left; }
+.agent .chip:hover { border-color: var(--cyan); color: var(--cyan); }
+.agent-card { padding: 8px; border: 1px solid var(--line); border-radius: 8px; display: grid; gap: 5px; font-size: 12px; }
 .findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
 .findings li span { display: inline-block; width: 1.2em; font-weight: 700; }
 .findings li.ok span { color: var(--green); }
 .findings li.warn span { color: var(--amber); }
 .findings li.error span { color: var(--red); }
-.agent form { display: grid; grid-template-columns: 1fr auto; gap: 5px; }
-.agent textarea { resize: vertical; font: inherit; font-size: 13px; padding: 5px 8px; border-radius: 8px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); }
+.agent form { display: grid; grid-template-columns: 1fr auto; gap: 5px; align-items: end; }
+.agent textarea { resize: vertical; font: inherit; font-size: 13px; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); }
+.agent textarea:focus { outline: none; border-color: var(--cyan); }
+.agent form button { width: 34px; height: 34px; padding: 0; border-radius: 8px; }
 .agent .small { font-size: 11px; margin: 0; }
+.pixel-dots { display: inline-flex; gap: 4px; padding: 4px 0; }
+.pixel-dots i { width: 5px; height: 5px; background: var(--cyan); animation: pixel-dot 0.9s steps(1) infinite; }
+.pixel-dots i:nth-child(2) { animation-delay: 0.3s; }
+.pixel-dots i:nth-child(3) { animation-delay: 0.6s; }
+@keyframes pixel-dot { 0%, 66% { opacity: 0.25; } 33% { opacity: 1; } }
+
+.sentri-launcher {
+  position: fixed; right: 13px; bottom: calc(var(--bottom, 89px) + 13px); z-index: 39;
+  display: flex; align-items: center; gap: 5px; padding: 3px 13px 3px 5px; border-radius: 34px;
+  background: var(--panel-solid); border: 1px solid var(--line-strong); color: var(--text); box-shadow: 0 6px 21px rgba(0, 0, 0, 0.45);
+  font-size: 13px; font-weight: 600;
+}
+.sentri-launcher:hover { border-color: var(--cyan); }
+@media (max-width: 800px) { .sentri-launcher span { display: none; } .sentri-launcher { padding: 3px; } }
+
+/* The sprite. Every move is in whole steps so it stays pixel-crisp. */
+.sentri { overflow: visible; image-rendering: pixelated; }
+.sentri-body { animation: sentri-bob 1.8s steps(2) infinite; }
+@keyframes sentri-bob { 50% { transform: translateY(-1px); } }
+.sentri-light { animation: sentri-light 1.2s steps(1) infinite; }
+@keyframes sentri-light { 50% { fill: #8a6a2a; } }
+.sentri-blink { opacity: 0; animation: sentri-blink 4.2s steps(1) infinite; }
+@keyframes sentri-blink { 0%, 93% { opacity: 0; } 94%, 97% { opacity: 1; } 98% { opacity: 0; } }
+.sentri-thinking .sentri-body { animation-duration: 0.7s; }
+.sentri-thinking .sentri-panel { transform-box: fill-box; transform-origin: center; animation: sentri-flap 0.5s steps(2) infinite; }
+@keyframes sentri-flap { 50% { transform: scaleY(0.6); } }
+.sentri-thinking .sentri-light { animation-duration: 0.3s; }
+.sentri-waves rect { opacity: 0; animation: sentri-wave 1.2s steps(1) infinite; }
+.sentri-waves rect:nth-child(2) { animation-delay: 0.3s; }
+.sentri-waves rect:nth-child(3) { animation-delay: 0.6s; }
+@keyframes sentri-wave { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.sentri-happy .sentri-body { animation: sentri-hop 0.6s steps(3) 3; }
+@keyframes sentri-hop { 50% { transform: translateY(-3px); } }
+.sentri-alert { animation: sentri-alert 0.8s steps(1) infinite; }
+@keyframes sentri-alert { 50% { opacity: 0.3; } }
+.sentri-launcher:hover .sentri-body { animation: sentri-hop 0.6s steps(3) 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .agent, .sentri *, .pixel-dots i, .agent-status .dot { animation: none !important; }
+  .sentri-blink { opacity: 0; }
+  .sentri-waves rect { opacity: 1; }
+}

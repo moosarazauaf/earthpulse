@@ -1,12 +1,13 @@
-/** The assistant: a small chat beside the globe. */
+/** Sentri, the assistant: a small chat beside the globe, and the button that opens it. */
 import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from "react";
 
 import { useStore } from "../app/store";
 import { type Card, type Message, agentOnline, ask } from "./agent";
 import { CAN_RUN, COMING } from "./args";
 import type { Finding } from "./s1checks";
+import { type Mood, Sentri } from "./Sentri";
 
-interface Entry { who: "you" | "assistant"; text: string; cards?: Card[] }
+interface Entry { who: "you" | "sentri"; text: string; cards?: Card[]; warn?: boolean }
 
 const EXAMPLES = [
   "What can you do?",
@@ -14,6 +15,13 @@ const EXAMPLES = [
   "What is the weather outlook for Multan?",
   "Show wind and sea temperature",
 ];
+
+const STATUS: Record<Mood, string> = {
+  idle: "Watching the Earth",
+  thinking: "Scanning the archive…",
+  happy: "Done",
+  warn: "Found something to check",
+};
 
 const MARK: Record<Finding["level"], string> = { ok: "✓", warn: "!", error: "✕" };
 
@@ -25,6 +33,19 @@ function Findings({ findings }: { findings: Finding[] }) {
   );
 }
 
+/** The floating button that opens Sentri; hidden while the chat is open. */
+export function SentriLauncher() {
+  const open = useStore((s) => s.agentOpen);
+  const set = useStore((s) => s.set);
+  if (open) return null;
+  return (
+    <button className="sentri-launcher" onClick={() => set({ agentOpen: true, introOpen: false })} aria-label="Ask Sentri, the EarthPulse assistant">
+      <Sentri size={44} />
+      <span>Ask Sentri</span>
+    </button>
+  );
+}
+
 export function AgentPanel() {
   const open = useStore((s) => s.agentOpen);
   const set = useStore((s) => s.set);
@@ -32,12 +53,21 @@ export function AgentPanel() {
   const [history, setHistory] = useState<Message[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [cheer, setCheer] = useState(false);
   const controller = useRef<AbortController | null>(null);
   const end = useRef<HTMLDivElement>(null);
   // Braces matter: newer browsers return a Promise from scrollIntoView, which React would take for a cleanup.
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [entries, busy]);
   useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => {
+    if (!cheer) return;
+    const t = window.setTimeout(() => setCheer(false), 2400);
+    return () => window.clearTimeout(t);
+  }, [cheer]);
   if (!open) return null;
+
+  const last = entries.at(-1);
+  const mood: Mood = busy ? "thinking" : last?.who === "sentri" && last.warn ? "warn" : cheer ? "happy" : "idle";
 
   async function send(event?: FormEvent, preset?: string) {
     event?.preventDefault();
@@ -50,9 +80,11 @@ export function AgentPanel() {
     try {
       const turn = await ask(q, history, controller.current.signal);
       setHistory(turn.history);
-      setEntries((e) => [...e, { who: "assistant", text: turn.text, cards: turn.cards }]);
+      const warn = turn.cards.some((c) => c.findings.some((f) => f.level !== "ok"));
+      setEntries((e) => [...e, { who: "sentri", text: turn.text, cards: turn.cards, warn }]);
+      setCheer(!warn);
     } catch {
-      if (!controller.current.signal.aborted) setEntries((e) => [...e, { who: "assistant", text: "Something went wrong; try again." }]);
+      if (!controller.current.signal.aborted) setEntries((e) => [...e, { who: "sentri", text: "Something went wrong; try again.", warn: true }]);
     } finally {
       setBusy(false);
     }
@@ -62,46 +94,62 @@ export function AgentPanel() {
   };
 
   return (
-    <aside className="agent" aria-label="Assistant">
-      <header className="row">
-        <h2>Assistant</h2>
-        <button className="ghost" onClick={() => { controller.current?.abort(); set({ agentOpen: false }); }} aria-label="Close the assistant">×</button>
+    <aside className="agent" aria-label="Sentri, the EarthPulse assistant">
+      <header className="agent-head">
+        <Sentri mood={mood} size={56} title={`Sentri: ${STATUS[mood]}`} />
+        <div>
+          <h2>Sentri</h2>
+          <p className="agent-status" role="status"><span className={`dot ${mood}`} aria-hidden="true" />{STATUS[mood]}</p>
+        </div>
+        <button className="ghost" onClick={() => { controller.current?.abort(); set({ agentOpen: false }); }} aria-label="Close Sentri">×</button>
       </header>
       <div className="agent-log" aria-live="polite">
         {!entries.length && (
-          <div className="muted">
-            <p>Ask in plain words, or paste a Google Earth Engine Sentinel-1 script to check it. Runnable so far:</p>
-            <ul className="can-run">{CAN_RUN.map((c) => <li key={c}>{c}</li>)}</ul>
-            <p>{COMING}</p>
-            <p>Try:</p>
-            {EXAMPLES.map((x) => <button key={x} className="link example" onClick={() => void send(undefined, x)}>{x}</button>)}
+          <div className="agent-hello">
+            <p><strong>Hi, I&apos;m Sentri.</strong> I watch the Earth with Landsat and Sentinel. Ask me in plain words, or paste a Google Earth Engine Sentinel-1 script and I&apos;ll check it.</p>
+            <details>
+              <summary>What I can run so far</summary>
+              <ul className="can-run">{CAN_RUN.map((c) => <li key={c}>{c}</li>)}</ul>
+              <p className="muted">{COMING}</p>
+            </details>
+            <div className="chips">
+              {EXAMPLES.map((x) => <button key={x} className="chip" onClick={() => void send(undefined, x)}>{x}</button>)}
+            </div>
           </div>
         )}
         {entries.map((e, i) => (
           <div key={i} className={`msg ${e.who}`}>
-            <p>{e.text}</p>
-            {e.cards?.map((c, j) => (
-              <div key={j} className="agent-card">
-                <strong>{c.title}</strong>
-                {c.kind === "plan" && <ul className="facts-list">{c.lines.map((l) => <li key={l}>{l}</li>)}</ul>}
-                {c.findings.length > 0 && <Findings findings={c.findings} />}
-                {c.kind === "plan" && <p className="muted">The plan is open in the side panel: check it, then press Run.</p>}
-              </div>
-            ))}
+            {e.who === "sentri" && <Sentri size={22} mood={e.warn ? "warn" : "idle"} />}
+            <div className="bubble">
+              <p>{e.text}</p>
+              {e.cards?.map((c, j) => (
+                <div key={j} className="agent-card">
+                  <strong>{c.title}</strong>
+                  {c.kind === "plan" && <ul className="facts-list">{c.lines.map((l) => <li key={l}>{l}</li>)}</ul>}
+                  {c.findings.length > 0 && <Findings findings={c.findings} />}
+                  {c.kind === "plan" && <p className="muted">The plan is open in the side panel: check it, then press Run.</p>}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
-        {busy && <p className="muted" role="status">Working…</p>}
+        {busy && (
+          <div className="msg sentri typing" aria-hidden="true">
+            <Sentri size={22} mood="thinking" />
+            <div className="bubble"><span className="pixel-dots"><i /><i /><i /></span></div>
+          </div>
+        )}
         <div ref={end} />
       </div>
       <form onSubmit={send}>
         <textarea value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} rows={2} maxLength={20_000}
-          placeholder="Floods in Layyah, August 2022… or paste a script" aria-label="Message to the assistant" />
-        <button type="submit" disabled={busy || !text.trim()}>Send</button>
+          placeholder="Floods in Layyah, August 2022… or paste a script" aria-label="Message to Sentri" />
+        <button type="submit" disabled={busy || !text.trim()} aria-label="Send">➤</button>
       </form>
       <p className="muted small">
         {agentOnline
-          ? "A free NVIDIA Nemotron model through OpenRouter reads your message; what you type is sent there. Numbers, dates and checks come from EarthPulse's own code. The model can misread you: check the plan before running it."
-          : "Built-in reader (no language model on this build). Pasted scripts are checked here in your browser."}
+          ? "Sentri runs on a free NVIDIA Nemotron model through OpenRouter, which reads what you type. Numbers, dates and checks come from EarthPulse's own code; check the plan before running it."
+          : "Built-in reader on this build (no language model). Pasted scripts are checked here in your browser."}
       </p>
     </aside>
   );
