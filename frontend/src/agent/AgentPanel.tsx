@@ -7,7 +7,26 @@ import { CAN_RUN, COMING } from "./args";
 import type { Finding } from "./s1checks";
 import { type Mood, Sentri } from "./Sentri";
 
-interface Entry { who: "you" | "sentri"; text: string; cards?: Card[]; warn?: boolean }
+interface Entry { who: "you" | "sentri"; text: string; cards?: Card[]; warn?: boolean; next?: string[] }
+
+/** The chat is kept in this browser only, so it survives a reload until the user clears it. */
+const SAVED = "earthpulse.sentri.v1";
+function loadChat(): { entries: Entry[]; history: Message[] } {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SAVED) ?? "null") as { entries?: Entry[]; history?: Message[] } | null;
+    return { entries: Array.isArray(raw?.entries) ? raw.entries : [], history: Array.isArray(raw?.history) ? raw.history : [] };
+  } catch {
+    return { entries: [], history: [] };
+  }
+}
+function saveChat(entries: Entry[], history: Message[]) {
+  try {
+    if (entries.length) localStorage.setItem(SAVED, JSON.stringify({ entries: entries.slice(-60), history }));
+    else localStorage.removeItem(SAVED);
+  } catch {
+    // Storage full or blocked (private window): the chat still works, it just is not kept.
+  }
+}
 
 const EXAMPLES = [
   "What can you do?",
@@ -49,8 +68,8 @@ export function SentriLauncher() {
 export function AgentPanel() {
   const open = useStore((s) => s.agentOpen);
   const set = useStore((s) => s.set);
-  const [entries, setEntries] = useState<Entry[]>([]);
-  const [history, setHistory] = useState<Message[]>([]);
+  const [entries, setEntries] = useState<Entry[]>(() => loadChat().entries);
+  const [history, setHistory] = useState<Message[]>(() => loadChat().history);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [cheer, setCheer] = useState(false);
@@ -59,6 +78,7 @@ export function AgentPanel() {
   // Braces matter: newer browsers return a Promise from scrollIntoView, which React would take for a cleanup.
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [entries, busy]);
   useEffect(() => () => controller.current?.abort(), []);
+  useEffect(() => saveChat(entries, history), [entries, history]);
   useEffect(() => {
     if (!cheer) return;
     const t = window.setTimeout(() => setCheer(false), 2400);
@@ -81,13 +101,19 @@ export function AgentPanel() {
       const turn = await ask(q, history, controller.current.signal);
       setHistory(turn.history);
       const warn = turn.cards.some((c) => c.findings.some((f) => f.level !== "ok"));
-      setEntries((e) => [...e, { who: "sentri", text: turn.text, cards: turn.cards, warn }]);
+      setEntries((e) => [...e, { who: "sentri", text: turn.text, cards: turn.cards, warn, next: turn.next }]);
       setCheer(!warn);
     } catch {
       if (!controller.current.signal.aborted) setEntries((e) => [...e, { who: "sentri", text: "Something went wrong; try again.", warn: true }]);
     } finally {
       setBusy(false);
     }
+  }
+  function clearChat() {
+    controller.current?.abort();
+    setEntries([]);
+    setHistory([]);
+    setBusy(false);
   }
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
@@ -101,7 +127,10 @@ export function AgentPanel() {
           <h2>Sentri</h2>
           <p className="agent-status" role="status"><span className={`dot ${mood}`} aria-hidden="true" />{STATUS[mood]}</p>
         </div>
-        <button className="ghost" onClick={() => { controller.current?.abort(); set({ agentOpen: false }); }} aria-label="Close Sentri">×</button>
+        <div className="agent-actions">
+          {entries.length > 0 && <button className="ghost" onClick={clearChat} title="Clear this chat and start a new one" aria-label="Clear chat">🗑</button>}
+          <button className="ghost" onClick={() => set({ agentOpen: false })} aria-label="Close Sentri">×</button>
+        </div>
       </header>
       <div className="agent-log" aria-live="polite">
         {!entries.length && (
@@ -125,11 +154,14 @@ export function AgentPanel() {
               {e.cards?.map((c, j) => (
                 <div key={j} className="agent-card">
                   <strong>{c.title}</strong>
-                  {c.kind === "plan" && <ul className="facts-list">{c.lines.map((l) => <li key={l}>{l}</li>)}</ul>}
+                  {c.kind !== "checks" && <ul className="facts-list">{c.lines.map((l) => <li key={l}>{l}</li>)}</ul>}
                   {c.findings.length > 0 && <Findings findings={c.findings} />}
                   {c.kind === "plan" && <p className="muted">The plan is open in the side panel: check it, then press Run.</p>}
                 </div>
               ))}
+              {e.next && i === entries.length - 1 && !busy && (
+                <div className="chips">{e.next.map((x) => <button key={x} className="chip" onClick={() => void send(undefined, x)}>{x}</button>)}</div>
+              )}
             </div>
           </div>
         ))}
@@ -148,8 +180,8 @@ export function AgentPanel() {
       </form>
       <p className="muted small">
         {agentOnline
-          ? "Sentri runs on a free NVIDIA Nemotron model through OpenRouter, which reads what you type. Numbers, dates and checks come from EarthPulse's own code; check the plan before running it."
-          : "Built-in reader on this build (no language model). Pasted scripts are checked here in your browser."}
+          ? "Sentri runs on a free NVIDIA Nemotron model through OpenRouter, which reads what you type. Numbers, dates and checks come from EarthPulse's own code. The chat is kept in this browser only; 🗑 clears it."
+          : "Built-in reader on this build (no language model). The chat is kept in this browser only; 🗑 clears it."}
       </p>
     </aside>
   );

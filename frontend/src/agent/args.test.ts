@@ -40,3 +40,29 @@ describe("what the assistant says it can do", () => {
     expect(abilitiesText()).toMatch(/Still in progress/);
   });
 });
+
+describe("chat memory and the built-in reader", () => {
+  it("keeps the recent turns and never starts on a cut-off tool reply", async () => {
+    const { trimHistory } = await import("./args");
+    const turn = (i: number) => [
+      { role: "user" as const, content: `q${i}` },
+      { role: "assistant" as const, content: null, tool_calls: [{ id: `c${i}`, type: "function" as const, function: { name: "open_area", arguments: "{}" } }] },
+      { role: "tool" as const, tool_call_id: `c${i}`, content: "{}" },
+    ];
+    const all = Array.from({ length: 12 }, (_, i) => turn(i)).flat(); // 36 messages
+    const kept = trimHistory(all, 10);
+    expect(kept[0]).toMatchObject({ role: "user" });
+    expect(kept.length).toBeLessThanOrEqual(10);
+    expect(kept.at(-1)).toMatchObject({ role: "tool", tool_call_id: "c11" });
+    expect(trimHistory(all.slice(0, 6), 10)).toHaveLength(6);
+  });
+
+  it("routes land cover and carbon requests, keeping 'here' as the open area", async () => {
+    const { offlineIntent } = await import("./args");
+    expect(offlineIntent("Land cover here")).toEqual({ tool: "land_cover", place: null });
+    expect(offlineIntent("carbon stock in Layyah, Pakistan?")).toEqual({ tool: "carbon_stock", place: "Layyah, Pakistan" });
+    expect(offlineIntent("LULC of Lahore")).toEqual({ tool: "land_cover", place: "Lahore" });
+    expect(offlineIntent("biomass for this area")).toEqual({ tool: "carbon_stock", place: null });
+    expect(offlineIntent("floods in Pakistan")).toBeNull();
+  });
+});

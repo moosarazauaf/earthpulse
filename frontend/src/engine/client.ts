@@ -2,13 +2,14 @@
  * Main-thread side of the browser engine: what this device can handle, and
  * starting an analysis in the worker.
  */
+import type { CarbonRequest, CarbonSums } from "./carbon";
 import type { AnalysisResult, Overlay } from "../app/types";
 import type { Progress } from "./common";
 import type { EngineResult, WorkerMessage, WorkerRequest } from "./worker";
 import type { CoverRequest, CoverResult } from "./cover";
 import type { ExposureRequest, ExposureResult, PopulationRequest, PopulationResult } from "./population";
 
-export const SOFTWARE_VERSION = "0.2.0-alpha.32";
+export const SOFTWARE_VERSION = "0.2.0-alpha.33";
 export type Quality = "fast" | "balanced" | "detailed";
 
 export interface DeviceProfile {
@@ -130,6 +131,8 @@ function countJob<T>(job: WorkerRequest): { promise: Promise<T>; cancel: () => v
 export const populationInBrowser = (request: PopulationRequest) => countJob<PopulationResult>({ kind: "population", request });
 /** People on the land an analysis marked as affected. */
 export const exposureInBrowser = (request: ExposureRequest) => countJob<ExposureResult>({ kind: "exposure", request });
+/** Biomass carbon in an area (Harmonized Global Biomass, 2010). */
+export const carbonInBrowser = (request: CarbonRequest) => countJob<CarbonSums & { areaHa: number }>({ kind: "carbon", request });
 
 export function landCoverInBrowser(request: CoverRequest): { promise: Promise<{ shares: CoverResult["shares"]; resolution: number; overlay: Overlay }>; cancel: () => void } {
   const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });

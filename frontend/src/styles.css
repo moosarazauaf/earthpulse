@@ -667,6 +667,7 @@ button.primary { color: #1b1d14; }
     linear-gradient(180deg, #1d1a14, #14120e);
   border-bottom: 1px solid var(--line);
 }
+.agent-actions { display: flex; gap: 2px; }
 .agent-head h2 { font-size: 17px; margin: 0; letter-spacing: 0.04em; }
 .agent-status { margin: 0; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
 .agent-status .dot { width: 6px; height: 6px; background: var(--green); }

@@ -1,5 +1,6 @@
 /** The model's tool arguments, checked before use: anything out of range is dropped, not trusted. */
 import type { Ask, AskKind } from "../ask/interpret";
+import type { Message } from "./agent";
 
 export const KINDS: AskKind[] = ["flood", "burn", "vegetation", "water", "urban", "trees", "heat", "series"];
 export const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -49,10 +50,29 @@ export const CAN_RUN = [
   "Burn scars, vegetation change, surface water through the years, urban growth, tree cover loss, land surface temperature and index time series",
   "Area overview of any place: 7-day forecast and warnings, air quality, solar power, water since 1984, climate, terrain, people and satellite passes",
   "Map layers: wind, clouds, rain, air quality, earthquakes, satellites, population, sea temperature, vegetation, soil moisture, smoke and dust, ozone",
+  "Land use and land cover (LULC) of any area: ESA WorldCover 2021, 10 m",
+  "Carbon stock in plants: above- and below-ground biomass carbon and CO2 equivalent (Harmonized Global Biomass, 2010)",
   "Checking a Google Earth Engine Sentinel-1 flood script for mixed orbits, compositing and other mistakes",
 ];
-export const COMING = "Still in progress: land cover classification, measuring and elevation profiles, map images and year-to-year comparisons by request. Until then they are in the Analyse menu and the toolbar.";
+export const COMING = "Still in progress: land cover classification with your own training samples, soil carbon, measuring and elevation profiles, map images and year-to-year comparisons by request. Until then they are in the Analyse menu and the toolbar.";
 
 const ASKS_ABILITIES = /^\s*(help|\?|what (can|do) you (do|run)|what are you|which analys[ie]s|what analys[ie]s|capabilities)\b/i;
 export const asksAbilities = (text: string) => ASKS_ABILITIES.test(text);
 export const abilitiesText = () => `I can run these now:\n${CAN_RUN.map((c) => `• ${c}`).join("\n")}\n\n${COMING}`;
+
+/** The last messages, starting at a user message so a tool reply is never cut from its call. */
+export function trimHistory(messages: Message[], max = 30): Message[] {
+  if (messages.length <= max) return messages;
+  const tail = messages.slice(-max);
+  const start = tail.findIndex((m) => m.role === "user");
+  return start < 0 ? [] : tail.slice(start);
+}
+
+/** Without a model: land cover and carbon requests, with the place after "of", "in" or "for" ("here" means the open area). */
+export function offlineIntent(text: string): { tool: "land_cover" | "carbon_stock"; place: string | null } | null {
+  const tool = /\b(carbon|biomass)\b/i.test(text) ? "carbon_stock" : /\b(land ?cover|land use|lulc)\b/i.test(text) ? "land_cover" : null;
+  if (!tool) return null;
+  const m = /\b(?:of|in|for|at)\s+(.+?)[.?!]*$/i.exec(text.trim());
+  const place = m && !/^(here|there|this|it|the same place|this area)$/i.test(m[1]!.trim()) ? m[1]!.trim() : null;
+  return { tool, place };
+}

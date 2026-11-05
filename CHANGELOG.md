@@ -5,6 +5,23 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.33] - 2026-11-06
+
+### Added
+- **Land use and land cover** through Sentri: hectares and share of each
+  ESA WorldCover 2021 class for any area, shown on the map and in the
+  overview. Layyah (20 km square): cropland 81%, trees 5%, built-up 5%.
+- **Carbon stock**: carbon in living plants, above and below ground, and
+  its CO2 equivalent, from the Harmonized Global Biomass map (Spawn et al.
+  2020, 2010, 300 m) read in the browser. Layyah: 95,331 t C, 2.5 t C/ha;
+  an independent rasterio sum of the same square gives 94,892 t (0.5%
+  apart). Biomass only; soil carbon is not included.
+- Sentri remembers the chat's context: each message tells the model the
+  open area, screen, waiting plan and layers, so "there" and "the same
+  place" work; history is trimmed by whole turns.
+- The chat is kept in this browser and survives a reload; the bin button
+  clears it. Suggested next steps appear as chips after an answer.
+
 ## [0.2.0-alpha.32] - 2026-11-06
 
 ### Added
