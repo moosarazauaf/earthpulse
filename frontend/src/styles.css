@@ -742,3 +742,24 @@ button.primary { color: #1b1d14; }
   .sentri-blink { opacity: 0; }
   .sentri-waves rect { opacity: 1; }
 }
+
+/* ---- Layers panel: on/off switches drawn as toggle buttons, matching the View buttons ----
+   Each is still a real checkbox (hidden visually), so keyboards and screen readers work as before. */
+.panel[aria-label="Layers"] section { display: flex; flex-wrap: wrap; gap: 4px; align-items: stretch; }
+.panel[aria-label="Layers"] section > :not(label.check) { flex-basis: 100%; }
+.panel[aria-label="Layers"] section > header.row { flex-wrap: wrap; gap: 4px; }
+.panel[aria-label="Layers"] label.check {
+  flex: 1 1 auto; position: relative; gap: 6px; padding: 5px 9px; font-size: 12px; line-height: 1.35;
+  border: 1px solid var(--line-strong); border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+}
+.panel[aria-label="Layers"] label.check:hover { border-color: var(--cyan); }
+.panel[aria-label="Layers"] label.check input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.panel[aria-label="Layers"] label.check:has(input:focus-visible) { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.panel[aria-label="Layers"] label.check:has(input:checked) { border-color: var(--cyan); background: rgba(163, 177, 138, 0.14); color: #fff; }
+/* A small light shows which are on, so the state does not rely on colour alone. */
+.panel[aria-label="Layers"] label.check::before {
+  content: ""; flex: none; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--muted);
+}
+.panel[aria-label="Layers"] label.check:has(input:checked)::before { background: var(--cyan); border-color: var(--cyan); }
+.panel[aria-label="Layers"] label.check kbd { margin-left: auto; }
