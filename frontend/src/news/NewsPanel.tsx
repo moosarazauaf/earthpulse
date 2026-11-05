@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useStore } from "../app/store";
 import { PIXEL_BUDGET, deviceProfile } from "../engine/client";
+import { HazardIcon } from "../ui/HazardIcon";
 import { KindBadge } from "../ui/KindBadge";
 import { type StoryAction, storyActions } from "./actions";
 import { type Corroboration, corroborate } from "./corroborate";
@@ -18,7 +19,7 @@ function outlets(story: NewsStory): number {
 }
 
 function Dot({ hazard }: { hazard: Hazard }) {
-  return <span className="dot" style={{ background: HAZARD_INFO[hazard].colour }} aria-hidden="true" />;
+  return <HazardIcon hazard={hazard} />;
 }
 
 function Badges({ c }: { c: Corroboration }) {

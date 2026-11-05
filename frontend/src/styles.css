@@ -823,3 +823,6 @@ button.primary { color: #1b1d14; }
 .climate-figure { margin: 0; }
 .paper .climate-chart text { fill: #222; }
 .paper .climate-chart rect { fill: #4f7fa0; }
+
+/* Pixel hazard icons sit on the text line like the dots they replace. */
+.hazard-icon { display: inline-block; vertical-align: -2px; flex: none; image-rendering: pixelated; }
