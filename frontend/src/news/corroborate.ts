@@ -76,6 +76,7 @@ export function newsMarkers(stories: NewsStory[], quakes: Quake[] | null, alerts
       id: story.id,
       lat: at.lat,
       lon: at.lon,
+      hazard: story.hazard,
       colour: HAZARD_INFO[story.hazard].colour,
       outlets: new Set(story.articles.map((a) => a.source)).size,
       exact: story.place.precision !== "country",

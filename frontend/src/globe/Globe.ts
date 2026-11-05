@@ -40,6 +40,8 @@ import { type Satellite, positionAt, track } from "./satellites";
 import { SHADERS, type ViewMode } from "./viewModes";
 import { type WindField, advect, speedColour } from "./wind";
 import { EARTH_LAYERS } from "./earthToday";
+import { BADGE_PX, GDACS_HAZARD, badge } from "./pixelMarkers";
+import type { Hazard } from "../news/types";
 import { WATER_TILES } from "../area/waterHistory";
 import type { SatRec } from "satellite.js";
 
@@ -76,7 +78,8 @@ const LOSS_COLOR = Color.fromCssColorString("#d0703f");
 const GAIN_COLOR = Color.fromCssColorString("#8db85a");
 const ALERT_RED = Color.fromCssColorString("#ff5a5a");
 const ALERT_ORANGE = Color.fromCssColorString("#ffa53c");
-const QUAKE_COLOR = Color.fromCssColorString("#c4abdc");
+/** The earthquake icon colour (news/hazards), so labels match their badges. */
+const QUAKE_COLOR = Color.fromCssColorString("#f0a73a");
 
 const BLANK_TILE = document.createElement("canvas");
 BLANK_TILE.width = BLANK_TILE.height = 1;
@@ -723,20 +726,14 @@ export class Globe {
     this.alertEntities = alerts.map((alert) => {
       const red = alert.level === "Red";
       const selected = alert.id === selectedId;
+      // The GDACS type picks the icon; the border and corner flag carry the alert level, red or orange.
+      const level = (red ? ALERT_RED : ALERT_ORANGE).toCssColorString();
       return this.viewer.entities.add({
         id: `alert:${alert.id}`,
         position: Cartesian3.fromDegrees(alert.lon, alert.lat),
-        point: {
-          pixelSize: selected ? 22 : 16,
-          color: (red ? ALERT_RED : ALERT_ORANGE).withAlpha(0.9),
-          outlineColor: Color.WHITE,
-          outlineWidth: selected ? 3 : 1.5,
-          disableDepthTestDistance: Number.POSITIVE_INFINITY,
-        },
-        label: {
-          text: red ? "R" : "O",
-          font: "bold 11px sans-serif",
-          fillColor: Color.BLACK,
+        billboard: {
+          image: badge(GDACS_HAZARD[alert.type] ?? "flood", level, level),
+          scale: selected ? 0.62 : 0.48,
           verticalOrigin: VerticalOrigin.CENTER,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
@@ -769,24 +766,27 @@ export class Globe {
   /** Earthquake markers; the ring grows with magnitude, which is also written beside it. */
   setQuakes(quakes: Quake[]) {
     for (const entity of this.quakeEntities) this.viewer.entities.remove(entity);
-    this.quakeEntities = quakes.map((quake) => this.viewer.entities.add({
+    this.quakeEntities = quakes.map((quake) => {
+      // The badge grows with magnitude, which is also written above the strong ones.
+      const scale = Math.min(0.62, 0.26 + Math.max(0, quake.magnitude - 4) * 0.09);
+      return this.viewer.entities.add({
       id: `quake:${quake.id}`,
       position: Cartesian3.fromDegrees(quake.lon, quake.lat),
-      point: {
-        pixelSize: 4 + (quake.magnitude - 4) * 5,
-        color: Color.TRANSPARENT,
-        outlineColor: QUAKE_COLOR,
-        outlineWidth: 2,
+      billboard: {
+        image: badge("earthquake"),
+        scale,
+        verticalOrigin: VerticalOrigin.CENTER,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       },
       label: quake.magnitude >= 5.5 ? {
         text: `M${quake.magnitude.toFixed(1)}`,
         font: "11px sans-serif",
         fillColor: QUAKE_COLOR,
-        pixelOffset: new Cartesian2(0, -16),
+        pixelOffset: new Cartesian2(0, -(BADGE_PX * scale) / 2 - 9),
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
       } : undefined,
-    }));
+      });
+    });
     this.render();
   }
 
@@ -824,19 +824,20 @@ export class Globe {
    * News story markers: filled when the story names a town or region, a ring
    * when it is placed only to the country. Size grows with the number of outlets.
    */
-  setNews(markers: { id: string; lat: number; lon: number; colour: string; outlets: number; exact: boolean; label: string }[], selectedId: string | null) {
+  setNews(markers: { id: string; lat: number; lon: number; hazard: Hazard; colour: string; outlets: number; exact: boolean; label: string }[], selectedId: string | null) {
     for (const entity of this.newsEntities) this.viewer.entities.remove(entity);
     this.newsEntities = markers.map((m) => {
       const selected = m.id === selectedId;
-      const colour = Color.fromCssColorString(m.colour);
+      // Bigger the more outlets report it; faded when the story names only a country.
+      const scale = 0.32 + Math.min(m.outlets, 5) * 0.03 + (selected ? 0.14 : 0);
       return this.viewer.entities.add({
         id: `news:${m.id}`,
         position: Cartesian3.fromDegrees(m.lon, m.lat),
-        point: {
-          pixelSize: (m.exact ? 9 : 16) + Math.min(m.outlets, 5) * 2 + (selected ? 6 : 0),
-          color: m.exact ? colour.withAlpha(0.95) : colour.withAlpha(0.15),
-          outlineColor: m.exact ? Color.fromCssColorString("#0b1416") : colour,
-          outlineWidth: selected ? 3 : 2,
+        billboard: {
+          image: badge(m.hazard, selected ? "#ffffff" : undefined),
+          scale,
+          color: Color.WHITE.withAlpha(m.exact ? 1 : 0.55),
+          verticalOrigin: VerticalOrigin.CENTER,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
         label: selected ? {
@@ -845,7 +846,7 @@ export class Globe {
           fillColor: Color.WHITE,
           showBackground: true,
           backgroundColor: Color.fromCssColorString("#0b1416").withAlpha(0.85),
-          pixelOffset: new Cartesian2(0, -24),
+          pixelOffset: new Cartesian2(0, -(BADGE_PX * scale) / 2 - 12),
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         } : undefined,
       });
