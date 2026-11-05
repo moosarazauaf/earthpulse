@@ -788,3 +788,17 @@ button.primary { color: #1b1d14; }
   /* Between the two side panels on smaller screens: narrower rather than on top of the Layers panel. */
   .app:has(.panel.right:not(.collapsed)) .agent { width: max(280px, min(390px, calc(100vw - 356px - 23px - 312px - 23px))); }
 }
+
+/* ---- Sentri on phones: a full-height sheet under the menu, text big enough that iPhones do not zoom ---- */
+@media (max-width: 800px) {
+  .agent {
+    left: 8px; right: 8px; width: auto; top: 76px; bottom: 8px; max-height: none; z-index: 60;
+    padding: 0 13px max(13px, env(safe-area-inset-bottom));
+  }
+  .agent textarea { font-size: 16px; }
+  .agent .chip { font-size: 13px; padding: 6px 11px; }
+  .agent-head .ghost { min-width: 40px; min-height: 40px; }
+  /* With a bottom sheet open, the button rises above it instead of covering its content. */
+  .app:has(.panel.right:not(.collapsed)) .sentri-launcher,
+  .app:has(.panel.left:not(.collapsed)) .sentri-launcher { bottom: calc(var(--bottom) + 46vh + 21px); }
+}

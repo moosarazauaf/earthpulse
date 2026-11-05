@@ -76,3 +76,56 @@ export function offlineIntent(text: string): { tool: "land_cover" | "carbon_stoc
   const place = m && !/^(here|there|this|it|the same place|this area)$/i.test(m[1]!.trim()) ? m[1]!.trim() : null;
   return { tool, place };
 }
+
+/**
+ * Example questions, a fresh handful each time the chat opens or is cleared.
+ * Every one is something the tools can run, with real places and real event dates.
+ */
+export const EXAMPLE_POOL = [
+  "Map the floods in Layyah, Pakistan, from 25 August to 5 September 2022",
+  "Floods in Dadu, Pakistan, in September 2022",
+  "Floods in Sylhet, Bangladesh, in June 2022",
+  "Floods in Derna, Libya, in September 2023",
+  "Floods in Valencia, Spain, from 29 October to 10 November 2024",
+  "Burn scar near Lahaina, Hawaii, August 2023",
+  "Burn scar near Jasper, Canada, July 2024",
+  "Burn scars in Evia, Greece, August 2021",
+  "How much has Lake Urmia shrunk since 2000?",
+  "Surface water of Manchar Lake from 2000 to 2024",
+  "How has the Aral Sea changed since 1990?",
+  "Urban growth of Lahore since 2000",
+  "How fast has Dubai grown since 2000?",
+  "Built-up growth of Islamabad since 2017",
+  "Tree cover loss in Rondonia, Brazil, since 2017",
+  "Forest loss near Swat, Pakistan",
+  "Vegetation change in Cholistan from 2000 to 2024",
+  "NDVI every year in Faisalabad since 2000",
+  "Land surface temperature in Jacobabad in June 2024",
+  "Heat in Karachi in May 2024",
+  "Land cover of Islamabad",
+  "LULC of the Nile delta near Tanta, Egypt",
+  "Land use around Peshawar",
+  "Carbon stock of Murree, Pakistan",
+  "How much carbon is stored in the Sundarbans?",
+  "Carbon stock of the forests around Abbottabad",
+  "What is the weather outlook for Karachi?",
+  "Air quality outlook for Lahore",
+  "Will it rain in Islamabad this week?",
+  "Solar power potential in Quetta",
+  "Has Nowshera flooded before? Show water since 1984",
+  "When do Landsat and Sentinel next pass over Multan?",
+  "Show wind and sea temperature",
+  "Show smoke and dust today",
+  "Show earthquakes from the past week",
+  "Show soil moisture and rain",
+];
+
+/** `n` different examples in random order; "What can you do?" always comes first. */
+export function pickExamples(n = 4, random: () => number = Math.random): string[] {
+  const pool = [...EXAMPLE_POOL];
+  for (let i = pool.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j]!, pool[i]!];
+  }
+  return ["What can you do?", ...pool.slice(0, n - 1)];
+}

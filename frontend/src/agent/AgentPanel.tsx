@@ -3,7 +3,7 @@ import { type FormEvent, type KeyboardEvent, useEffect, useRef, useState } from 
 
 import { useStore } from "../app/store";
 import { type Card, type Message, agentOnline, ask } from "./agent";
-import { CAN_RUN, COMING } from "./args";
+import { CAN_RUN, COMING, pickExamples } from "./args";
 import type { Finding } from "./s1checks";
 import { type Mood, Sentri } from "./Sentri";
 
@@ -28,12 +28,6 @@ function saveChat(entries: Entry[], history: Message[]) {
   }
 }
 
-const EXAMPLES = [
-  "What can you do?",
-  "Map the floods in Layyah, Pakistan, from 25 August to 5 September 2022",
-  "What is the weather outlook for Multan?",
-  "Show wind and sea temperature",
-];
 
 const STATUS: Record<Mood, string> = {
   idle: "Watching the Earth",
@@ -73,12 +67,17 @@ export function AgentPanel() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [cheer, setCheer] = useState(false);
+  // A new handful of example questions for every new chat.
+  const [examples, setExamples] = useState(() => pickExamples());
   const controller = useRef<AbortController | null>(null);
   const end = useRef<HTMLDivElement>(null);
   // Braces matter: newer browsers return a Promise from scrollIntoView, which React would take for a cleanup.
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [entries, busy]);
   useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => saveChat(entries, history), [entries, history]);
+  // Reopening an empty chat brings new examples too.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { if (open && !entries.length) setExamples(pickExamples()); }, [open]);
   useEffect(() => {
     if (!cheer) return;
     const t = window.setTimeout(() => setCheer(false), 2400);
@@ -114,6 +113,7 @@ export function AgentPanel() {
     setEntries([]);
     setHistory([]);
     setBusy(false);
+    setExamples(pickExamples());
   }
   const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void send(); }
@@ -142,7 +142,7 @@ export function AgentPanel() {
               <p className="muted">{COMING}</p>
             </details>
             <div className="chips">
-              {EXAMPLES.map((x) => <button key={x} className="chip" onClick={() => void send(undefined, x)}>{x}</button>)}
+              {examples.map((x) => <button key={x} className="chip" onClick={() => void send(undefined, x)}>{x}</button>)}
             </div>
           </div>
         )}

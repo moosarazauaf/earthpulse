@@ -66,3 +66,19 @@ describe("chat memory and the built-in reader", () => {
     expect(offlineIntent("floods in Pakistan")).toBeNull();
   });
 });
+
+describe("example questions", () => {
+  it("offers a different handful each time, all distinct, starting with what Sentri can do", async () => {
+    const { EXAMPLE_POOL, pickExamples } = await import("./args");
+    const a = pickExamples(4), b = pickExamples(4);
+    expect(a[0]).toBe("What can you do?");
+    expect(new Set(a).size).toBe(4);
+    expect(a.slice(1).every((x) => EXAMPLE_POOL.includes(x))).toBe(true);
+    // Shuffled with a fixed source of randomness the same way twice; with Math.random, almost never.
+    let seed = 1;
+    const fixed = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    expect(pickExamples(4, fixed)).not.toEqual(pickExamples(4, fixed));
+    expect(EXAMPLE_POOL.length).toBeGreaterThan(30);
+    void b;
+  });
+});
