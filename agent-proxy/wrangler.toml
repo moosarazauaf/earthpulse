@@ -4,7 +4,7 @@ name = "earthpulse-agent"
 main = "src/index.js"
 compatibility_date = "2026-10-01"
 
-# 20 requests a minute per visitor IP; one assistant turn makes 2 or 3.
+# 20 requests a minute per visitor IP; one assistant message makes one.
 [[ratelimits]]
 name = "LIMITER"
 namespace_id = "1001"

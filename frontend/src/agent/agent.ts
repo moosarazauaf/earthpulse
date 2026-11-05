@@ -18,13 +18,13 @@ import { EARTH_LAYERS } from "../globe/earthToday";
 import { geometryBounds } from "../globe/Globe";
 import { getGlobe } from "../globe/GlobeViewer";
 import { isS1Script, lintGeeScript } from "./geeLint";
+import { fetchOutlook, warnings } from "../area/outlook";
 import { type Finding, checkFloodPlan } from "./s1checks";
 import { KINDS, askFromArgs, floodDates, honest, num, str } from "./args";
 
 const AGENT_URL = (import.meta.env.VITE_AGENT_URL as string | undefined) ?? "";
 /** True when the site was built with the model proxy's address. */
 export const agentOnline = AGENT_URL.startsWith("https://");
-const MAX_ROUNDS = 5;
 
 export interface ToolCall { id: string; type: "function"; function: { name: string; arguments: string } }
 export interface Message { role: "system" | "user" | "assistant" | "tool"; content: string | null; tool_calls?: ToolCall[]; tool_call_id?: string }
@@ -95,18 +95,20 @@ const system = () => `You are the EarthPulse assistant inside a satellite map ap
 Use the tools to act; never invent numbers, dates of satellite passes or results.
 plan_analysis only prepares a plan: never say a map, analysis or result has been made, generated or shows anything. Say the plan is ready and the user should check it and press Run. Call one tool per request unless the user asks for several things.
 For floods, give a flood window of 10 to 24 days around the peak when the date is known. Places: include the country.
-After the tools return, answer in at most three short plain sentences. Repeat any warning or error from the checks in plain words. If something is outside what the tools do, say so briefly.`;
+If the request is unclear, or outside what the tools do, do not call a tool: answer in one or two short sentences and say what you can do.`;
 
 // ---- tool execution --------------------------------------------------------------
 
 const addDays = (iso: string, d: number) => new Date(Date.parse(`${iso}T00:00:00Z`) + d * 86_400_000).toISOString().slice(0, 10);
 
-interface ToolResult { result: string; card?: Card }
+/** `result` goes back to the model; `say` is the reply the user reads, written here from real results, never by the model. */
+interface ToolResult { result: string; say: string; card?: Card }
+const failed = (error: string): ToolResult => ({ result: JSON.stringify({ error }), say: error });
 
 async function planAnalysis(text: string, ask: Ask, dates: { start: string; end: string } | null): Promise<ToolResult> {
   const state = useStore.getState();
   const planned = await requestRun(text, ask, state.aoi, PIXEL_BUDGET[deviceProfile().recommended]);
-  if ("error" in planned) return { result: JSON.stringify({ error: planned.error }) };
+  if ("error" in planned) return failed(planned.error);
   const request = planned.run.request as Record<string, unknown> & { before?: Period; flood?: Period; after?: Period };
   let notes = [...(planned.run.fromAsk?.notes ?? [])];
   if (ask.kind === "flood" && dates) {
@@ -133,6 +135,7 @@ async function planAnalysis(text: string, ask: Ask, dates: { start: string; end:
   const title = `${ask.kind === "flood" ? "Sentinel-1 flood mapping" : `${ask.kind[0]!.toUpperCase()}${ask.kind.slice(1)} analysis`}, ${planned.aoi.label}`;
   return {
     result: JSON.stringify({ planned: title, windows, notes, checks: findings.map((f) => `${f.level}: ${f.text}`), status: "PLANNED, NOT RUN: no map or result exists yet. The user must press Run on screen to start it." }),
+    say: `Plan ready: ${title}.${findings.some((f) => f.level === "error") ? " The checks found a problem; read them before running." : findings.some((f) => f.level === "warn") ? " Read the checks below." : ""} Nothing has run yet: press Run in the side panel.`,
     card: { kind: "plan", title, lines: [...windows, ...notes], findings },
   };
 }
@@ -140,13 +143,20 @@ async function planAnalysis(text: string, ask: Ask, dates: { start: string; end:
 async function openArea(place: string, sizeKm: number | null): Promise<ToolResult> {
   const { results } = await api.geocode(place);
   const found = results[0];
-  if (!found) return { result: JSON.stringify({ error: `No place called "${place}" was found.` }) };
+  if (!found) return failed(`No place called "${place}" was found. Try adding the country.`);
   const label = found.name.split(",")[0]!.trim();
   const geometry = squareAround(found.lon, found.lat, sizeKm ?? 10);
   useStore.getState().setAoi({ geometry, label });
   useStore.getState().set({ mode: "area", introOpen: false, result: null });
   void getGlobe()?.flyToBounds(geometryBounds(geometry));
-  return { result: JSON.stringify({ opened: `${label}, ${formatLatLon(found.lat, found.lon)}`, shows: "area overview with forecast, air, climate, solar, water history, terrain, people, satellite passes" }) };
+  // The reply quotes the same forecast the overview shows, so the two can never disagree.
+  const outlook = await fetchOutlook(found.lat, found.lon).catch(() => null);
+  const warned = outlook ? warnings(outlook.days) : [];
+  const ahead = !outlook ? "" : warned.length ? ` Next 7 days: ${warned.map((w) => w.text.split(":")[0]).join(", ").toLowerCase()} (details in the overview).` : " Next 7 days: no heavy rain, dangerous heat, frost, gales or unhealthy air in the forecast.";
+  return {
+    result: JSON.stringify({ opened: `${label}, ${formatLatLon(found.lat, found.lon)}`, warnings: warned.map((w) => w.text) }),
+    say: `Opened ${label}.${ahead} The full overview (forecast, air, climate, solar power, water history, terrain, people, satellite passes) is in the side panel.`,
+  };
 }
 
 function showLayers(a: Record<string, unknown>): ToolResult {
@@ -156,35 +166,42 @@ function showLayers(a: Record<string, unknown>): ToolResult {
   if (typeof a.earthquakes === "boolean") Object.assign(patch, { quakesOn: a.earthquakes }, a.earthquakes ? { mode: "live" } : {});
   if (typeof a.earth_today === "string") patch.earthLayer = EARTH_LAYERS.some((l) => l.id === a.earth_today) ? a.earth_today : null;
   useStore.getState().set({ ...patch, introOpen: false });
-  return { result: JSON.stringify({ set: Object.keys(patch) }) };
+  const names: Record<string, string> = { windOn: "wind", cloudsOn: "clouds", rainOn: "rain", airOn: "air quality", satellitesOn: "satellites", waterHistoryOn: "water since 1984", populationOn: "population", quakesOn: "earthquakes" };
+  const said = Object.entries(patch).filter(([k]) => k !== "mode").map(([k, v]) => k === "earthLayer" ? (v ? `${EARTH_LAYERS.find((l) => l.id === v)!.label.toLowerCase()} on` : "Earth today off") : `${names[k]} ${v ? "on" : "off"}`);
+  return { result: JSON.stringify({ set: Object.keys(patch) }), say: said.length ? `Done: ${said.join(", ")}.` : "No layer named that I can change." };
 }
 
 function checkScript(code: string): ToolResult {
   const findings = lintGeeScript(code);
-  return { result: JSON.stringify(findings.map((f) => `${f.level}: ${f.text}`)), card: { kind: "checks", title: "Earth Engine script check", findings } };
+  const errors = findings.filter((f) => f.level === "error").length;
+  return {
+    result: JSON.stringify(findings.map((f) => `${f.level}: ${f.text}`)),
+    say: errors ? `Found ${errors} problem${errors === 1 ? " that changes" : "s that change"} the result; details below.` : "No errors found; warnings below.",
+    card: { kind: "checks", title: "Earth Engine script check", findings },
+  };
 }
 
 export async function runTool(name: string, rawArgs: string, userText: string): Promise<ToolResult> {
   let a: Record<string, unknown>;
-  try { a = JSON.parse(rawArgs || "{}") as Record<string, unknown>; } catch { return { result: JSON.stringify({ error: "Arguments were not valid JSON." }) }; }
-  if (typeof a !== "object" || a === null) return { result: JSON.stringify({ error: "Arguments must be an object." }) };
+  try { a = JSON.parse(rawArgs || "{}") as Record<string, unknown>; } catch { return failed("I could not read that request; try rewording it."); }
+  if (typeof a !== "object" || a === null) return failed("I could not read that request; try rewording it.");
   try {
     switch (name) {
       case "plan_analysis": {
         const ask = askFromArgs(a);
-        if (typeof ask === "string") return { result: JSON.stringify({ error: ask }) };
+        if (typeof ask === "string") return failed(ask);
         return await planAnalysis(userText, ask, floodDates(a));
       }
       case "open_area": {
         const place = str(a.place, 120);
-        return place ? await openArea(place, num(a.size_km, 1, 50)) : { result: JSON.stringify({ error: "No place given." }) };
+        return place ? await openArea(place, num(a.size_km, 1, 50)) : failed("Which place?");
       }
       case "show_layers": return showLayers(a);
       case "check_earth_engine_script": return checkScript(str(a.code, 20_000) ?? "");
-      default: return { result: JSON.stringify({ error: `No tool called ${name}.` }) };
+      default: return failed("I cannot do that here yet.");
     }
   } catch (e) {
-    return { result: JSON.stringify({ error: e instanceof Error ? e.message : "The tool failed." }) };
+    return failed(e instanceof Error ? e.message : "That did not work; try again.");
   }
 }
 
@@ -210,15 +227,11 @@ async function offline(text: string): Promise<{ text: string; cards: Card[] }> {
   const ask = interpret(text);
   if (ask) {
     const r = await planAnalysis(text, ask, null);
-    const body = JSON.parse(r.result) as { error?: string };
-    return { text: body.error ?? "Here is the plan. Check the notes, then press Run.", cards: r.card ? [r.card] : [] };
+    return { text: r.say, cards: r.card ? [r.card] : [] };
   }
   const r = await openArea(text, null);
-  const body = JSON.parse(r.result) as { error?: string; opened?: string };
-  return {
-    text: body.error ? `I could not read that as a request or a place. Try "floods in Layyah, Pakistan, August 2022" or paste an Earth Engine script.` : `Opened ${body.opened}.`,
-    cards: [],
-  };
+  const notFound = r.say.startsWith("No place");
+  return { text: notFound ? `I could not read that as a request or a place. Try "floods in Layyah, Pakistan, August 2022" or paste an Earth Engine script.` : r.say, cards: [] };
 }
 
 /** One user message through the assistant. `history` excludes the system prompt. */
@@ -226,25 +239,26 @@ export async function ask(text: string, history: Message[], signal?: AbortSignal
   // Pasted scripts are checked by code alone: no need to send them to a model.
   if (isS1Script(text)) {
     const r = checkScript(text);
-    const errors = r.card!.findings.filter((f) => f.level === "error").length;
-    return { text: errors ? `Found ${errors} problem${errors === 1 ? " that changes" : "s that change"} the result; details below.` : "No errors found; warnings below.", cards: [r.card!], history };
+    return { text: r.say, cards: [r.card!], history };
   }
   if (!agentOnline) return { ...(await offline(text)), history };
 
   const messages: Message[] = [...history, { role: "user", content: text.slice(0, 4000) }];
   const cards: Card[] = [];
+  const says: string[] = [];
   try {
-    for (let round = 0; round < MAX_ROUNDS; round += 1) {
-      const reply = await complete([{ role: "system", content: system() }, ...messages.slice(-16)], signal);
-      messages.push(reply);
-      if (!reply.tool_calls?.length) return { text: honest(reply.content?.trim() || "Done.", cards), cards, history: messages };
-      for (const call of reply.tool_calls) {
-        const r = await runTool(call.function.name, call.function.arguments, text);
-        if (r.card) cards.push(r.card);
-        messages.push({ role: "tool", tool_call_id: call.id, content: r.result });
-      }
+    // One model call per turn: it picks the tools (up to three at once), code does and reports the rest.
+    // The model's own prose is used only when it calls no tool, so it can never describe results it did not see.
+    const reply = await complete([{ role: "system", content: system() }, ...messages.slice(-16)], signal);
+    messages.push(reply);
+    if (!reply.tool_calls?.length) return { text: honest(reply.content?.trim() || "Sorry, I did not catch that.", cards), cards, history: messages };
+    for (const call of reply.tool_calls) {
+      const r = await runTool(call.function.name, call.function.arguments, text);
+      if (r.card) cards.push(r.card);
+      says.push(r.say);
+      messages.push({ role: "tool", tool_call_id: call.id, content: r.result });
     }
-    return { text: "Done.", cards, history: messages };
+    return { text: says.join(" "), cards, history: messages };
   } catch (e) {
     if (signal?.aborted) throw e;
     // The model being unavailable should not stop the request: fall back to the rule-based reader.

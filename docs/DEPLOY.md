@@ -146,7 +146,7 @@ reader, and pasted Earth Engine scripts are always checked in the browser.
 1. Make a key at openrouter.ai (Keys). Free models cost nothing; without any
    credit on the account OpenRouter allows about 50 free requests a day for
    the whole key, and about 1,000 a day once the account has ever had 10 USD
-   of credit. One assistant turn makes two or three requests.
+   of credit. One assistant message makes one request.
 2. With a free Cloudflare account, from `agent-proxy/`:
 
    ```bash
