@@ -50,5 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      # The tests need only vitest; installing wrangler (the deploy tool) would add minutes.
-      - run: npx --yes vitest@4 run
+          cache: npm
+          cache-dependency-path: agent-proxy/package-lock.json
+      - run: npm ci
+      - run: npm test
