@@ -5,6 +5,23 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.36] - 2026-11-06
+
+### Added
+- **Time-lapse videos** (Layers panel, Save time-lapse video; or ask Sentri):
+  the year layer steps through up to 21 evenly spread years (Landsat from
+  1985, Sentinel-2 from 2017), each frame taken only once that year's
+  mosaic has arrived and its tiles have loaded, stamped with the year, title
+  and source, and recorded with the browser's MediaRecorder (MP4 where
+  supported, else WebM). Recording pauses while each year loads, so the video
+  has no waiting. Dubai, Sentinel-2, 2017 to 2025: 9 frames, 7.5 s, about 3
+  minutes to record.
+
+### Fixed
+- Waiting for a complete view now waits for the new year's layer to arrive,
+  for frames to be drawn and for Cesium to report its tiles loaded, and
+  accepts a nearly complete view that has stopped changing.
+
 ## [0.2.0-alpha.35] - 2026-11-06
 
 ### Added

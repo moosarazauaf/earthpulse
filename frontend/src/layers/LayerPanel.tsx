@@ -10,6 +10,7 @@ import { aqiBand } from "../area/air";
 import { VIEW_MODES } from "../globe/viewModes";
 import { EARTH_LAYERS, earthLayer } from "../globe/earthToday";
 import { saveFigure } from "../ui/saveFigure";
+import { startTimelapse, stopTimelapse } from "../ui/timelapse";
 import { getGlobe } from "../globe/GlobeViewer";
 
 const RENDER_OPTIONS: { id: RenderId; label: string; hint: string }[] = [
@@ -269,6 +270,14 @@ export function LayerPanel() {
               </p>
             )}
             <button className="link" onClick={() => void saveFigure()} title="A PNG of this view with title, scale bar, north arrow, legend and credits, for a report (I)">Save map image <kbd>I</kbd></button>
+            {s.timelapse ? (
+              <p className="timelapse-status" role="status">
+                Recording {s.timelapse.year} ({s.timelapse.done + 1} of {s.timelapse.total})…{" "}
+                <button className="link" onClick={stopTimelapse}>Stop</button>
+              </p>
+            ) : (
+              <button className="link" onClick={() => void startTimelapse()} title="A video of this view through the years, one frame a year once its imagery has loaded">Save time-lapse video</button>
+            )}
             <button className="link" onClick={() => s.set({ sourcesOpen: true })}>Data sources</button>
           </section>
         </div>

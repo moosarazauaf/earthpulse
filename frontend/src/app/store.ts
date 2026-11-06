@@ -169,6 +169,8 @@ interface State {
   placesOpen: boolean;
   /** The assistant chat beside the globe. */
   agentOpen: boolean;
+  /** A time-lapse video being recorded: years done, how many, and the one on screen. */
+  timelapse: { done: number; total: number; year: number } | null;
   /** Start a one-click analysis of the current area. */
   runQuick: (info: QuickActionInfo, device: DeviceProfile) => void;
   loadCatalog: () => Promise<void>;
@@ -365,6 +367,7 @@ export const useStore = create<State>((set, get) => {
     recent: loadRecent(),
     placesOpen: false,
     agentOpen: false,
+    timelapse: null,
     saveCurrentPlace: () => {
       const aoi = get().aoi;
       if (!aoi) return;

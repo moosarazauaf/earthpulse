@@ -16,6 +16,7 @@ import { requestRun } from "../ask/request";
 import { carbonInBrowser, deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } from "../engine/client";
 import { formatPeople } from "../engine/population";
 import { saveFigure } from "../ui/saveFigure";
+import { startTimelapse } from "../ui/timelapse";
 import { CO2_PER_C } from "../engine/carbon";
 import { WORLDCOVER } from "../engine/cover";
 import type { BarChartSpec } from "../ui/Figure";
@@ -117,6 +118,14 @@ export const TOOLS = [
       name: "save_map",
       description: "Save the current map view as a publication-ready image: title, coordinate ticks, scale bar, north arrow, legend and credits.",
       parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "time_lapse",
+      description: "Record a time-lapse video of a place through the years from Landsat (1985 on) or Sentinel-2 (2017 on): one frame a year. Omit place to use the area already open.",
+      parameters: { type: "object", properties: { place: { type: "string" }, size_km: { type: "number" } } },
     },
   },
   {
@@ -334,6 +343,18 @@ async function saveMap(): Promise<ToolResult> {
   };
 }
 
+async function timeLapse(a: Record<string, unknown>): Promise<ToolResult> {
+  const area = await areaFor(a);
+  if (typeof area === "string") return failed(area);
+  await getGlobe()?.flyToBounds(geometryBounds(area.geometry), 1.5);
+  // Recording takes a minute or two; it runs on while the chat stays free, with progress in the Layers panel.
+  void startTimelapse();
+  return {
+    result: JSON.stringify({ started: true, area: area.label }),
+    say: `Recording a time-lapse of ${area.label}: one frame a year, each taken once that year's imagery has loaded. Progress and a Stop button are in the Layers panel; the video downloads when it is done.`,
+  };
+}
+
 function checkScript(code: string): ToolResult {
   const findings = lintGeeScript(code);
   const errors = findings.filter((f) => f.level === "error").length;
@@ -364,6 +385,7 @@ export async function runTool(name: string, rawArgs: string, userText: string): 
       case "carbon_stock": return await carbonStock(a);
       case "people_count": return await peopleCount(a);
       case "save_map": return await saveMap();
+      case "time_lapse": return await timeLapse(a);
       case "check_earth_engine_script": return checkScript(str(a.code, 20_000) ?? "");
       default: return failed("I cannot do that here yet.");
     }

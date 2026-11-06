@@ -163,3 +163,10 @@ export function circleAround(lon: number, lat: number, km: number, sides = 48): 
 export function formatLatLon(lat: number, lon: number): string {
   return `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? "N" : "S"}, ${Math.abs(lon).toFixed(2)}° ${lon >= 0 ? "E" : "W"}`;
 }
+
+/** `max` years spread evenly from `first` to `last`, both included. */
+export function pickYears(first: number, last: number, max = 21): number[] {
+  if (last <= first) return [first];
+  const n = Math.min(max, last - first + 1);
+  return [...new Set(Array.from({ length: n }, (_, i) => Math.round(first + ((last - first) * i) / (n - 1))))];
+}

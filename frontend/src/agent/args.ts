@@ -54,6 +54,7 @@ export const CAN_RUN = [
   "Carbon stock in plants and soil, with uncertainty ranges and a chart: biomass (Harmonized Global Biomass, 2010) and soil organic carbon to 30 cm (SoilGrids 2.0)",
   "How many people live in an area (GHS-POP 2020)",
   "Saving the map as a publication-ready image, and charts as SVG or 300 dpi PNG",
+  "Time-lapse videos of any place through the years, from Landsat (1985 on) or Sentinel-2",
   "Checking a Google Earth Engine Sentinel-1 flood script for mixed orbits, compositing and other mistakes",
 ];
 export const COMING = "Still in progress: land cover classification with your own training samples, measuring and elevation profiles, map images and year-to-year comparisons by request. Until then they are in the Analyse menu and the toolbar.";
@@ -71,7 +72,11 @@ export function trimHistory(messages: Message[], max = 30): Message[] {
 }
 
 /** Without a model: land cover and carbon requests, with the place after "of", "in" or "for" ("here" means the open area). */
-export function offlineIntent(text: string): { tool: "land_cover" | "carbon_stock" | "people_count" | "save_map"; place: string | null } | null {
+export function offlineIntent(text: string): { tool: "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse"; place: string | null } | null {
+  if (/\btime-?\s?lapse\b/i.test(text)) {
+    const m = /\b(?:of|in|for|at)\s+(.+?)[.?!]*$/i.exec(text.trim());
+    return { tool: "time_lapse", place: m && !/^(here|there|this|it|this area|this view)$/i.test(m[1]!.trim()) ? m[1]!.trim() : null };
+  }
   if (/\b(save|make|export|download|print)\b.*\b(map|image|figure)\b/i.test(text)) return { tool: "save_map", place: null };
   const tool = /\b(carbon|biomass)\b/i.test(text) ? "carbon_stock" : /\b(land ?cover|land use|lulc)\b/i.test(text) ? "land_cover"
     : /\b(people|population|inhabitants|how many live)\b/i.test(text) ? "people_count" : null;
@@ -125,6 +130,8 @@ export const EXAMPLE_POOL = [
   "How many people live in Peshawar?",
   "Population of Hyderabad, Pakistan",
   "Make a map of this view",
+  "Make a time-lapse of Dubai",
+  "Time-lapse of Lake Urmia",
 ];
 
 /** `n` different examples in random order; "What can you do?" always comes first. */

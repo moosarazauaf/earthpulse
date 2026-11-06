@@ -66,6 +66,8 @@ describe("chat memory and the built-in reader", () => {
     expect(offlineIntent("floods in Pakistan")).toBeNull();
     expect(offlineIntent("How many people live in Peshawar?")).toEqual({ tool: "people_count", place: "Peshawar" });
     expect(offlineIntent("make a map of this view")).toEqual({ tool: "save_map", place: null });
+    expect(offlineIntent("Make a time-lapse of Dubai")).toEqual({ tool: "time_lapse", place: "Dubai" });
+    expect(offlineIntent("timelapse here")).toEqual({ tool: "time_lapse", place: null });
   });
 });
 

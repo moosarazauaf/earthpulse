@@ -826,3 +826,5 @@ button.primary { color: #1b1d14; }
 
 /* Pixel hazard icons sit on the text line like the dots they replace. */
 .hazard-icon { display: inline-block; vertical-align: -2px; flex: none; image-rendering: pixelated; }
+
+.timelapse-status { flex-basis: 100%; font-size: 12px; color: var(--amber); margin: 0; }

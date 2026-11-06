@@ -172,12 +172,60 @@ export class Globe {
     scene.globe.tileLoadProgressEvent.addEventListener((queued: number) => {
       // In request-render mode nothing draws once a tile lands; keep frames coming until the queue is empty, so it is reported.
       if (queued > 0) this.render();
+      this.tilesQueued = queued;
       this.onTilesQueued?.(queued);
     });
   }
 
   /** Called with the number of map tiles still to load, so the interface can say imagery is on its way. */
   onTilesQueued: ((queued: number) => void) | null = null;
+  private tilesQueued = 0;
+  /** Counts year-layer swaps, so a caller can wait for the layer it asked for to arrive. */
+  primaryVersion = 0;
+
+  /** Resolves true once the year layer has been swapped since `version`, false after `timeoutMs`. */
+  async newPrimary(version: number, timeoutMs = 30_000, signal?: AbortSignal): Promise<boolean> {
+    const started = performance.now();
+    while (this.primaryVersion === version) {
+      if (signal?.aborted || performance.now() - started > timeoutMs) return false;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    return true;
+  }
+
+  /**
+   * Resolves once the year layer is fully faded in and no map tiles have been
+   * waiting for `quietMs`, so a picture taken then shows that year complete;
+   * gives up after `timeoutMs` (false) rather than waiting forever on a slow tile.
+   */
+  settled(quietMs = 500, timeoutMs = 20_000, signal?: AbortSignal): Promise<boolean> {
+    const started = performance.now();
+    const { scene } = this.viewer;
+    // An empty tile queue means nothing until frames have been drawn: before the first, nothing is requested yet.
+    let frames = 0;
+    const count = () => { frames += 1; };
+    scene.postRender.addEventListener(count);
+    let quietSince = 0, stuckSince = 0, lastQueue = -1;
+    return new Promise<boolean>((resolve) => {
+      const check = () => {
+        if (signal?.aborted || this.viewer.isDestroyed()) { resolve(false); return; }
+        this.render();
+        const now = performance.now();
+        const faded = !this.primary || (this.primary.alpha === this.primaryAlpha && !this.fading.length);
+        const done = scene.globe.tilesLoaded && this.tilesQueued === 0;
+        // A slow server can leave a tile or two hanging: a nearly complete view that has stopped changing is accepted.
+        if (this.tilesQueued !== lastQueue) { lastQueue = this.tilesQueued; stuckSince = now; }
+        const stalled = this.tilesQueued <= 3 && now - stuckSince >= 3000;
+        if (faded && frames >= 3 && (done || stalled)) {
+          quietSince ||= now;
+          if (now - quietSince >= quietMs) { resolve(true); return; }
+        } else quietSince = 0;
+        if (now - started > timeoutMs) { resolve(false); return; }
+        window.setTimeout(check, 100);
+      };
+      check();
+    }).finally(() => scene.postRender.removeEventListener(count));
+  }
 
   private clouds: CloudShell;
 
@@ -334,6 +382,7 @@ export class Globe {
 
   /** Swap the year layer, cross-fading so the change in time reads as a change in place. */
   setPrimary(info: ImageryLayerInfo | null, alpha: number) {
+    this.primaryVersion += 1;
     this.primaryAlpha = alpha;
     if (this.primary) {
       this.fading.push(this.primary);
