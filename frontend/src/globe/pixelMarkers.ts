@@ -48,3 +48,27 @@ export function badge(hazard: Hazard, border?: string, flag?: string): HTMLCanva
 
 /** GDACS event types as the hazards whose icons they use. */
 export const GDACS_HAZARD: Record<string, Hazard> = { FL: "flood", WF: "wildfire", TC: "storm", EQ: "earthquake", DR: "drought", VO: "volcano" };
+
+/**
+ * Pixel offsets that fan out markers drawn on top of each other: points (in
+ * screen pixels) falling in the same `cell` form a ring, wider for bigger
+ * groups, so each badge can be seen and clicked; lone markers stay put.
+ */
+export function spreadOffsets(points: ({ x: number; y: number } | null)[], cell = 24, radiusPx = 16): [number, number][] {
+  const groups = new Map<string, number[]>();
+  points.forEach((p, i) => {
+    if (!p) return;
+    const key = `${Math.round(p.x / cell)},${Math.round(p.y / cell)}`;
+    groups.set(key, [...(groups.get(key) ?? []), i]);
+  });
+  const out: [number, number][] = points.map(() => [0, 0]);
+  for (const members of groups.values()) {
+    if (members.length < 2) continue;
+    const r = Math.max(radiusPx, members.length * 5);
+    members.forEach((i, k) => {
+      const angle = (2 * Math.PI * k) / members.length - Math.PI / 2;
+      out[i] = [Math.round(Math.cos(angle) * r), Math.round(Math.sin(angle) * r)];
+    });
+  }
+  return out;
+}

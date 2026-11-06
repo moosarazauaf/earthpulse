@@ -13,7 +13,9 @@ import type { AoiGeometry, Period } from "../app/types";
 import { modeForRun } from "../app/shareRun";
 import { type Ask, interpret } from "../ask/interpret";
 import { requestRun } from "../ask/request";
-import { carbonInBrowser, deviceProfile, landCoverInBrowser, PIXEL_BUDGET } from "../engine/client";
+import { carbonInBrowser, deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } from "../engine/client";
+import { formatPeople } from "../engine/population";
+import { saveFigure } from "../ui/saveFigure";
 import { CO2_PER_C } from "../engine/carbon";
 import { WORLDCOVER } from "../engine/cover";
 import type { BarChartSpec } from "../ui/Figure";
@@ -99,6 +101,22 @@ export const TOOLS = [
       name: "carbon_stock",
       description: "Carbon stored in living plants (above- and below-ground biomass) over an area, in tonnes of carbon and CO2 equivalent, from the Harmonized Global Biomass map (2010, 300 m). Omit place to use the area already open.",
       parameters: { type: "object", properties: { place: { type: "string" }, size_km: { type: "number" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "people_count",
+      description: "How many people live in an area, from GHS-POP 2020 (European Commission JRC, about 100 m). Omit place to use the area already open.",
+      parameters: { type: "object", properties: { place: { type: "string" }, size_km: { type: "number" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "save_map",
+      description: "Save the current map view as a publication-ready image: title, coordinate ticks, scale bar, north arrow, legend and credits.",
+      parameters: { type: "object", properties: {} },
     },
   },
   {
@@ -293,6 +311,29 @@ async function carbonStock(a: Record<string, unknown>): Promise<ToolResult> {
   };
 }
 
+const capitalise = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+async function peopleCount(a: Record<string, unknown>): Promise<ToolResult> {
+  const area = await areaFor(a);
+  if (typeof area === "string") return failed(area);
+  useStore.getState().set({ mode: "area", introOpen: false, result: null });
+  const p = await populationInBrowser({ aoi: area.geometry }).promise;
+  const density = p.areaKm2 ? Math.round(p.people / p.areaKm2) : 0;
+  return {
+    result: JSON.stringify({ area: area.label, people: Math.round(p.people), areaKm2: Math.round(p.areaKm2) }),
+    say: `${capitalise(formatPeople(p.people))} ${p.people < 1 ? "lives" : "live"} in this ${Math.round(p.areaKm2).toLocaleString("en")} km² around ${area.label}, ${density.toLocaleString("en")} per km² (GHS-POP 2020, modelled; it can undercount scattered rural homes).`,
+    next: ["Land cover here", "Has this area flooded before? Show water since 1984", "Air quality outlook here"],
+  };
+}
+
+async function saveMap(): Promise<ToolResult> {
+  await saveFigure();
+  return {
+    result: JSON.stringify({ saved: true }),
+    say: "Saved the map as a print-ready PNG: title, coordinate ticks, scale bar, north arrow, legend and credits. Charts have their own SVG and PNG buttons.",
+  };
+}
+
 function checkScript(code: string): ToolResult {
   const findings = lintGeeScript(code);
   const errors = findings.filter((f) => f.level === "error").length;
@@ -321,6 +362,8 @@ export async function runTool(name: string, rawArgs: string, userText: string): 
       case "show_layers": return showLayers(a);
       case "land_cover": return await landCover(a);
       case "carbon_stock": return await carbonStock(a);
+      case "people_count": return await peopleCount(a);
+      case "save_map": return await saveMap();
       case "check_earth_engine_script": return checkScript(str(a.code, 20_000) ?? "");
       default: return failed("I cannot do that here yet.");
     }

@@ -21,6 +21,9 @@ import {
   PostProcessStage,
   PolylineGraphics,
   Rectangle,
+  SceneTransforms,
+  EllipsoidalOccluder,
+  Ellipsoid,
   ScreenSpaceEventHandler,
   ScreenSpaceEventType,
   SingleTileImageryProvider,
@@ -40,7 +43,7 @@ import { type Satellite, positionAt, track } from "./satellites";
 import { SHADERS, type ViewMode } from "./viewModes";
 import { type WindField, advect, speedColour } from "./wind";
 import { EARTH_LAYERS } from "./earthToday";
-import { BADGE_PX, GDACS_HAZARD, badge } from "./pixelMarkers";
+import { BADGE_PX, GDACS_HAZARD, badge, spreadOffsets } from "./pixelMarkers";
 import type { Hazard } from "../news/types";
 import { WATER_TILES } from "../area/waterHistory";
 import type { SatRec } from "satellite.js";
@@ -162,6 +165,9 @@ export class Globe {
       destination: Cartesian3.fromDegrees(HOME.lon, HOME.lat, HOME.height),
     });
     this.clouds = new CloudShell(scene, !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    this.watchHover();
+    // Overlaps depend on the zoom, so markers are spread again whenever the camera stops.
+    this.viewer.camera.moveEnd.addEventListener(() => this.spreadMarkers());
     scene.preUpdate.addEventListener(() => this.stepFades());
     scene.globe.tileLoadProgressEvent.addEventListener((queued: number) => {
       // In request-render mode nothing draws once a tile lands; keep frames coming until the queue is empty, so it is reported.
@@ -694,6 +700,69 @@ export class Globe {
   // ---- live hazards ------------------------------------------------------------
   private hazards = new Map<string, ImageryLayer>();
   private alertEntities: Entity[] = [];
+  /** Names shown when the pointer rests on a marker, by entity id. */
+  private markerNames = new Map<string, string>();
+  private hoverLabel: Entity | null = null;
+
+  /** Fans out news, earthquake and alert badges drawn on top of each other at the current zoom, so each can be seen and clicked. */
+  private spreadMarkers() {
+    const all = [...this.newsEntities, ...this.quakeEntities, ...this.alertEntities].filter((e) => e.billboard && e.position);
+    const now = JulianDate.now();
+    const scene = this.viewer.scene;
+    const { clientWidth: w, clientHeight: h } = scene.canvas;
+    // Only markers on screen and on the near side of the Earth can overlap what the user sees.
+    const occluder = new EllipsoidalOccluder(Ellipsoid.WGS84, this.viewer.camera.positionWC);
+    const at = all.map((e) => {
+      const p = e.position!.getValue(now)!;
+      const xy = occluder.isPointVisible(p) ? SceneTransforms.worldToWindowCoordinates(scene, p) : undefined;
+      return xy && xy.x >= 0 && xy.y >= 0 && xy.x <= w && xy.y <= h ? xy : null;
+    });
+    spreadOffsets(at).forEach(([x, y], i) => {
+      all[i]!.billboard!.pixelOffset = new ConstantProperty(new Cartesian2(x, y));
+    });
+    this.render();
+  }
+
+  /** A name beside the marker under the pointer, and a hand cursor, so markers can be read without clicking. */
+  private watchHover() {
+    const { scene } = this.viewer;
+    this.hoverLabel = this.viewer.entities.add({
+      position: Cartesian3.ZERO,
+      label: {
+        text: "", show: false, font: "12px Inter Variable, sans-serif", fillColor: Color.WHITE, showBackground: true,
+        backgroundColor: Color.fromCssColorString("#14120e").withAlpha(0.9), pixelOffset: new Cartesian2(0, -26),
+        disableDepthTestDistance: Number.POSITIVE_INFINITY,
+      },
+    });
+    const handler = new ScreenSpaceEventHandler(scene.canvas);
+    let pending = false, last: Cartesian2 | null = null;
+    handler.setInputAction((e: { endPosition: Cartesian2 }) => {
+      last = e.endPosition;
+      if (pending) return;
+      pending = true;
+      // At most one pick a frame: picking is not free, and the pointer moves faster than frames.
+      requestAnimationFrame(() => {
+        pending = false;
+        if (!last || this.viewer.isDestroyed()) return;
+        const picked = scene.pick(last) as { id?: Entity } | undefined;
+        const entity = picked?.id;
+        const name = entity ? this.markerNames.get(String(entity.id)) : undefined;
+        const label = this.hoverLabel!.label!;
+        scene.canvas.style.cursor = name ? "pointer" : this.drawCursor;
+        if (name && entity?.position) {
+          this.hoverLabel!.position = new ConstantPositionProperty(entity.position.getValue(JulianDate.now())!);
+          label.text = new ConstantProperty(name);
+          label.show = new ConstantProperty(true);
+        } else if (label.show?.getValue(JulianDate.now())) {
+          label.show = new ConstantProperty(false);
+        } else return;
+        this.render();
+      });
+    }, ScreenSpaceEventType.MOUSE_MOVE);
+  }
+
+  /** The cursor drawing tools set; restored when the pointer leaves a marker. */
+  drawCursor = "";
 
   /** Show exactly the hazard layers whose ids are given. */
   setHazardLayers(ids: string[]) {
@@ -733,12 +802,16 @@ export class Globe {
         position: Cartesian3.fromDegrees(alert.lon, alert.lat),
         billboard: {
           image: badge(GDACS_HAZARD[alert.type] ?? "flood", level, level),
+          pixelOffset: new Cartesian2(0, 0),
           scale: selected ? 0.62 : 0.48,
           verticalOrigin: VerticalOrigin.CENTER,
           disableDepthTestDistance: Number.POSITIVE_INFINITY,
         },
       });
     });
+    for (const k of [...this.markerNames.keys()]) if (k.startsWith("alert:")) this.markerNames.delete(k);
+    for (const a of alerts) this.markerNames.set(`alert:${a.id}`, `${a.level} alert: ${a.name}${a.country ? `, ${a.country}` : ""}`);
+    this.spreadMarkers();
     this.render();
   }
 
@@ -787,6 +860,9 @@ export class Globe {
       } : undefined,
       });
     });
+    for (const k of [...this.markerNames.keys()]) if (k.startsWith("quake:")) this.markerNames.delete(k);
+    for (const q of quakes) this.markerNames.set(`quake:${q.id}`, `M${q.magnitude.toFixed(1)} earthquake: ${q.place}`);
+    this.spreadMarkers();
     this.render();
   }
 
@@ -851,6 +927,9 @@ export class Globe {
         } : undefined,
       });
     });
+    for (const k of [...this.markerNames.keys()]) if (k.startsWith("news:")) this.markerNames.delete(k);
+    for (const m of markers) this.markerNames.set(`news:${m.id}`, m.label);
+    this.spreadMarkers();
     this.render();
   }
 

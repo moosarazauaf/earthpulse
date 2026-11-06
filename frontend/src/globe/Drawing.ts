@@ -54,7 +54,8 @@ export class Drawing {
   setTool(tool: DrawTool) {
     this.tool = tool;
     this.reset();
-    this.globe.viewer.scene.canvas.style.cursor = tool === "none" ? "" : "crosshair";
+    this.globe.drawCursor = tool === "none" ? "" : "crosshair";
+    this.globe.viewer.scene.canvas.style.cursor = this.globe.drawCursor;
   }
 
   /** Close the polygon from the keyboard (Enter), for users not using a mouse double-click. */

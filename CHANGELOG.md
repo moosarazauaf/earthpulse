@@ -5,6 +5,20 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.35] - 2026-11-06
+
+### Added
+- **Hazard markers as pixel badges** on the globe: news stories by hazard
+  (bigger with more outlets), earthquakes (bigger with magnitude) and GDACS
+  alerts (border and corner flag in the alert level's colour).
+- **Hover names**: resting the pointer on a marker shows what it is, with a
+  hand cursor, without clicking.
+- **Overlapping markers fan out** in a ring at the current zoom and settle back
+  when zoomed in; only markers on screen and on the near side count.
+- **Sentri**: "how many people live here" (GHS-POP 2020) and "make a map of
+  this view" (the print-layout map). Lahore, central 100 km2: about 2.73
+  million people, 27,370 per km2.
+
 ## [0.2.0-alpha.34] - 2026-11-06
 
 ### Added

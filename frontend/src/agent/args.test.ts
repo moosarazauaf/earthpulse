@@ -64,6 +64,8 @@ describe("chat memory and the built-in reader", () => {
     expect(offlineIntent("LULC of Lahore")).toEqual({ tool: "land_cover", place: "Lahore" });
     expect(offlineIntent("biomass for this area")).toEqual({ tool: "carbon_stock", place: null });
     expect(offlineIntent("floods in Pakistan")).toBeNull();
+    expect(offlineIntent("How many people live in Peshawar?")).toEqual({ tool: "people_count", place: "Peshawar" });
+    expect(offlineIntent("make a map of this view")).toEqual({ tool: "save_map", place: null });
   });
 });
 
