@@ -146,6 +146,33 @@ export const TOPICS: Topic[] = [
     points: ["Population density worldwide, about 1 km", "People count for any area or district", "Checked against World Bank country totals"],
     preset: { populationOn: true },
   },
+  {
+    slug: "carbon-stock-calculator",
+    title: "Free Carbon Stock Calculator: Biomass and Soil | EarthPulse",
+    description: "Estimate carbon stored in plants and soil for any area, with uncertainty ranges and a chart, from Harmonized Global Biomass and SoilGrids. Free, no account.",
+    h1: "Free carbon stock calculator for any area",
+    intro: "How much carbon does this land hold? Ask Sentri, the EarthPulse assistant, for any place: carbon in plants above and below ground from Harmonized Global Biomass, and in the top 30 cm of soil from SoilGrids 2.0, each with its uncertainty and the CO2 equivalent.",
+    points: ["Biomass carbon with the published uncertainty", "Soil organic carbon to 30 cm with its 5% to 95% range", "Chart with error bars, ready for a paper as SVG or 300 dpi PNG"],
+    preset: { agentOpen: true },
+  },
+  {
+    slug: "land-cover-map",
+    title: "Land Use and Land Cover (LULC) Map, Free | EarthPulse",
+    description: "Free land use and land cover statistics for any area: hectares of trees, cropland, built-up and water from ESA WorldCover at 10 m, on a 3D globe.",
+    h1: "Land use and land cover (LULC) for any area",
+    intro: "What is this land used for? EarthPulse reads ESA WorldCover 2021 at 10 m for any area and gives the hectares and share of each class, drawn on the map, with a chart you can save for a report.",
+    points: ["Hectares and share of trees, cropland, built-up, water and more", "Map overlay and a publication-ready chart", "Classify your own land cover with training samples and an accuracy assessment"],
+    preset: { agentOpen: true },
+  },
+  {
+    slug: "satellite-time-lapse",
+    title: "Satellite Time-Lapse Maker, Landsat Since 1985 | EarthPulse",
+    description: "Make a free satellite time-lapse video of any place from Landsat (1985 on) or Sentinel-2 imagery, in your browser, with years and sources stamped on each frame.",
+    h1: "Make a satellite time-lapse of any place",
+    intro: "Watch a city grow, a lake shrink or a river move. EarthPulse steps through up to 21 years of Landsat or Sentinel-2 imagery for the view you choose and records a video in your browser, each frame stamped with its year and source.",
+    points: ["Landsat from 1985, Sentinel-2 from 2017", "Each frame taken only once its imagery has fully loaded", "MP4 recorded on your own computer, nothing uploaded"],
+    preset: { agentOpen: true },
+  },
 ];
 
 /** The topic a page path ends in, if any: "/earthpulse/wind-map/" gives the wind map. */

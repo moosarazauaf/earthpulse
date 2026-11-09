@@ -54,6 +54,47 @@ assumption it made before anything downloads. If a request cannot be met
 instead of guessing. No code and no forms; the full form is still there
 for every analysis.
 
+### 🛰️ Sentri, the assistant
+**Sentri** is a pixel-art satellite in the corner of the screen (or
+**Analyse → Ask Sentri**). Ask it in plain words: *"map the floods in Layyah
+from 25 August to 5 September 2022"*, *"how much carbon is stored there?"*,
+*"land cover of Islamabad"*, *"how many people live in Peshawar?"*, *"make a
+time-lapse of Dubai"*, *"show wind and sea temperature"*. A free NVIDIA
+Nemotron model on OpenRouter chooses what to do; EarthPulse's own code does
+it and writes the answer, so numbers, dates and checks never come from the
+model. It remembers the conversation ("there", "the same place"), suggests
+next steps, keeps the chat in your browser only, and works without the model
+through a built-in reader.
+
+Before a flood map downloads anything, Sentri checks the **Sentinel-1
+archive** for the dates you chose and flags **mixed relative orbits** and
+directions, passes **composited** in the flood window, long windows and thin
+baselines. Paste a **Google Earth Engine** Sentinel-1 script and it is checked
+in your browser for a missing orbit filter, `.mosaic()` and long composites,
+a mean over the flood period, a logarithm on data already in dB, and missing
+speckle filtering or before-after comparison.
+
+### 🌱 Carbon stock and land cover
+For any area: **carbon in plants** (above and below ground, Harmonized Global
+Biomass) and **in the top 30 cm of soil** (SoilGrids 2.0), each with its
+uncertainty, a chart with error bars, and the CO₂ equivalent. Checked against
+an independent sum of the same rasters: Layyah, 20 km square, 95,331 t C in
+plants (± 15,885) and 827,188 t C in soil (192,000 to 1.83 million). **Land
+use and land cover** gives the hectares and share of each ESA WorldCover class
+and draws it on the map.
+
+### 🎞️ Time-lapse videos
+**Layers → Save time-lapse video** (or ask Sentri) steps the satellite layer
+through up to 21 years, Landsat from 1985 or Sentinel-2 from 2017, takes each
+frame only once that year has fully loaded, stamps it with the year, place and
+source, and saves an MP4 recorded in your browser.
+
+### 📄 Figures ready for a paper
+Every chart saves as **SVG** or a **300 dpi PNG** at 160 mm, in a print style
+with title and data source. **Save map image** (<kbd>I</kbd>) makes a print
+layout: the view at twice screen resolution in a frame with latitude and
+longitude ticks, a scale bar, north arrow, legend and every data credit.
+
 ### 🗺️ Find your district
 Search for a place and EarthPulse outlines the district it lies in, from FAO
 GAUL 2024 (45,523 districts worldwide). One click analyses the whole district,
@@ -100,7 +141,13 @@ night side in real time. **Views** (<kbd>V</kbd>) switch the globe to night visi
 a thermal look or mono, and the **readout** shows UTC time, the coordinates
 under the pointer and camera height. **Population density** shows NASA SEDAC's 2020
 Gridded Population of the World, so you can see who lives near a flood or a
-fire. Choosing an area also picks the imagery that suits
+fire. **Surface wind** (<kbd>B</kbd>) animates the wind now; **Earth today**
+shows NASA's latest sea temperature, vegetation (NDVI), soil moisture, smoke
+and dust, and ozone; **Water since 1984** shows where water has ever been
+seen (JRC Global Surface Water). Opening an area adds a **7-day outlook**
+(heavy rain, heat, frost, gales and unhealthy air, with the cleanest hours of
+the day), **solar power** per kW of panels, the **cloud forecast** at each
+satellite pass, and how much of the area has been under water. Choosing an area also picks the imagery that suits
 it: Sentinel-2 at 10 m for areas up to 40 km across, Landsat beyond that.
 
 ### 🔴 See what is happening now
@@ -271,11 +318,16 @@ install icon in the address bar).
 - Live layers are other agencies' products, shown as published.
 - News stories are found by keyword and placed by place name, automatically.
   Some will be off-topic or misplaced; every story links to its sources.
+- Carbon stock shows plants as they were in 2010 and soil to 30 cm only;
+  soil carbon from SoilGrids is modelled and its range is wide.
+- Sentri's free model can misread a request. It never reports a number it did
+  not get from EarthPulse's code, and a planned analysis only runs when you
+  press Run.
 
 ## Roadmap
 
-Pre-2017 built-up history, forest disturbance from Landsat, land-cover classification with accuracy assessment, carbon
-accounting with exposed equations, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
+Pre-2017 built-up history, land-cover classification through Sentri, soil carbon below 30 cm, carbon change over
+time, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
 [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
