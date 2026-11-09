@@ -71,6 +71,20 @@ export function trimHistory(messages: Message[], max = 30): Message[] {
   return start < 0 ? [] : tail.slice(start);
 }
 
+/**
+ * The place in a request typed without a model, with the command and question
+ * words around it removed: "Open Lahore, Pakistan" is "Lahore, Pakistan".
+ * Searched as typed, the whole sentence finds an open-air theatre in Lahore.
+ */
+export function placeFromText(text: string): string {
+  return text.trim()
+    .replace(/^(please\s+)?(open|show( me)?|go to|fly to|zoom( in)? to|take me to|find|where is|tell me about)\s+/i, "")
+    .replace(/^(what('s| is)\s+the\s+)?(weather|forecast|air quality|outlook)(\s+(outlook|forecast))?\s+(for|in|at|of)\s+/i, "")
+    .replace(/^(the\s+)?(area|overview)\s+(of|for|around)\s+/i, "")
+    .replace(/[?.!]+$/, "")
+    .trim();
+}
+
 /** Without a model: land cover and carbon requests, with the place after "of", "in" or "for" ("here" means the open area). */
 export function offlineIntent(text: string): { tool: "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse"; place: string | null } | null {
   if (/\btime-?\s?lapse\b/i.test(text)) {

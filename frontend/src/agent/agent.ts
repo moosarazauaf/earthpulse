@@ -12,7 +12,7 @@ import { useStore } from "../app/store";
 import type { AoiGeometry, Period } from "../app/types";
 import { modeForRun } from "../app/shareRun";
 import { type Ask, interpret } from "../ask/interpret";
-import { requestRun } from "../ask/request";
+import { STREET, requestRun } from "../ask/request";
 import { carbonInBrowser, deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } from "../engine/client";
 import { formatPeople } from "../engine/population";
 import { saveFigure } from "../ui/saveFigure";
@@ -26,7 +26,7 @@ import { getGlobe } from "../globe/GlobeViewer";
 import { isS1Script, lintGeeScript } from "./geeLint";
 import { fetchOutlook, warnings } from "../area/outlook";
 import { type Finding, checkFloodPlan } from "./s1checks";
-import { KINDS, abilitiesText, askFromArgs, asksAbilities, floodDates, honest, num, offlineIntent, str, trimHistory } from "./args";
+import { KINDS, abilitiesText, askFromArgs, asksAbilities, floodDates, honest, num, offlineIntent, placeFromText, str, trimHistory } from "./args";
 
 const AGENT_URL = (import.meta.env.VITE_AGENT_URL as string | undefined) ?? "";
 /** True when the site was built with the model proxy's address. */
@@ -213,7 +213,8 @@ async function planAnalysis(text: string, ask: Ask, dates: { start: string; end:
 
 async function openArea(place: string, sizeKm: number | null): Promise<ToolResult> {
   const { results } = await api.geocode(place);
-  const found = results[0];
+  // Prefer the place itself over a street or building that shares its name.
+  const found = results.find((r) => !STREET.test(r.kind)) ?? results[0];
   if (!found) return failed(`No place called "${place}" was found. Try adding the country.`);
   const label = found.name.split(",")[0]!.trim();
   const geometry = squareAround(found.lon, found.lat, sizeKm ?? 10);
@@ -250,7 +251,8 @@ async function areaFor(a: Record<string, unknown>): Promise<{ geometry: AoiGeome
   const place = str(a.place, 120);
   if (!place) return useStore.getState().aoi ?? "Which place? Name one, or open an area on the map first.";
   const { results } = await api.geocode(place);
-  const found = results[0];
+  // Prefer the place itself over a street or building that shares its name.
+  const found = results.find((r) => !STREET.test(r.kind)) ?? results[0];
   if (!found) return `No place called "${place}" was found. Try adding the country.`;
   const area = { geometry: squareAround(found.lon, found.lat, num(a.size_km, 1, 50) ?? 10), label: found.name.split(",")[0]!.trim() };
   useStore.getState().setAoi(area);
@@ -424,7 +426,7 @@ async function offline(text: string): Promise<{ text: string; cards: Card[]; nex
     const r = await planAnalysis(text, ask, null);
     return { text: r.say, cards: r.card ? [r.card] : [] };
   }
-  const r = await openArea(text, null);
+  const r = await openArea(placeFromText(text), null);
   const notFound = r.say.startsWith("No place");
   return { text: notFound ? `I could not read that as a request or a place. Try "floods in Layyah, Pakistan, August 2022" or paste an Earth Engine script.` : r.say, cards: [], next: notFound ? undefined : r.next };
 }

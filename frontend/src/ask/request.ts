@@ -7,7 +7,8 @@ import { type Ask, planFor } from "./interpret";
 
 const DEFAULT_KM = 10;
 const MAX_KM = 50;
-const STREET = /road|street|highway|railway|building|house|amenity|shop|office|bus|parking|square/i;
+/** Search results that are a street or a building rather than a place to analyse. */
+export const STREET = /road|street|highway|railway|building|house|amenity|shop|office|bus|parking|square/i;
 
 export async function requestRun(
   text: string, ask: Ask, current: { geometry: AoiGeometry; label: string } | null, maxPixels: number,

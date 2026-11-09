@@ -71,6 +71,17 @@ describe("chat memory and the built-in reader", () => {
   });
 });
 
+describe("the place in a request typed without a model", () => {
+  it("drops command and question words, so the search finds the place, not a theatre", async () => {
+    const { placeFromText } = await import("./args");
+    expect(placeFromText("Open Lahore, Pakistan")).toBe("Lahore, Pakistan");
+    expect(placeFromText("What is the weather outlook for Multan?")).toBe("Multan");
+    expect(placeFromText("show me Karachi")).toBe("Karachi");
+    expect(placeFromText("air quality outlook for Lahore")).toBe("Lahore");
+    expect(placeFromText("Peshawar")).toBe("Peshawar");
+  });
+});
+
 describe("example questions", () => {
   it("offers a different handful each time, all distinct, starting with what Sentri can do", async () => {
     const { EXAMPLE_POOL, pickExamples } = await import("./args");
