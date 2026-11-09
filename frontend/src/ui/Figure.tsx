@@ -123,7 +123,7 @@ export function BarChart({ spec }: { spec: BarChartSpec }) {
     const W = 360, labelW = 130, rowH = 18, H = 26 + spec.bars.length * rowH;
     const x = (v: number) => labelW + (v / top) * (W - labelW - 16);
     return (
-      <Figure title={spec.title} source={spec.source} className="chart bars">
+      <Figure title={spec.title} source={spec.source} className="chart bar-chart">
         <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${spec.title}: ${spec.bars.map((b) => `${b.label} ${fmt(b.value)} ${spec.unit}`).join(", ")}`}>
           {ticks.map((t) => <line key={t} x1={x(t)} x2={x(t)} y1={6} y2={H - 16} stroke="#d8d8d8" strokeWidth={0.6} />)}
           {spec.bars.map((b, i) => (
@@ -142,7 +142,7 @@ export function BarChart({ spec }: { spec: BarChartSpec }) {
   const W = 360, H = 200, left = 46, bottom = 30, slot = (W - left - 10) / spec.bars.length;
   const y = (v: number) => H - bottom - (v / top) * (H - bottom - 12);
   return (
-    <Figure title={spec.title} source={spec.source} className="chart bars">
+    <Figure title={spec.title} source={spec.source} className="chart bar-chart">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${spec.title}: ${spec.bars.map((b) => `${b.label} ${fmt(b.value)} ${spec.unit}${b.low !== undefined ? ` (${fmt(b.low)} to ${fmt(b.high!)})` : ""}`).join(", ")}`}>
         {ticks.map((t) => (
           <g key={t}>

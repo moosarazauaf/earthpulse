@@ -808,7 +808,7 @@ button.primary { color: #1b1d14; }
 .figure-tools { display: flex; gap: 8px; justify-content: flex-end; font-size: 11px; margin-top: 3px; }
 .figure-tools .link { font-size: 11px; padding: 0; }
 /* Sentri's charts are drawn in print colours on screen too, so what you see is what is saved. */
-.chart.bars svg { background: #fff; border-radius: 5px; padding: 3px; }
+.chart.bar-chart svg { background: #fff; border-radius: 5px; padding: 3px; }
 /* The print theme, worn only while a figure is being saved (see ui/Figure.tsx). */
 .paper .axis { stroke: #333; }
 .paper .tick, .paper text { fill: #222; }
