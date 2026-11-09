@@ -15,7 +15,7 @@ If EarthPulse is useful to you, a ⭐ helps other researchers find it.
 [![License: MIT](https://img.shields.io/badge/license-MIT-5fd0c5.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/moosarazauaf/earthpulse?include_prereleases&color=7bd88f)](https://github.com/moosarazauaf/earthpulse/releases)
 
-<img src="docs/media/news.jpg" alt="EarthPulse Live view: natural-hazard stories from the past 24 hours of news as coloured markers on a 3D globe, with headlines, outlets and agency matches in a side panel" width="100%">
+<img src="docs/media/news.jpg" alt="EarthPulse Live view: natural-hazard stories, earthquakes and disaster alerts from the past 24 hours as pixel-art badges on a 3D globe, with the Layers panel on the left and headlines filtered by hazard on the right" width="100%">
 
 </div>
 
@@ -74,6 +74,8 @@ in your browser for a missing orbit filter, `.mosaic()` and long composites,
 a mean over the flood period, a logarithm on data already in dB, and missing
 speckle filtering or before-after comparison.
 
+<img src="docs/media/sentri.jpg" alt="Sentri, the pixel-art satellite assistant, answering 'Carbon stock of Layyah, Pakistan' beside the globe: 24,911 t of carbon in plants (plus or minus 4,118 t) and 200,103 t in the top 30 cm of soil, with a bar chart and error bars that saves as SVG or 300 dpi PNG" width="100%">
+
 ### 🌱 Carbon stock and land cover
 For any area: **carbon in plants** (above and below ground, Harmonized Global
 Biomass) and **in the top 30 cm of soil** (SoilGrids 2.0), each with its
@@ -125,7 +127,7 @@ steep ground, the conditions in which landslides happen, and today's air
 quality (US AQI, PM2.5, PM10, NO₂, ozone) with how many of the past seven days
 were above the WHO PM2.5 guideline.
 
-<img src="docs/media/area.jpg" alt="Analyse here: a 5 km square around a spot in Lahore outlined on the globe, with the area overview listing seven one-click analyses, each with its defaults and how long it takes" width="100%">
+<img src="docs/media/area.jpg" alt="Area overview of central Lahore, opened by asking Sentri: a 10 km square outlined on Sentinel-2 imagery, with one-click analyses listed in the side panel, each with its defaults and how long it takes" width="100%">
 
 ### ☁️ Clouds, rain and air on the globe
 Three switches in the Layers panel, each with a key. **Clouds** (<kbd>K</kbd>)
@@ -168,7 +170,7 @@ any year from 1991 to 2020"*. One click then proposes the satellite analysis
 that can test the story: flood water from radar, a burn scar, or landslide
 scars.
 
-<img src="docs/media/news-story.jpg" alt="A news story about flash flooding in Oklahoma City, with the outlet's headline, a chart of daily rain for the 30 days before, and the finding that 54 mm in 3 days was wetter than any year from 1991 to 2020" width="100%">
+<img src="docs/media/news-story.jpg" alt="A news story about flooding in Manila, Philippines, opened on the globe: its pixel flood badge labelled on the map, and every outlet's headline with source and age in the side panel" width="100%">
 
 ### 🛰️ Compare any two years since 1984
 Annual Landsat and Sentinel-2 layers in true colour, false colour and four
