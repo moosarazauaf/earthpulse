@@ -68,6 +68,12 @@ describe("chat memory and the built-in reader", () => {
     expect(offlineIntent("make a map of this view")).toEqual({ tool: "save_map", place: null });
     expect(offlineIntent("Make a time-lapse of Dubai")).toEqual({ tool: "time_lapse", place: "Dubai" });
     expect(offlineIntent("timelapse here")).toEqual({ tool: "time_lapse", place: null });
+    expect(offlineIntent("Buffer 5 km around Layyah, Pakistan")).toEqual({ tool: "buffer", place: "Layyah, Pakistan", args: { km: 5 } });
+    expect(offlineIntent("buffer 500 m")).toEqual({ tool: "buffer", place: null, args: { km: 0.5 } });
+    expect(offlineIntent("Slope map of Murree, Pakistan")).toEqual({ tool: "terrain", place: "Murree, Pakistan", args: { map: "slope" } });
+    expect(offlineIntent("terrain here")).toEqual({ tool: "terrain", place: null, args: {} });
+    expect(offlineIntent("How big is this area? Area and perimeter")).toMatchObject({ tool: "measure_area" });
+    expect(offlineIntent("export this area as KML")).toEqual({ tool: "export_area", place: null, args: { format: "kml" } });
   });
 });
 

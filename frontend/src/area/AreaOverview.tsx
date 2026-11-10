@@ -25,6 +25,8 @@ import { useT } from "../i18n";
 import { type AirQuality, WHO_PM25_DAY, aqiBand, fetchAir } from "./air";
 import { type ClimateProfile, describeNormals, fetchClimate, landslideConditions } from "./climate";
 import { SLOPE_CLASSES, type Terrain, fetchTerrain } from "./elevation";
+import { TERRAIN_KINDS, type TerrainKind, terrainOverlay } from "./terrainMap";
+import { LegendBar } from "../analysis/charts";
 import { AreaChoices } from "../analysis/AreaPrompt";
 import { Figure } from "../ui/Figure";
 import { type WaterHistory as WaterShares, fetchWaterHistory } from "./waterHistory";
@@ -255,6 +257,16 @@ function TerrainSection() {
     return () => controller.abort();
   }, [aoi]);
   const at = (p: [number, number]) => formatLatLon(p[1], p[0]);
+  const shown = useStore((s) => s.terrainMap);
+  const [drawing, setDrawing] = useState(false);
+  const showMap = (kind: TerrainKind | null) => {
+    if (!kind || shown?.kind === kind) { useStore.getState().set({ terrainMap: null }); return; }
+    setDrawing(true);
+    terrainOverlay(kind, aoi.geometry).then(
+      (overlay) => useStore.getState().set({ terrainMap: { kind, overlay } }),
+      () => setError("The terrain map could not be drawn."),
+    ).finally(() => setDrawing(false));
+  };
   return (
     <section>
       <header className="row"><h3>{t("area.terrain")}</h3><KindBadge kind="DERIVED" /></header>
@@ -277,6 +289,17 @@ function TerrainSection() {
               </li>
             ))}
           </ul>
+          <div className="field">
+            <span>Show on the map</span>
+            <div className="seg" role="group" aria-label="Terrain map">
+              {TERRAIN_KINDS.map((k) => (
+                <button key={k.id} aria-pressed={shown?.kind === k.id} className={shown?.kind === k.id ? "on" : ""} disabled={drawing} onClick={() => showMap(k.id)}>{k.label}</button>
+              ))}
+            </div>
+            {shown && ("classes" in shown.overlay.legend
+              ? <ul className="legend-classes">{shown.overlay.legend.classes.map((c) => <li key={c.label}><span className="swatch" style={{ background: c.color }} aria-hidden="true" /> {c.label}</li>)}</ul>
+              : <LegendBar min={shown.overlay.legend.min} max={shown.overlay.legend.max} colors={shown.overlay.legend.colors} label={shown.overlay.legend.unit ?? ""} />)}
+          </div>
           <p className="muted">
             Lowest point {at(terrain.lowest)}, highest {at(terrain.highest)}.
             {terrain.slopeShares[3]! + terrain.slopeShares[4]! > 0.1 ? " Over a tenth of the area is steeper than 15°, where heavy rain can set off landslides." : ""}

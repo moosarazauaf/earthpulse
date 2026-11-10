@@ -252,10 +252,10 @@ export function GlobeViewer() {
   const layered: LayeredResult | null = hasLayers(s.result) ? s.result : null;
   useEffect(() => {
     const overlays: Record<string, Overlay> | null = layered?.overlays ?? null;
-    const coverShown = s.mode === "area" && s.showCover && s.areaCover ? s.areaCover.overlay : null;
+    const coverShown = s.mode !== "area" ? null : s.terrainMap?.overlay ?? (s.showCover && s.areaCover ? s.areaCover.overlay : null);
     const overlay = coverShown ?? (overlays && s.overlay.key ? overlays[s.overlay.key] ?? null : null);
     void instance?.setOverlay(overlay, s.overlay.opacity);
-  }, [layered, s.overlay.key, s.overlay.opacity, s.mode, s.showCover, s.areaCover]);
+  }, [layered, s.overlay.key, s.overlay.opacity, s.mode, s.showCover, s.areaCover, s.terrainMap]);
   useEffect(() => {
     void instance?.setDetections(mapped, s.overlay.detections);
   }, [mapped, s.overlay.detections]);

@@ -1,4 +1,5 @@
 /** Application state shared by the globe and every panel. */
+import type { TerrainKind } from "../area/terrainMap";
 import { create } from "zustand";
 
 import { ApiError, api, pollAnalysis } from "./api";
@@ -151,6 +152,8 @@ interface State {
   /** Land cover read for the area overview, shown on the globe while `showCover` is on. */
   areaCover: { overlay: Overlay; shares: { code: number; name: string; ha: number; share: number }[]; resolution: number } | null;
   showCover: boolean;
+  /** A terrain map (hillshade, slope or aspect) drawn over the area; takes the place of the land-cover map while set. */
+  terrainMap: { kind: TerrainKind; overlay: Overlay } | null;
   /** Share of the current area steeper than 15 degrees, once terrain has been read. */
   areaSteepShare: number | null;
   /** People in the current area (GHS-POP 2020), once counted. */
@@ -359,7 +362,7 @@ export const useStore = create<State>((set, get) => {
     // Any other way of setting the area is not "around a point", so the size chips and centre go.
     // A new area also picks the imagery that suits its size; the Layers panel can still switch it.
     areaPeople: null,
-    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, areaSteepShare: null, areaPeople: null, pickCentre: null, ...(aoi ? { preferredDataset: datasetForArea(aoi.geometry) } : {}) }),
+    setAoi: (aoi) => set({ aoi, drawTool: "none", areaCover: null, terrainMap: null, areaSteepShare: null, areaPeople: null, pickCentre: null, ...(aoi ? { preferredDataset: datasetForArea(aoi.geometry) } : {}) }),
     measure: [],
     drawnSamples: [],
     sampleClass: "",
@@ -377,11 +380,12 @@ export const useStore = create<State>((set, get) => {
     forgetPlace: (id) => set({ places: removePlace(get().places, id) }),
     openPlace: (place) => {
       get().cancelJob(); // a run for the previous area must not land on this one
-      set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, areaSteepShare: null, result: null, placesOpen: false, introOpen: false, drawTool: "none" });
+      set({ aoi: { geometry: place.geometry, label: place.label }, pickCentre: null, mode: "area", areaCover: null, terrainMap: null, areaSteepShare: null, result: null, placesOpen: false, introOpen: false, drawTool: "none" });
     },
     pickSizeKm: 5,
     pickCentre: null,
     areaCover: null,
+    terrainMap: null,
     showCover: false,
     areaSteepShare: null,
     analyseAt: (lon, lat, sizeKm) => {
@@ -390,7 +394,7 @@ export const useStore = create<State>((set, get) => {
       get().cancelJob(); // a run for the previous area must not land on this one
       set({
         aoi: { geometry: squareAround(lon, lat, km), label }, pickCentre: [lon, lat], pickSizeKm: km,
-        drawTool: "none", mode: "area", areaCover: null, areaSteepShare: null, introOpen: false, result: null,
+        drawTool: "none", mode: "area", areaCover: null, terrainMap: null, areaSteepShare: null, introOpen: false, result: null,
       });
       // Name the place when OpenStreetMap knows it; the coordinates stay if it does not answer.
       void reverseGeocode(lat, lon).then((name) => {

@@ -137,8 +137,20 @@ export async function readTile(z: number, x: number, y: number, signal?: AbortSi
   return out;
 }
 
-export async function fetchTerrain(aoi: AoiGeometry, signal?: AbortSignal): Promise<Terrain | null> {
-  const rings = aoi.type === "Polygon" ? [aoi.coordinates[0]!] : aoi.coordinates.map((p) => p[0]!);
+export interface HeightGrid {
+  heights: Float32Array;
+  width: number;
+  height: number;
+  /** Tile coordinates of the top-left pixel, and the zoom. */
+  x0: number;
+  y0: number;
+  z: number;
+  rings: number[][][];
+}
+
+/** The height mosaic over an area's bounds, at the zoom that keeps it to a few tiles. */
+export async function fetchHeights(aoi: AoiGeometry, signal?: AbortSignal): Promise<HeightGrid> {
+  const rings = (aoi.type === "Polygon" ? [aoi.coordinates[0]!] : aoi.coordinates.map((p) => p[0]!)) as number[][][];
   const all = rings.flat();
   const bounds: [number, number, number, number] = [
     Math.min(...all.map((p) => p[0]!)), Math.min(...all.map((p) => p[1]!)),
@@ -160,5 +172,14 @@ export async function fetchTerrain(aoi: AoiGeometry, signal?: AbortSignal): Prom
     }
   }
   await Promise.all(jobs);
-  return terrainStats(heights, width, height, tx0, ty0, z, rings as number[][][]);
+  return { heights, width, height, x0: tx0, y0: ty0, z, rings };
+}
+
+/** Ground resolution (m per pixel) of a mosaic row. */
+export const rowResolution = (grid: Pick<HeightGrid, "y0" | "z">, row: number) =>
+  (EQUATOR_M * Math.cos((tileYToLat(grid.y0 + (row + 0.5) / TILE, grid.z) * Math.PI) / 180)) / (TILE * 2 ** grid.z);
+
+export async function fetchTerrain(aoi: AoiGeometry, signal?: AbortSignal): Promise<Terrain | null> {
+  const g = await fetchHeights(aoi, signal);
+  return terrainStats(g.heights, g.width, g.height, g.x0, g.y0, g.z, g.rings);
 }

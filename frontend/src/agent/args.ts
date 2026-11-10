@@ -53,6 +53,7 @@ export const CAN_RUN = [
   "Land use and land cover (LULC) of any area: ESA WorldCover 2021, 10 m",
   "Carbon stock in plants and soil, with uncertainty ranges and a chart: biomass (Harmonized Global Biomass, 2010) and soil organic carbon to 30 cm (SoilGrids 2.0)",
   "How many people live in an area (GHS-POP 2020)",
+  "GIS tools: buffer an area, terrain statistics with hillshade, slope and aspect maps, area and perimeter, and export to GeoJSON or KML",
   "Saving the map as a publication-ready image, and charts as SVG or 300 dpi PNG",
   "Time-lapse videos of any place through the years, from Landsat (1985 on) or Sentinel-2",
   "Checking a Google Earth Engine Sentinel-1 flood script for mixed orbits, compositing and other mistakes",
@@ -86,7 +87,23 @@ export function placeFromText(text: string): string {
 }
 
 /** Without a model: land cover and carbon requests, with the place after "of", "in" or "for" ("here" means the open area). */
-export function offlineIntent(text: string): { tool: "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse"; place: string | null } | null {
+type OfflineTool = "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse" | "buffer" | "terrain" | "measure_area" | "export_area";
+const HERE = /^(here|there|this|it|the same place|this area|this view)$/i;
+const placeAfter = (text: string): string | null => {
+  const m = /\b(?:of|in|for|at|around)\s+(.+?)[.?!]*$/i.exec(text.trim());
+  return m && !HERE.test(m[1]!.trim()) ? m[1]!.trim() : null;
+};
+
+export function offlineIntent(text: string): { tool: OfflineTool; place: string | null; args?: Record<string, unknown> } | null {
+  const buffered = /\bbuffer\b/i.test(text) ? /([\d.]+)\s*(km|kilomet\w*|m|met\w*)\b/i.exec(text) : null;
+  if (/\bbuffer\b/i.test(text)) {
+    const km = buffered ? Number(buffered[1]) / (/^k/i.test(buffered[2]!) ? 1 : 1000) : 1;
+    return { tool: "buffer", place: placeAfter(text.replace(/([\d.]+)\s*(km|kilomet\w*|m|met\w*)\b/i, "").replace(/\bbuffer\b/i, "")), args: { km } };
+  }
+  if (/\b(export|download|save)\b.*\b(geojson|kml|boundary|outline|area|shape)\b/i.test(text)) return { tool: "export_area", place: null, args: { format: /\bkml\b/i.test(text) ? "kml" : "geojson" } };
+  const relief = /\b(hillshade|slope|aspect)\b/i.exec(text);
+  if (relief || /\b(terrain|elevation|relief|zonal)\b/i.test(text)) return { tool: "terrain", place: placeAfter(text), args: relief ? { map: relief[1]!.toLowerCase() } : {} };
+  if (/\b(perimeter|centroid|bounding box|how (big|large)|measure (this|the) area|size of)\b/i.test(text)) return { tool: "measure_area", place: placeAfter(text) };
   if (/\btime-?\s?lapse\b/i.test(text)) {
     const m = /\b(?:of|in|for|at)\s+(.+?)[.?!]*$/i.exec(text.trim());
     return { tool: "time_lapse", place: m && !/^(here|there|this|it|this area|this view)$/i.test(m[1]!.trim()) ? m[1]!.trim() : null };
@@ -145,6 +162,11 @@ export const EXAMPLE_POOL = [
   "Population of Hyderabad, Pakistan",
   "Make a map of this view",
   "Make a time-lapse of Dubai",
+  "Slope map of Murree, Pakistan",
+  "Hillshade of Hunza",
+  "Buffer 5 km around Layyah, Pakistan",
+  "How big is this area? Area and perimeter",
+  "Terrain of Quetta",
   "Time-lapse of Lake Urmia",
 ];
 

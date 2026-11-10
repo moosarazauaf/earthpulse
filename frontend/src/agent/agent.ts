@@ -16,6 +16,10 @@ import { STREET, requestRun } from "../ask/request";
 import { carbonInBrowser, deviceProfile, landCoverInBrowser, PIXEL_BUDGET, populationInBrowser } from "../engine/client";
 import { formatPeople } from "../engine/population";
 import { saveFigure } from "../ui/saveFigure";
+import { downloadText } from "../analysis/download";
+import { SLOPE_CLASSES, fetchTerrain } from "../area/elevation";
+import { bufferGeometry, geometryInfo, toGeoJson, toKml } from "../area/gis";
+import { TERRAIN_KINDS, type TerrainKind, terrainOverlay } from "../area/terrainMap";
 import { startTimelapse } from "../ui/timelapse";
 import { CO2_PER_C } from "../engine/carbon";
 import { WORLDCOVER } from "../engine/cover";
@@ -126,6 +130,38 @@ export const TOOLS = [
       name: "time_lapse",
       description: "Record a time-lapse video of a place through the years from Landsat (1985 on) or Sentinel-2 (2017 on): one frame a year. Omit place to use the area already open.",
       parameters: { type: "object", properties: { place: { type: "string" }, size_km: { type: "number" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "buffer",
+      description: "GIS buffer: grow the area outward by a distance on every side and make that the new area, e.g. everything within 5 km of a town or district. Omit place to buffer the area already open.",
+      parameters: { type: "object", properties: { km: { type: "number", description: "Buffer distance in km, 0.1 to 100." }, place: { type: "string" }, size_km: { type: "number" } }, required: ["km"] },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "terrain",
+      description: "Terrain analysis of an area (zonal statistics of elevation and slope): lowest, highest and mean height, mean slope and the share in each slope class. Optionally draw a hillshade, slope or aspect map on the globe. Omit place to use the area already open.",
+      parameters: { type: "object", properties: { map: { type: "string", enum: ["hillshade", "slope", "aspect", "none"] }, place: { type: "string" }, size_km: { type: "number" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "measure_area",
+      description: "Geometry of the area: its area, perimeter, centre point and bounding box. Omit place to use the area already open.",
+      parameters: { type: "object", properties: { place: { type: "string" }, size_km: { type: "number" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "export_area",
+      description: "Save the open area's outline as a file for QGIS, ArcGIS, Google Earth Engine (GeoJSON) or Google Earth (KML).",
+      parameters: { type: "object", properties: { format: { type: "string", enum: ["geojson", "kml"] } } },
     },
   },
   {
@@ -357,6 +393,85 @@ async function timeLapse(a: Record<string, unknown>): Promise<ToolResult> {
   };
 }
 
+const km2 = (v: number) => `${v.toLocaleString("en", { maximumSignificantDigits: 4 })} km²`;
+const GIS_NEXT = ["Land cover here", "How many people live here?", "Slope map here"];
+
+async function buffer(a: Record<string, unknown>): Promise<ToolResult> {
+  const km = num(a.km, 0.1, 100);
+  if (km === null) return failed("Say how far to buffer, between 0.1 and 100 km, for example \"buffer 5 km\".");
+  const area = await areaFor(a);
+  if (typeof area === "string") return failed(area);
+  const before = geometryInfo(area.geometry).areaKm2;
+  const geometry = bufferGeometry(area.geometry, km);
+  const label = `${area.label.replace(/ \+ [\d.]+ km$/, "")} + ${km} km`;
+  useStore.getState().setAoi({ geometry, label });
+  useStore.getState().set({ mode: "area", introOpen: false, result: null });
+  void getGlobe()?.flyToBounds(geometryBounds(geometry));
+  return {
+    result: JSON.stringify({ area: label, before_km2: before, after_km2: geometryInfo(geometry).areaKm2 }),
+    say: `Buffered ${area.label} by ${km} km: the area went from ${km2(before)} to ${km2(geometryInfo(geometry).areaKm2)} and is now the area in use. The buffer follows the area's outer outline, so inlets of a winding shape are filled.`,
+    next: GIS_NEXT,
+  };
+}
+
+async function terrain(a: Record<string, unknown>): Promise<ToolResult> {
+  const area = await areaFor(a);
+  if (typeof area === "string") return failed(area);
+  useStore.getState().set({ mode: "area", introOpen: false, result: null });
+  const t = await fetchTerrain(area.geometry);
+  if (!t) return failed(`No elevation data inside ${area.label}.`);
+  const kind = TERRAIN_KINDS.find((k) => k.id === a.map)?.id as TerrainKind | undefined;
+  if (kind) useStore.getState().set({ terrainMap: { kind, overlay: await terrainOverlay(kind, area.geometry) } });
+  const m = (v: number) => `${Math.round(v).toLocaleString("en")} m`;
+  const steep = t.slopeShares[3]! + t.slopeShares[4]!;
+  return {
+    result: JSON.stringify({ area: area.label, min_m: t.min, max_m: t.max, mean_m: t.mean, mean_slope_deg: t.meanSlope }),
+    say: `${area.label} lies between ${m(t.min)} and ${m(t.max)} above sea level (mean ${m(t.mean)}), with an average slope of ${t.meanSlope.toFixed(1)}°.${kind ? ` The ${kind} map is on the globe.` : ""}`,
+    card: {
+      kind: "facts", title: `Terrain, ${area.label}`,
+      lines: [`Elevation: lowest ${m(t.min)}, highest ${m(t.max)}, mean ${m(t.mean)}, relief ${m(t.max - t.min)}`, `Mean slope ${t.meanSlope.toFixed(1)}°; ${Math.round(steep * 100)}% of the area is steeper than 15°`, `AWS Terrain Tiles (SRTM and others), read at ${Math.round(t.resolutionM)} m`],
+      findings: steep > 0.1 ? [{ level: "warn", text: "Over a tenth of the area is steeper than 15°, where heavy rain can set off landslides." }] : [],
+      chart: {
+        title: `Slope classes, ${area.label}`, unit: "% of area", horizontal: true,
+        bars: SLOPE_CLASSES.map((c, i) => ({ label: `${c.label} (${i === 0 ? "under " + c.max : i === SLOPE_CLASSES.length - 1 ? "over " + SLOPE_CLASSES[i - 1]!.max : SLOPE_CLASSES[i - 1]!.max + " to " + c.max}°)`, value: t.slopeShares[i]! * 100, colour: ["#2e7d32", "#9ccc65", "#fdd835", "#fb8c00", "#c62828"][i]! })),
+        source: `Slope from AWS Terrain Tiles (SRTM, GMTED2010 and national models), read at ${Math.round(t.resolutionM)} m. Made with EarthPulse.`,
+      },
+    },
+    next: kind ? ["Aspect map here", "Hillshade here", "Land cover here"] : ["Slope map here", "Hillshade here", "Has this area flooded before? Show water since 1984"],
+  };
+}
+
+async function measureArea(a: Record<string, unknown>): Promise<ToolResult> {
+  const area = await areaFor(a);
+  if (typeof area === "string") return failed(area);
+  const g = geometryInfo(area.geometry);
+  const lines = [
+    `Area: ${km2(g.areaKm2)} (${Math.round(g.areaKm2 * 100).toLocaleString("en")} ha)`,
+    `Perimeter: ${g.perimeterKm.toLocaleString("en", { maximumSignificantDigits: 4 })} km`,
+    `Centre: ${formatLatLon(g.centroid[1], g.centroid[0])}`,
+    `Bounds: ${g.bbox[0].toFixed(4)}° to ${g.bbox[2].toFixed(4)}° E, ${g.bbox[1].toFixed(4)}° to ${g.bbox[3].toFixed(4)}° N`,
+    `Outline: ${g.vertices.toLocaleString("en")} points`,
+  ];
+  return {
+    result: JSON.stringify({ area: area.label, lines }),
+    say: `${area.label} covers ${km2(g.areaKm2)} with a perimeter of ${g.perimeterKm.toLocaleString("en", { maximumSignificantDigits: 4 })} km, centred at ${formatLatLon(g.centroid[1], g.centroid[0])}.`,
+    card: { kind: "facts", title: `Geometry, ${area.label}`, lines: [...lines, "Area measured in the local UTM zone; perimeter along the outline on the globe."], findings: [] },
+    next: ["Export this area as GeoJSON", "Buffer 2 km", "Terrain here"],
+  };
+}
+
+function exportArea(a: Record<string, unknown>): ToolResult {
+  const area = useStore.getState().aoi;
+  if (!area) return failed("Open an area first, then ask to export it.");
+  const kml = a.format === "kml";
+  const name = `earthpulse-${area.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "area"}.${kml ? "kml" : "geojson"}`;
+  downloadText(name, kml ? "application/vnd.google-earth.kml+xml" : "application/geo+json", kml ? toKml(area.geometry, area.label) : toGeoJson(area.geometry, area.label));
+  return {
+    result: JSON.stringify({ saved: name }),
+    say: `Saved ${name}. ${kml ? "Open it in Google Earth." : "Drag it into QGIS or ArcGIS, or upload it as an asset in Google Earth Engine. Coordinates are WGS 84 (EPSG:4326)."}`,
+  };
+}
+
 function checkScript(code: string): ToolResult {
   const findings = lintGeeScript(code);
   const errors = findings.filter((f) => f.level === "error").length;
@@ -388,6 +503,10 @@ export async function runTool(name: string, rawArgs: string, userText: string): 
       case "people_count": return await peopleCount(a);
       case "save_map": return await saveMap();
       case "time_lapse": return await timeLapse(a);
+      case "buffer": return await buffer(a);
+      case "terrain": return await terrain(a);
+      case "measure_area": return await measureArea(a);
+      case "export_area": return exportArea(a);
       case "check_earth_engine_script": return checkScript(str(a.code, 20_000) ?? "");
       default: return failed("I cannot do that here yet.");
     }
@@ -418,7 +537,7 @@ export interface Turn { text: string; cards: Card[]; history: Message[]; next?: 
 async function offline(text: string): Promise<{ text: string; cards: Card[]; next?: string[] }> {
   const intent = offlineIntent(text);
   if (intent) {
-    const r = await runTool(intent.tool, JSON.stringify(intent.place ? { place: intent.place } : {}), text);
+    const r = await runTool(intent.tool, JSON.stringify({ ...(intent.place ? { place: intent.place } : {}), ...intent.args }), text);
     return { text: r.say, cards: r.card ? [r.card] : [], next: r.next };
   }
   const ask = interpret(text);
