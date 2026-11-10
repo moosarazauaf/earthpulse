@@ -5,6 +5,26 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.37] - 2026-11-10
+
+### Changed
+- **Renamed to Earthsift (formerly EarthPulse).** Other sites already rank
+  for "EarthPulse". The app now lives at moosarazauaf.github.io/earthsift/ and
+  github.com/moosarazauaf/earthsift; the old /earthpulse/ address and its
+  topic pages forward to the new ones. Saved places, recent searches and Sentri
+  history are kept (their storage keys did not change).
+- **Problem-first opening screen.** It asks "What do you need to know about a
+  place?" and offers eight common questions (is this land flooded, who is
+  affected, is the coming week safe, how much carbon, how has it changed,
+  maps for a report, buffer and terrain). Each opens Sentri with the question
+  ready, or a typed question goes straight to Sentri.
+
+### Added
+- **GIS tools, also through Sentri:** measure area and perimeter, buffer an
+  area by a distance, hillshade, slope and aspect maps on the globe (with a
+  slope-class chart), and export the area as GeoJSON or KML. Short prompts
+  work, for example "buffer 3 km", "slope map of Murree", "export kml".
+
 ## [0.2.0-alpha.36] - 2026-11-06
 
 ### Added
