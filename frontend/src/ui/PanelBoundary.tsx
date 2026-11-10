@@ -19,7 +19,7 @@ export class PanelBoundary extends Component<Props, { error: Error | null }> {
   }
 
   componentDidCatch(error: Error) {
-    console.error(`EarthPulse: the ${this.props.name} panel failed`, error);
+    console.error(`Earthsift: the ${this.props.name} panel failed`, error);
   }
 
   reset = () => {
@@ -40,7 +40,7 @@ export class PanelBoundary extends Component<Props, { error: Error | null }> {
             <p>The globe and the rest of the app still work. You can clear this panel and carry on.</p>
             <div className="row-actions">
               <button className="primary" onClick={this.reset}>Clear and continue</button>
-              <a className="button" href={`https://github.com/moosarazauaf/earthpulse/issues/new?labels=bug&title=${encodeURIComponent(`Panel error: ${this.state.error.message.slice(0, 80)}`)}&body=${body}`}
+              <a className="button" href={`https://github.com/moosarazauaf/earthsift/issues/new?labels=bug&title=${encodeURIComponent(`Panel error: ${this.state.error.message.slice(0, 80)}`)}&body=${body}`}
                 target="_blank" rel="noopener noreferrer">Report it</a>
             </div>
           </section>

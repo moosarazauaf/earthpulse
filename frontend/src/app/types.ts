@@ -1,4 +1,4 @@
-/** Shapes shared with the EarthPulse API. */
+/** Shapes shared with the Earthsift API. */
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from "geojson";
 
 export type DatasetId = "landsat" | "sentinel2";

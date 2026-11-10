@@ -53,7 +53,7 @@ export function SentriLauncher() {
   const set = useStore((s) => s.set);
   if (open) return null;
   return (
-    <button className="sentri-launcher" onClick={() => set({ agentOpen: true, introOpen: false })} aria-label="Ask Sentri, the EarthPulse assistant">
+    <button className="sentri-launcher" onClick={() => set({ agentOpen: true, introOpen: false })} aria-label="Ask Sentri, the Earthsift assistant">
       <Sentri size={44} />
       <span>Ask Sentri</span>
     </button>
@@ -138,7 +138,7 @@ export function AgentPanel() {
   };
 
   return (
-    <aside className="agent" aria-label="Sentri, the EarthPulse assistant">
+    <aside className="agent" aria-label="Sentri, the Earthsift assistant">
       <header className="agent-head">
         <Sentri mood={mood} size={56} title={`Sentri: ${STATUS[mood]}`} />
         <div>
@@ -199,7 +199,7 @@ export function AgentPanel() {
       </form>
       <p className="muted small">
         {agentOnline
-          ? "Sentri runs on a free NVIDIA Nemotron model through OpenRouter, which reads what you type. Numbers, dates and checks come from EarthPulse's own code. The chat is kept in this browser only; 🗑 clears it."
+          ? "Sentri runs on a free NVIDIA Nemotron model through OpenRouter, which reads what you type. Numbers, dates and checks come from Earthsift's own code. The chat is kept in this browser only; 🗑 clears it."
           : "Built-in reader on this build (no language model). The chat is kept in this browser only; 🗑 clears it."}
       </p>
     </aside>

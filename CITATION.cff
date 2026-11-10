@@ -1,12 +1,12 @@
 cff-version: 1.2.0
-message: "If you use EarthPulse in research, please cite it as below, and cite the satellite data providers listed in docs/DATA_SOURCES.md."
-title: "EarthPulse: browser-based, reproducible satellite change analysis"
+message: "If you use Earthsift in research, please cite it as below, and cite the satellite data providers listed in docs/DATA_SOURCES.md."
+title: "Earthsift: browser-based, reproducible satellite change analysis"
 type: software
 authors:
   - family-names: "Raza"
     given-names: "Muhammad Moosa"
-repository-code: "https://github.com/moosarazauaf/earthpulse"
-url: "https://moosarazauaf.github.io/earthpulse/"
+repository-code: "https://github.com/moosarazauaf/earthsift"
+url: "https://moosarazauaf.github.io/earthsift/"
 license: MIT
 version: "0.2.0-alpha.36"
 date-released: 2026-11-06

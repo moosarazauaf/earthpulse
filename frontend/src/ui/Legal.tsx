@@ -55,7 +55,7 @@ function LegalContent({ page }: { page: LegalPage }) {
             <li><strong>Open-Meteo</strong> — {t("legal.privacy.sections.thirdParty.items.meteo")}</li>
             <li><strong>NASA, Copernicus, EUMETSAT, AWS Terrain Tiles, Source Cooperative, CelesTrak, ISRIC SoilGrids</strong> — {t("legal.privacy.sections.thirdParty.items.layers")}</li>
             <li><strong>World Bank, UN OCHA Humanitarian API</strong> — {t("legal.privacy.sections.thirdParty.items.official")}</li>
-            <li><strong>OpenRouter (through the EarthPulse proxy on Cloudflare)</strong> — Only when you use the assistant, Sentri: the messages you type there, and the steps it takes, go to a free language model. Nothing is sent until you press Send.</li>
+            <li><strong>OpenRouter (through the Earthsift proxy on Cloudflare)</strong> — Only when you use the assistant, Sentri: the messages you type there, and the steps it takes, go to a free language model. Nothing is sent until you press Send.</li>
             <li><strong>GitHub Pages</strong> — {t("legal.privacy.sections.thirdParty.items.github")}</li>
           </ul>
           <p>{t("legal.privacy.sections.thirdParty.text2")}</p>
@@ -91,7 +91,7 @@ function LegalContent({ page }: { page: LegalPage }) {
         <section>
           <h3>{t("legal.privacy.sections.contact.title")}</h3>
           <p>{t("legal.privacy.sections.contact.text")}</p>
-          <p><a href="https://github.com/moosarazauaf/earthpulse/issues" target="_blank" rel="noreferrer">GitHub Issues</a> · <a href="mailto:moosaraza@proton.me">Email</a></p>
+          <p><a href="https://github.com/moosarazauaf/earthsift/issues" target="_blank" rel="noreferrer">GitHub Issues</a> · <a href="mailto:moosaraza@proton.me">Email</a></p>
         </section>
       </div>
     );

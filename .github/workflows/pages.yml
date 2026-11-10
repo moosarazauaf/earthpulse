@@ -24,7 +24,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  SITE: https://moosarazauaf.github.io/earthpulse
+  SITE: https://moosarazauaf.github.io/earthsift
 
 jobs:
   build:
@@ -70,7 +70,7 @@ jobs:
       # in hosted mode (no analysis service). See docs/DEPLOY.md.
       - run: npm run build
         env:
-          VITE_BASE: /earthpulse/
+          VITE_BASE: /earthsift/
           VITE_API_BASE: ${{ vars.EARTHPULSE_API_BASE }}
           # Umami Cloud website ID (public, not a secret); visit counting stays off until it is set.
           VITE_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}

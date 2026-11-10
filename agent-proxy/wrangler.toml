@@ -1,4 +1,4 @@
-# EarthPulse assistant proxy. Deploy steps: docs/DEPLOY.md, "Assistant proxy".
+# Earthsift assistant proxy. Deploy steps: docs/DEPLOY.md, "Assistant proxy".
 # The OpenRouter key is a secret (wrangler secret put OPENROUTER_API_KEY), never in this file.
 name = "earthpulse-agent"
 main = "src/index.js"

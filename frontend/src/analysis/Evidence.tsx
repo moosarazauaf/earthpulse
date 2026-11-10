@@ -122,7 +122,7 @@ export function Evidence({ result }: { result: AnalysisResult }) {
   if (p.computedOn === "browser") {
     rows.push(["Computed", `In the visitor's browser (${p.device?.cores} threads${p.device?.memoryGb ? `, about ${p.device.memoryGb} GB` : ""}) in ${p.seconds} s`]);
   }
-  rows.push(["Software", `EarthPulse ${result.softwareVersion}`]);
+  rows.push(["Software", `Earthsift ${result.softwareVersion}`]);
   rows.push(["License", p.dataset?.license ?? "n/a"]);
 
   return (

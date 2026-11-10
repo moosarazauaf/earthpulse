@@ -1,6 +1,6 @@
 /**
- * The EarthPulse assistant. A free model on OpenRouter (NVIDIA Nemotron,
- * through the EarthPulse proxy that holds the key) reads the request and
+ * The Earthsift assistant. A free model on OpenRouter (NVIDIA Nemotron,
+ * through the Earthsift proxy that holds the key) reads the request and
  * calls tools; the tools do the work with the same code as the rest of the
  * app. Every number, date window and validity finding comes from code, not
  * from the model. Without the proxy, a rule-based reader handles the same
@@ -196,7 +196,7 @@ export function stateLine(): string {
   return parts.join(" ");
 }
 
-const system = () => `You are Sentri, the EarthPulse assistant, inside a satellite map app. Today is ${new Date().toISOString().slice(0, 10)}.
+const system = () => `You are Sentri, the Earthsift assistant, inside a satellite map app. Today is ${new Date().toISOString().slice(0, 10)}.
 State now: ${stateLine()}
 When the user means the current area ("here", "there", "it", "this district", "the same place"), omit place so the tool uses it.
 Use the tools to act; never invent numbers, dates of satellite passes or results.
@@ -316,7 +316,7 @@ async function landCover(a: Record<string, unknown>): Promise<ToolResult> {
       chart: {
         title: `Land use and land cover, ${area.label}`, unit: "% of area", horizontal: true,
         bars: cover.shares.filter((c) => c.share >= 0.005).map((c) => ({ label: c.name, value: c.share * 100, colour: `rgb(${(WORLDCOVER[c.code]?.colour ?? [128, 128, 128]).join(",")})` })),
-        source: `ESA WorldCover 2021 v200, 10 m (read at ${cover.resolution} m). Made with EarthPulse.`,
+        source: `ESA WorldCover 2021 v200, 10 m (read at ${cover.resolution} m). Made with Earthsift.`,
       },
     },
     next: ["Carbon stock here", "Urban growth here since 2000", "Tree cover loss here"],
@@ -351,7 +351,7 @@ async function carbonStock(a: Record<string, unknown>): Promise<ToolResult> {
           { label: "Roots", value: b.below, low: Math.max(0, b.below - b.uncertainty * (b.below / (b.total || 1))), high: b.below + b.uncertainty * (b.below / (b.total || 1)), colour: "#8a6a3b" },
           ...(soil ? [{ label: "Soil 0-30 cm", value: soil.total, low: soil.low, high: soil.high, colour: "#5b4636" }] : []),
         ],
-        source: "Error bars: plants, published uncertainty added over pixels (shared between above ground and roots by their share); soil, 5% to 95% quantiles. Plants: Harmonized Global Biomass 2010 (Spawn et al. 2020). Soil: SoilGrids 2.0 (Poggio et al. 2021). Made with EarthPulse.",
+        source: "Error bars: plants, published uncertainty added over pixels (shared between above ground and roots by their share); soil, 5% to 95% quantiles. Plants: Harmonized Global Biomass 2010 (Spawn et al. 2020). Soil: SoilGrids 2.0 (Poggio et al. 2021). Made with Earthsift.",
       },
     },
     next: ["Land cover here", "Tree cover loss here", "Vegetation change here 2010 to 2024"],
@@ -434,7 +434,7 @@ async function terrain(a: Record<string, unknown>): Promise<ToolResult> {
       chart: {
         title: `Slope classes, ${area.label}`, unit: "% of area", horizontal: true,
         bars: SLOPE_CLASSES.map((c, i) => ({ label: `${c.label} (${i === 0 ? "under " + c.max : i === SLOPE_CLASSES.length - 1 ? "over " + SLOPE_CLASSES[i - 1]!.max : SLOPE_CLASSES[i - 1]!.max + " to " + c.max}°)`, value: t.slopeShares[i]! * 100, colour: ["#2e7d32", "#9ccc65", "#fdd835", "#fb8c00", "#c62828"][i]! })),
-        source: `Slope from AWS Terrain Tiles (SRTM, GMTED2010 and national models), read at ${Math.round(t.resolutionM)} m. Made with EarthPulse.`,
+        source: `Slope from AWS Terrain Tiles (SRTM, GMTED2010 and national models), read at ${Math.round(t.resolutionM)} m. Made with Earthsift.`,
       },
     },
     next: kind ? ["Aspect map here", "Hillshade here", "Land cover here"] : ["Slope map here", "Hillshade here", "Has this area flooded before? Show water since 1984"],
@@ -464,7 +464,7 @@ function exportArea(a: Record<string, unknown>): ToolResult {
   const area = useStore.getState().aoi;
   if (!area) return failed("Open an area first, then ask to export it.");
   const kml = a.format === "kml";
-  const name = `earthpulse-${area.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "area"}.${kml ? "kml" : "geojson"}`;
+  const name = `earthsift-${area.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "area"}.${kml ? "kml" : "geojson"}`;
   downloadText(name, kml ? "application/vnd.google-earth.kml+xml" : "application/geo+json", kml ? toKml(area.geometry, area.label) : toGeoJson(area.geometry, area.label));
   return {
     result: JSON.stringify({ saved: name }),

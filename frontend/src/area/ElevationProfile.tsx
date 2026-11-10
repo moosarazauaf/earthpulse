@@ -27,7 +27,7 @@ export function ElevationProfile({ points }: { points: [number, number][] }) {
   const y = (h: number) => H - ((h - stats.min) / span) * (H - 6) - 3;
   const line = samples.map((s, i) => `${i ? "L" : "M"}${x(s.km).toFixed(1)},${y(heights[i]!).toFixed(1)}`).join(" ");
   return (
-    <Figure className="profile" title={`Ground height along a ${formatKm(total)} line`} source="AWS Terrain Tiles (SRTM and others, about 30 m at best; a surface model, so the tops of buildings and trees in cities and forests). Made with EarthPulse.">
+    <Figure className="profile" title={`Ground height along a ${formatKm(total)} line`} source="AWS Terrain Tiles (SRTM and others, about 30 m at best; a surface model, so the tops of buildings and trees in cities and forests). Made with Earthsift.">
       <svg viewBox={`0 0 ${W} ${H + 14}`} role="img"
         aria-label={`Ground height along the line: from ${m(heights[0]!)} to ${m(heights.at(-1)!)}, lowest ${m(stats.min)}, highest ${m(stats.max)}`}>
         <path className="area" d={`${line} L${W},${H} L0,${H} Z`} />

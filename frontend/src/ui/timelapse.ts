@@ -72,7 +72,7 @@ export async function startTimelapse(): Promise<void> {
     ctx.font = `${17 * k}px Helvetica, Arial, sans-serif`;
     ctx.fillStyle = "#c9c0ae";
     ctx.fillText(title.slice(0, 32), 36 * k, 106 * k);
-    const credit = `${datasetForYear(s.preferredDataset, year) === "sentinel2" ? "Sentinel-2 (ESA)" : "Landsat (USGS, NASA)"} via Microsoft Planetary Computer · Made with EarthPulse`;
+    const credit = `${datasetForYear(s.preferredDataset, year) === "sentinel2" ? "Sentinel-2 (ESA)" : "Landsat (USGS, NASA)"} via Microsoft Planetary Computer · Made with Earthsift`;
     ctx.font = `${14 * k}px Helvetica, Arial, sans-serif`;
     const w = ctx.measureText(credit).width;
     ctx.fillStyle = "rgba(20,18,14,0.78)";
@@ -112,7 +112,7 @@ export async function startTimelapse(): Promise<void> {
     await stopped;
     if (!signal.aborted && chunks.length) {
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      downloadBlob(`earthpulse-timelapse-${slug}-${years[0]}-${years.at(-1)}.${type.ext}`, new Blob(chunks, { type: type.mime.split(";")[0] }));
+      downloadBlob(`earthsift-timelapse-${slug}-${years[0]}-${years.at(-1)}.${type.ext}`, new Blob(chunks, { type: type.mime.split(";")[0] }));
       useStore.getState().set({ notice: `Time-lapse saved: ${years.length} years, ${years[0]} to ${years.at(-1)}.` });
     }
   } catch {

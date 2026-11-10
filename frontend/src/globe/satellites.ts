@@ -1,5 +1,5 @@
 /**
- * The Earth-observation satellites EarthPulse reads, where they are now and
+ * The Earth-observation satellites Earthsift reads, where they are now and
  * when they next pass over a place. Orbits are CelesTrak's two-line elements
  * (keyless, CORS), propagated in the browser with satellite.js (SGP4).
  * A pass means the place lies inside the satellite's imaging swath, and, for

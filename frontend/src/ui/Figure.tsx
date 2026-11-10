@@ -63,7 +63,7 @@ export function paperSvg(svg: SVGSVGElement, title: string, source: string): { m
 
 export async function exportFigure(svg: SVGSVGElement, format: "svg" | "png", title: string, source: string): Promise<void> {
   const { markup, width, height } = paperSvg(svg, title, source);
-  const name = `earthpulse-${slug(title)}`;
+  const name = `earthsift-${slug(title)}`;
   if (format === "svg") { downloadBlob(`${name}.svg`, new Blob([markup], { type: "image/svg+xml" })); return; }
   const px = Math.round((WIDTH_MM / 25.4) * DPI);
   const url = URL.createObjectURL(new Blob([markup], { type: "image/svg+xml" }));
@@ -80,7 +80,7 @@ export async function exportFigure(svg: SVGSVGElement, format: "svg" | "png", ti
 }
 
 /** A chart with print-quality export buttons. */
-export function Figure({ title, source = "Made with EarthPulse.", className = "chart", children }: { title: string; source?: string; className?: string; children: ReactNode }) {
+export function Figure({ title, source = "Made with Earthsift.", className = "chart", children }: { title: string; source?: string; className?: string; children: ReactNode }) {
   const ref = useRef<HTMLElement>(null);
   const [busy, setBusy] = useState(false);
   const save = async (format: "svg" | "png") => {

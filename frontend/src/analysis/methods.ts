@@ -5,7 +5,7 @@
  */
 import type { AnalysisResult } from "../app/types";
 
-const REPO = "https://github.com/moosarazauaf/earthpulse";
+const REPO = "https://github.com/moosarazauaf/earthsift";
 const sentence = (s: string) => (/[.!?]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`);
 
 export function methodsText(result: AnalysisResult, today = new Date().toISOString().slice(0, 10)): string {
@@ -14,7 +14,7 @@ export function methodsText(result: AnalysisResult, today = new Date().toISOStri
   const dates = scenes.map((s) => s.datetime.slice(0, 10)).sort();
   const platforms = [...new Set(scenes.map((s) => s.platform))].sort();
   const parts = [
-    `The analysis was run with EarthPulse ${result.softwareVersion} (Raza, ${today.slice(0, 4)}), ${p.computedOn === "browser" ? "in the web browser, reading" : "using"} data from ${p.provider.name}.`,
+    `The analysis was run with Earthsift ${result.softwareVersion} (Raza, ${today.slice(0, 4)}), ${p.computedOn === "browser" ? "in the web browser, reading" : "using"} data from ${p.provider.name}.`,
     sentence(p.method),
     p.index && `${p.index.name} was computed as ${p.index.formula} (${p.index.reference}).`,
     p.cloudMask && `Cloud mask: ${sentence(p.cloudMask)}`,
@@ -25,7 +25,7 @@ export function methodsText(result: AnalysisResult, today = new Date().toISOStri
   ].filter(Boolean);
 
   const refs = [
-    `Raza, M. M. (${today.slice(0, 4)}). EarthPulse: browser-based, reproducible satellite change analysis (Version ${result.softwareVersion}) [Computer software]. ${REPO}`,
+    `Raza, M. M. (${today.slice(0, 4)}). Earthsift: browser-based, reproducible satellite change analysis (Version ${result.softwareVersion}) [Computer software]. ${REPO}`,
     p.index && p.index.reference,
     platforms.some((x) => /landsat/i.test(x)) && "Landsat Collection 2 Level-2 data courtesy of the U.S. Geological Survey.",
     platforms.some((x) => /sentinel/i.test(x)) && `Contains modified Copernicus Sentinel data ${dates[0]?.slice(0, 4)}–${dates[dates.length - 1]?.slice(0, 4)}, processed by ESA.`,

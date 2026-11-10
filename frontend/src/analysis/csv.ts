@@ -11,7 +11,7 @@ const rows = (header: string[], body: unknown[][]) => [header, ...body].map((r) 
 
 /** The result's main table, or null when it has none. Header lines start with # and carry the provenance. */
 export function resultCsv(result: AnalysisResult): string | null {
-  const head = `# EarthPulse ${result.softwareVersion} · ${result.id} · ${result.label ?? ""} · ${result.valueKind}\n`;
+  const head = `# Earthsift ${result.softwareVersion} · ${result.id} · ${result.label ?? ""} · ${result.valueKind}\n`;
   if (result.type === "timeseries") {
     return head + rows(
       ["year", "status", "ndvi", "ndwi", "mndwi", "ndbi", "valid_fraction", "sensors", "scenes"],

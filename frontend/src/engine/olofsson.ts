@@ -22,7 +22,7 @@ export interface AdjustedArea {
 }
 
 /**
- * `matrix[reference][predicted]` (EarthPulse's layout) and the mapped area of
+ * `matrix[reference][predicted]` (Earthsift's layout) and the mapped area of
  * each class, in the same class order. Classes never mapped or never tested
  * contribute nothing; their estimate can still be non-zero from omission.
  */

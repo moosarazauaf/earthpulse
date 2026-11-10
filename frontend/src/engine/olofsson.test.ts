@@ -12,7 +12,7 @@ describe("error-adjusted areas (Olofsson et al. 2014)", () => {
       [1, 0, 153, 11],
       [2, 1, 9, 313],
     ];
-    // EarthPulse stores [reference][predicted], the transpose.
+    // Earthsift stores [reference][predicted], the transpose.
     const matrix = mapRows[0]!.map((_, j) => mapRows.map((row) => row[j]!));
     const pixelHa = 0.09;
     const mapped = [200000, 150000, 3200000, 6450000].map((px) => px * pixelHa);

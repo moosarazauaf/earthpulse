@@ -24,7 +24,7 @@ export function rasterToGeoTiff(raster: ResultRaster): ArrayBuffer {
 /** A short text file to go with the GeoTIFF: what the values mean and where they came from. */
 export function rasterReadme(raster: ResultRaster, resultId: string): string {
   const lines = [
-    `EarthPulse result ${resultId}: ${raster.name}.tif`,
+    `Earthsift result ${resultId}: ${raster.name}.tif`,
     raster.description,
     `CRS EPSG:${raster.epsg}, ${raster.res} m pixels, ${raster.width} x ${raster.height}, nodata ${raster.noData}.`,
   ];

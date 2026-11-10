@@ -15,12 +15,12 @@ export async function saveFigure(): Promise<void> {
   try {
     const shot = globe.snapshot();
     const view = globe.cameraView();
-    const title = s.aoi?.label ?? s.district?.name ?? "EarthPulse map";
+    const title = s.aoi?.label ?? s.district?.name ?? "Earthsift map";
     const date = new Date().toISOString().slice(0, 10);
     const layer = earthLayer(s.earthLayer);
     const legend = layer ? { title: layer.label, stops: layer.stops, scale: layer.scale } : s.populationOn ? POPULATION : null;
     const blob = await composeFigure(shot, title, `Centre ${formatLatLon(view.lat, view.lon)} · ${date}`, legend);
-    downloadBlob(`earthpulse-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${date}.png`, blob);
+    downloadBlob(`earthsift-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${date}.png`, blob);
     s.set({ notice: "Map image saved, with scale, north arrow and data credits." });
   } catch {
     s.set({ notice: "The map image could not be made; one of the layers on show does not allow copying. Turn it off and try again." });

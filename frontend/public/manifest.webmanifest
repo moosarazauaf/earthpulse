@@ -1,6 +1,6 @@
 {
-  "name": "EarthPulse",
-  "short_name": "EarthPulse",
+  "name": "Earthsift",
+  "short_name": "Earthsift",
   "description": "Free satellite image analysis in your browser: floods, land cover, water, cities, heat, air quality and hazard news for any place on Earth.",
   "start_url": ".",
   "scope": ".",

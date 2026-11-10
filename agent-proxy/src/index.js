@@ -1,9 +1,9 @@
 /**
- * EarthPulse assistant proxy (Cloudflare Worker).
+ * Earthsift assistant proxy (Cloudflare Worker).
  *
  * Holds the OpenRouter key as a Worker secret and forwards chat requests from
- * the EarthPulse site to free models only. It answers browsers on the
- * EarthPulse origins, checks the shape and size of every request, limits each
+ * the Earthsift site to free models only. It answers browsers on the
+ * Earthsift origins, checks the shape and size of every request, limits each
  * visitor's rate, and returns only the model's message. Nothing is logged.
  */
 
@@ -84,8 +84,8 @@ export default {
       headers: {
         Authorization: `Bearer ${env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://moosarazauaf.github.io/earthpulse/",
-        "X-Title": "EarthPulse",
+        "HTTP-Referer": "https://moosarazauaf.github.io/earthsift/",
+        "X-Title": "Earthsift",
       },
       body: JSON.stringify({ models: MODELS, messages: checked.messages, tools: checked.tools, tool_choice: checked.tools ? "auto" : undefined, max_tokens: 1024, temperature: 0.2 }),
     });

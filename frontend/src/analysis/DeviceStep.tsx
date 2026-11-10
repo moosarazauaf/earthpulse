@@ -48,7 +48,7 @@ export function DeviceStep({ step, device, quality, setQuality, nativeRes, senso
       </div>
       <p className="muted">
         {resolution ? `For this area, ${quality} works at ${resolution} m (${sensor}, ${nativeRes} m native). ` : ""}
-        Higher quality downloads more data and needs more memory. Nothing is sent to an EarthPulse server.
+        Higher quality downloads more data and needs more memory. Nothing is sent to an Earthsift server.
       </p>
     </section>
   );

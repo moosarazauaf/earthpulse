@@ -1,7 +1,7 @@
 /**
  * Live hazard information from public services.
  *
- * EarthPulse does not produce any of this itself: it shows what the named
+ * Earthsift does not produce any of this itself: it shows what the named
  * agency publishes, with that agency's own wording of what the product is.
  * Each layer says whether it is an observation or a forecast.
  */

@@ -8,7 +8,7 @@ public issue.
 
 ## How the application is built to fail safely
 
-- **No secrets in the client.** The browser only ever talks to the EarthPulse
+- **No secrets in the client.** The browser only ever talks to the Earthsift
   API. Credentials for optional backends (for example Earth Engine) are read
   from environment variables on the server.
 - **No server-side fetching of caller-supplied URLs.** Every outbound request

@@ -1,5 +1,5 @@
 /**
- * Official figures to set beside EarthPulse's own estimates: national
+ * Official figures to set beside Earthsift's own estimates: national
  * statistics from the World Bank, and, where the UN tracks a place, IPC
  * food-insecurity analyses and WFP rainfall anomalies through UN OCHA's
  * Humanitarian API (HDX HAPI). All keyless and readable from the browser.
@@ -7,7 +7,7 @@
 const WB = "https://api.worldbank.org/v2/country";
 const HAPI = "https://hapi.humdata.org/api/v2";
 // HAPI asks every caller to identify itself as base64("app:email"); this is an identification, not a secret.
-const APP = btoa("EarthPulse:moosarazauaf@users.noreply.github.com");
+const APP = btoa("Earthsift:moosarazauaf@users.noreply.github.com");
 
 export const INDICATORS = {
   population: "SP.POP.TOTL",

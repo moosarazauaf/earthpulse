@@ -1,5 +1,5 @@
 /**
- * Hosted mode: EarthPulse served as static files, with no analysis service.
+ * Hosted mode: Earthsift served as static files, with no analysis service.
  *
  * Imagery layers are requested from Planetary Computer by the browser, which
  * needs no key. New analyses cannot run here; analyses exported from the
@@ -57,7 +57,7 @@ const LANDSAT7_NOTE =
 export const HOSTED_NOTICE: ApiErrorBody = {
   code: "hosted",
   message: "This hosted demo cannot run new analyses.",
-  hint: "Analyses need the EarthPulse backend. Run the project locally to analyse your own area.",
+  hint: "Analyses need the Earthsift backend. Run the project locally to analyse your own area.",
 };
 
 class HostedError extends Error {

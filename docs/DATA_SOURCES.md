@@ -1,6 +1,6 @@
 # Data sources
 
-Everything EarthPulse shows or computes comes from the sources below. The same
+Everything Earthsift shows or computes comes from the sources below. The same
 information is served by `GET /api/datasets` and shown in the application
 under **Layers → Data sources**. Access date for this version: 2026-10-06.
 
@@ -32,7 +32,7 @@ are striped); 7 for 2012, with a warning; 8 and 9 from 2013.
 | Provider | ESA / Copernicus |
 | Processing level | Level-2A surface reflectance |
 | Resolution | 10 m (visible, NIR), 20 m (SWIR, scene classification) |
-| Coverage | 2015 to present; EarthPulse offers it from 2016 |
+| Coverage | 2015 to present; Earthsift offers it from 2016 |
 | License | Copernicus Sentinel data terms (free, full and open) |
 | Attribution | Contains modified Copernicus Sentinel data |
 | Reference | https://sentinels.copernicus.eu/web/sentinel/user-guides/sentinel-2-msi |
@@ -56,7 +56,7 @@ under floodwater.
 
 **Microsoft Planetary Computer** (https://planetarycomputer.microsoft.com/).
 Public STAC API and cloud-optimised GeoTIFFs in Azure storage. No account is
-required. EarthPulse uses its STAC search, its token endpoint for read access
+required. Earthsift uses its STAC search, its token endpoint for read access
 to the files, and its mosaic tile service for the annual map layers.
 
 ## Spectral indices
@@ -69,7 +69,7 @@ to the files, and its mosaic tile service for the annual map layers.
 | NDBI | (SWIR1 − NIR) / (SWIR1 + NIR) | Zha, Gao and Ni 2003 |
 | NBR | (NIR − SWIR2) / (NIR + SWIR2); severity from dNBR = NBR before − NBR after | Key and Benson 2006 (FIREMON, USDA RMRS-GTR-164-CD) |
 
-NDBI responds to bare soil as well as built-up surfaces. EarthPulse reports it
+NDBI responds to bare soil as well as built-up surfaces. Earthsift reports it
 as an index and does not call a rise in it "urban expansion".
 
 ## Context layers (not used in any calculation)
@@ -109,7 +109,7 @@ borders in the label layer is Esri's and implies no position on any border.
 
 ## Live hazard feeds
 
-Shown in the Live view exactly as published. EarthPulse does not compute or
+Shown in the Live view exactly as published. Earthsift does not compute or
 validate them.
 
 | Layer | Source | Kind | Terms |

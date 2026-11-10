@@ -2,7 +2,7 @@
  * Visit counting with Umami Cloud, a cookie-free analytics service: it records
  * the page, referrer, browser, device type and country (worked out from the
  * IP address, which is not stored), so the author can see how many people use
- * EarthPulse now and over time. Off unless the build sets
+ * Earthsift now and over time. Off unless the build sets
  * VITE_UMAMI_WEBSITE_ID; visitors with Do Not Track on are never counted.
  */
 const ID = import.meta.env.VITE_UMAMI_WEBSITE_ID as string | undefined;

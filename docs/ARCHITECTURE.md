@@ -6,7 +6,7 @@
 Browser (React + CesiumJS)
    │  JSON, PNG tiles
    ▼
-EarthPulse API (FastAPI)
+Earthsift API (FastAPI)
    ├── imagery service   → registers a STAC mosaic, proxies its tiles
    ├── analysis service  → searches scenes, reads COG windows, computes results
    ├── job runner        → background threads, real stage reporting

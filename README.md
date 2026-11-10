@@ -1,25 +1,27 @@
 <div align="center">
 
-# 🌍 EarthPulse
+# 🌍 Earthsift
+
+*(formerly EarthPulse)*
 
 ### See what is changing on Earth, with the evidence behind every number.
 
-**[Open the live app →](https://moosarazauaf.github.io/earthpulse/)**
+**[Open the live app →](https://moosarazauaf.github.io/earthsift/)**
 
 No account. No API key. No server. Satellite analyses run on your own computer.
 
-If EarthPulse is useful to you, a ⭐ helps other researchers find it.
+If Earthsift is useful to you, a ⭐ helps other researchers find it.
 
-[![CI](https://github.com/moosarazauaf/earthpulse/actions/workflows/ci.yml/badge.svg)](https://github.com/moosarazauaf/earthpulse/actions/workflows/ci.yml)
-[![Deploy](https://github.com/moosarazauaf/earthpulse/actions/workflows/pages.yml/badge.svg)](https://moosarazauaf.github.io/earthpulse/)
+[![CI](https://github.com/moosarazauaf/earthsift/actions/workflows/ci.yml/badge.svg)](https://github.com/moosarazauaf/earthsift/actions/workflows/ci.yml)
+[![Deploy](https://github.com/moosarazauaf/earthsift/actions/workflows/pages.yml/badge.svg)](https://moosarazauaf.github.io/earthsift/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-5fd0c5.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/moosarazauaf/earthpulse?include_prereleases&color=7bd88f)](https://github.com/moosarazauaf/earthpulse/releases)
+[![Release](https://img.shields.io/github/v/release/moosarazauaf/earthsift?include_prereleases&color=7bd88f)](https://github.com/moosarazauaf/earthsift/releases)
 
-<img src="docs/media/news.jpg" alt="EarthPulse Live view: natural-hazard stories, earthquakes and disaster alerts from the past 24 hours as pixel-art badges on a 3D globe, with the Layers panel on the left and headlines filtered by hazard on the right" width="100%">
+<img src="docs/media/news.jpg" alt="Earthsift Live view: natural-hazard stories, earthquakes and disaster alerts from the past 24 hours as pixel-art badges on a 3D globe, with the Layers panel on the left and headlines filtered by hazard on the right" width="100%">
 
 </div>
 
-EarthPulse is a free, open-source remote sensing web app for researchers,
+Earthsift is a free, open-source remote sensing web app for researchers,
 students, journalists and anyone curious about a place. It puts four decades of open satellite imagery, live hazard feeds and
 a reproducible analysis engine on one 3D globe in the browser. Ask *"what
 changed here?"* about any place on Earth and get an answer that names the
@@ -38,7 +40,7 @@ scenes, the method and the limits behind it.
   *observed*, *derived*, *modelled* or *estimated*, never mixed up.
 - **Share a link, not a screenshot.** A shared analysis link carries the full
   recipe. Whoever opens it re-runs the same analysis on their own device.
-  [Try one: surface water at Mangla Reservoir, 2000 and 2025.](https://moosarazauaf.github.io/earthpulse/?lat=33.15&lon=73.7&h=90000&run=eyJ2IjoxLCJrIjoid2F0ZXIiLCJtIjoyNTAwMDAsInIiOnsiYW9pIjp7InR5cGUiOiJQb2x5Z29uIiwiY29vcmRpbmF0ZXMiOltbWzczLjU1LDMzLjAyXSxbNzMuODUsMzMuMDJdLFs3My44NSwzMy4zXSxbNzMuNTUsMzMuM10sWzczLjU1LDMzLjAyXV1dfSwibGFiZWwiOiJNYW5nbGEgUmVzZXJ2b2lyIiwiZGF0YXNldCI6ImxhbmRzYXQiLCJ5ZWFycyI6WzIwMDAsMjAyNV0sInN0YXJ0TW9udGgiOjEwLCJlbmRNb250aCI6MTIsInRocmVzaG9sZCI6MCwibWF4Q2xvdWQiOjIwfX0)
+  [Try one: surface water at Mangla Reservoir, 2000 and 2025.](https://moosarazauaf.github.io/earthsift/?lat=33.15&lon=73.7&h=90000&run=eyJ2IjoxLCJrIjoid2F0ZXIiLCJtIjoyNTAwMDAsInIiOnsiYW9pIjp7InR5cGUiOiJQb2x5Z29uIiwiY29vcmRpbmF0ZXMiOltbWzczLjU1LDMzLjAyXSxbNzMuODUsMzMuMDJdLFs3My44NSwzMy4zXSxbNzMuNTUsMzMuM10sWzczLjU1LDMzLjAyXV1dfSwibGFiZWwiOiJNYW5nbGEgUmVzZXJ2b2lyIiwiZGF0YXNldCI6ImxhbmRzYXQiLCJ5ZWFycyI6WzIwMDAsMjAyNV0sInN0YXJ0TW9udGgiOjEwLCJlbmRNb250aCI6MTIsInRocmVzaG9sZCI6MCwibWF4Q2xvdWQiOjIwfX0)
 - **Your area, your file.** Draw a rectangle or polygon, or drop in a zipped
   shapefile or GeoJSON. It is read in the browser and never uploaded.
 
@@ -47,7 +49,7 @@ scenes, the method and the limits behind it.
 ### 💬 Ask in plain words
 Type a request in the search box, such as *"floods in Layyah in August
 2022"*, *"how much has Lake Urmia shrunk since 2000"* or *"is Lahore
-growing?"*. EarthPulse works out the analysis, finds the place, sizes the
+growing?"*. Earthsift works out the analysis, finds the place, sizes the
 area to it and picks the dates, then shows what it will run and every
 assumption it made before anything downloads. If a request cannot be met
 (radar before 2014, a fire with no month, a whole country) it says why
@@ -60,7 +62,7 @@ for every analysis.
 from 25 August to 5 September 2022"*, *"how much carbon is stored there?"*,
 *"land cover of Islamabad"*, *"how many people live in Peshawar?"*, *"make a
 time-lapse of Dubai"*, *"show wind and sea temperature"*. A free NVIDIA
-Nemotron model on OpenRouter chooses what to do; EarthPulse's own code does
+Nemotron model on OpenRouter chooses what to do; Earthsift's own code does
 it and writes the answer, so numbers, dates and checks never come from the
 model. It remembers the conversation ("there", "the same place"), suggests
 next steps, keeps the chat in your browser only, and works without the model
@@ -98,13 +100,13 @@ layout: the view at twice screen resolution in a frame with latitude and
 longitude ticks, a scale bar, north arrow, legend and every data credit.
 
 ### 🗺️ Find your district
-Search for a place and EarthPulse outlines the district it lies in, from FAO
+Search for a place and Earthsift outlines the district it lies in, from FAO
 GAUL 2024 (45,523 districts worldwide). One click analyses the whole district,
 another downloads its outline as GeoJSON. Districts are found by where the
 place is, not by spelling, so "Layyah" finds GAUL's "Leiah".
 
 ### 🎯 Click a place, get an analysis
-Press **Analyse here** (or <kbd>A</kbd>) and click anywhere on the globe. EarthPulse
+Press **Analyse here** (or <kbd>A</kbd>) and click anywhere on the globe. Earthsift
 makes a square area of 2 to 25 km around the spot, names it, and in a few
 seconds shows its land cover (ESA WorldCover), its terrain (elevation range,
 slopes, where landslides are possible), its 1991 to 2020 climate and how the
@@ -116,7 +118,7 @@ built-up growth, tree cover, how hot the ground gets, whether it is flooded
 now, and whether it has burned recently. Drawing or uploading an area opens
 the same overview; **☆ Save** keeps it in My places (<kbd>M</kbd>) together with
 your recent analyses, and **Print report** saves the overview as a PDF. Saved
-places are watched: when EarthPulse opens it tells you about hazard news,
+places are watched: when Earthsift opens it tells you about hazard news,
 earthquakes or alerts near any of them. The overview also shows the rain of
 the last days against normal, how many people live in the area (GHS-POP
 2020), and official figures to check against: World Bank country statistics,
@@ -157,14 +159,14 @@ Current red and orange disaster alerts (GDACS), active fire detections (NASA
 VIIRS), river flood forecasts and observed flood extent (Copernicus GloFAS),
 fire danger (Copernicus GWIS) and the past week's earthquakes (USGS). Each
 layer says who publishes it, whether it is an observation or a forecast, and
-what it is not. EarthPulse shows these products; it is not a warning service.
+what it is not. Earthsift shows these products; it is not a warning service.
 
 ### 📰 Hazards in the news, and how they happened
-Every hour EarthPulse scans more than 30 news outlets (BBC, The Guardian, NYT,
+Every hour Earthsift scans more than 30 news outlets (BBC, The Guardian, NYT,
 Dawn, Rappler, ABC Australia, ReliefWeb and more) for earthquakes, floods,
 landslides, storms and wildfires, and puts each story on the globe with links
 to every outlet that reported it. Stories are checked against the USGS
-earthquake catalogue and GDACS alerts. Open one and EarthPulse shows what led
+earthquake catalogue and GDACS alerts. Open one and Earthsift shows what led
 up to it, for example *"54 mm of rain in the 3 days before: wetter than in
 any year from 1991 to 2020"*. One click then proposes the satellite analysis
 that can test the story: flood water from radar, a burn scar, or landslide
@@ -197,7 +199,7 @@ the differenced Normalized Burn Ratio (dNBR), and maps burn severity in the
 standard classes of Key and Benson (2006), with the area in each class.
 
 ### 🌱 Measure change
-Pick two years and a season; EarthPulse builds cloud-free composites for both,
+Pick two years and a season; Earthsift builds cloud-free composites for both,
 computes NDVI, NDWI, MNDWI or NDBI, and maps where the index moved past a
 threshold, with the largest regions listed and the distribution plotted.
 
@@ -297,7 +299,7 @@ All of it is open and keyless. Licences and attribution are in
 The live app needs nothing installed. To develop:
 
 ```bash
-git clone https://github.com/moosarazauaf/earthpulse
+git clone https://github.com/moosarazauaf/earthsift
 cd earthpulse/frontend
 npm install
 npm run dev
@@ -307,7 +309,7 @@ Open http://localhost:5173. That is the whole application; analyses run in
 the browser. The optional Python backend (multi-year index series, Earth
 Engine script export) is described in [docs/DEPLOY.md](docs/DEPLOY.md).
 
-EarthPulse can also be installed as a desktop app from Chrome or Edge (the
+Earthsift can also be installed as a desktop app from Chrome or Edge (the
 install icon in the address bar).
 
 ## Honest limits
@@ -323,7 +325,7 @@ install icon in the address bar).
 - Carbon stock shows plants as they were in 2010 and soil to 30 cm only;
   soil carbon from SoilGrids is modelled and its range is wide.
 - Sentri's free model can misread a request. It never reports a number it did
-  not get from EarthPulse's code, and a planned analysis only runs when you
+  not get from Earthsift's code, and a planned analysis only runs when you
   press Run.
 
 ## Roadmap
@@ -336,12 +338,12 @@ time, and story mode. See [docs/ROADMAP.md](docs/ROADMAP.md) and
 
 Contributions are welcome, especially new open data sources and analyses. Read [CONTRIBUTING.md](CONTRIBUTING.md) first: it sets the
 scientific rules every change must follow. Issues labelled
-[good first issue](https://github.com/moosarazauaf/earthpulse/labels/good%20first%20issue)
+[good first issue](https://github.com/moosarazauaf/earthsift/labels/good%20first%20issue)
 are a good place to start.
 
-## Citing EarthPulse
+## Citing Earthsift
 
-If EarthPulse helps your research, cite it with the metadata in
+If Earthsift helps your research, cite it with the metadata in
 [CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button), and
 cite the data providers listed in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
 
@@ -354,7 +356,7 @@ Emergency Management Service, USGS. Globe: CesiumJS. Several interface ideas
 one-click reset, coordinate search) came from studying
 [God's Eye View](https://github.com/bilawalsidhu/gods-eye-view) by Bilawal
 Sidhu and Sameh Khamis (MIT). No code, assets or data from that project are
-included; EarthPulse covers environmental change and hazards and does not
+included; Earthsift covers environmental change and hazards and does not
 track aircraft, vessels, cameras or people.
 
 ## Author
@@ -364,14 +366,14 @@ Built by **Muhammad Moosa Raza**, remote sensing and GIS
 
 ## Responsible use and licence
 
-EarthPulse works at landscape scale on public data and does not identify,
+Earthsift works at landscape scale on public data and does not identify,
 track or profile people. Code: MIT ([LICENSE](LICENSE)). Data keeps its
 providers' licences.
 
 ## Legal compliance
 
-- **Privacy Policy** — No personal data is collected or sent to any server. All analyses run locally in your browser. See the in-app Privacy Policy (footer → Privacy) or [the policy text](https://moosarazauaf.github.io/earthpulse/?legal=privacy).
-- **Cookie Policy** — EarthPulse uses only browser localStorage (no cookies) for preferences, saved areas, and analysis history. No analytics or tracking. See the in-app Cookie Policy (footer → Cookies).
+- **Privacy Policy** — No personal data is collected or sent to any server. All analyses run locally in your browser. See the in-app Privacy Policy (footer → Privacy) or [the policy text](https://moosarazauaf.github.io/earthsift/?legal=privacy).
+- **Cookie Policy** — Earthsift uses only browser localStorage (no cookies) for preferences, saved areas, and analysis history. No analytics or tracking. See the in-app Cookie Policy (footer → Cookies).
 - **Terms of Service** — Free, open-source, no warranty. Do not use for decisions affecting life, property, or regulatory compliance without independent verification. See the in-app Terms of Service (footer → Terms).
 
 All three open from the links at the bottom right of the app.

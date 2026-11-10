@@ -56,8 +56,8 @@ export function App() {
 
   return (
     <main className="app">
-      <h1 className="sr-only">EarthPulse: satellite analysis of any place on Earth</h1>
-      <p className="print-header">EarthPulse · {window.location.origin}{window.location.pathname} · printed {new Date().toISOString().slice(0, 10)} · values carry their kind: observed, derived, modelled or estimated</p>
+      <h1 className="sr-only">Earthsift: satellite analysis of any place on Earth</h1>
+      <p className="print-header">Earthsift · {window.location.origin}{window.location.pathname} · printed {new Date().toISOString().slice(0, 10)} · values carry their kind: observed, derived, modelled or estimated</p>
       <a className="skip" href="#timeline">Skip to timeline</a>
       <GlobeViewer />
       <div className="grid-overlay" aria-hidden="true" />

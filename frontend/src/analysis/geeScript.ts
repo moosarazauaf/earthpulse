@@ -2,7 +2,7 @@
  * A Google Earth Engine script that repeats a change analysis: the same
  * scenes, cloud masks, scaling, compositing rule, index, threshold and scale.
  * Earth Engine resamples and reprojects with its own machinery, so its
- * numbers will be close to EarthPulse's but not identical; the header says so.
+ * numbers will be close to Earthsift's but not identical; the header says so.
  * Ported from the backend's generator so browser results get one too.
  */
 import type { ChangeResult } from "../app/types";
@@ -74,9 +74,9 @@ export function changeScript(result: ChangeResult): string {
   const t = Number(summary.threshold);
   const scale = Number(prov.workingResolutionM);
   const dataset = prov.dataset ? `${prov.dataset.name} (${prov.dataset.provider})` : request.dataset === "sentinel2" ? "Sentinel-2 L2A (ESA)" : "Landsat Collection 2 Level-2 (USGS)";
-  return `// EarthPulse generated script
+  return `// Earthsift generated script
 // Analysis ID : ${result.id}
-// Software    : EarthPulse ${result.softwareVersion}${prov.computedOn === "browser" ? " (computed in the browser)" : ""}
+// Software    : Earthsift ${result.softwareVersion}${prov.computedOn === "browser" ? " (computed in the browser)" : ""}
 // Dataset     : ${dataset}
 // Index       : ${index.name} = ${index.formula}  [${index.reference}]
 // Before      : ${request.before.start} to ${request.before.end} (${scenes.before.length} scenes)
@@ -85,9 +85,9 @@ export function changeScript(result: ChangeResult): string {
 // Scale       : ${scale} m, ${prov.crs}
 //
 // This script uses the same scenes, cloud masks, scaling, compositing rule,
-// index, threshold and scale as the EarthPulse analysis. Earth Engine
+// index, threshold and scale as the Earthsift analysis. Earth Engine
 // resamples and reprojects differently, so expect close but not identical
-// numbers. EarthPulse reported: decrease ${summary.lossAreaHa.toFixed(1)} ha,
+// numbers. Earthsift reported: decrease ${summary.lossAreaHa.toFixed(1)} ha,
 // increase ${summary.gainAreaHa.toFixed(1)} ha.
 
 var aoi = ee.Geometry(${JSON.stringify(result.aoi)});

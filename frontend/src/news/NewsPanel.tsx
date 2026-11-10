@@ -182,7 +182,7 @@ export function reportUrl(story: NewsStory): string {
     labels: "news-scan",
     body: lines.join("\n"),
   });
-  return `https://github.com/moosarazauaf/earthpulse/issues/new?${query.toString()}`;
+  return `https://github.com/moosarazauaf/earthsift/issues/new?${query.toString()}`;
 }
 
 function Evidence({ c, story }: { c: Corroboration; story: NewsStory }) {
@@ -222,7 +222,7 @@ function WhyItHappened({ story, c }: { story: NewsStory; c: Corroboration }) {
       )}
       {story.hazard === "volcano" && (
         <p className="muted">
-          Eruptions are driven by magma beneath the volcano, which satellites in EarthPulse cannot see. The Smithsonian{" "}
+          Eruptions are driven by magma beneath the volcano, which satellites in Earthsift cannot see. The Smithsonian{" "}
           <a href="https://volcano.si.edu/reports_weekly.cfm" target="_blank" rel="noopener noreferrer">Global Volcanism Program</a>{" "}
           publishes weekly activity reports.
         </p>

@@ -1,4 +1,4 @@
-// EarthPulse service worker.
+// Earthsift service worker.
 //
 // It caches only files that never change under the same name:
 //  - /assets/*  the application's build files, whose names carry a content hash;

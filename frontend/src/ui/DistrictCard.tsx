@@ -12,7 +12,7 @@ export function DistrictCard() {
   function download() {
     const feature = {
       type: "Feature",
-      properties: { name: district!.name, admin1: district!.admin1, country: district!.country, gaul2_code: district!.code, source: "FAO GAUL 2024 (CC BY 4.0), simplified to about 500 m by EarthPulse" },
+      properties: { name: district!.name, admin1: district!.admin1, country: district!.country, gaul2_code: district!.code, source: "FAO GAUL 2024 (CC BY 4.0), simplified to about 500 m by Earthsift" },
       geometry: district!.geometry,
     };
     downloadText(`${district!.name.replace(/[^\w-]+/g, "_")}-district.geojson`, "application/geo+json", JSON.stringify({ type: "FeatureCollection", features: [feature] }));

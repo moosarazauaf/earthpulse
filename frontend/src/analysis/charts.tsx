@@ -26,7 +26,7 @@ export function ChangeHistogram({ edges, counts, threshold, indexName }: {
   const hovered = hover === null ? null : { lo: edges[hover] ?? 0, hi: edges[hover + 1] ?? 0, n: counts[hover] ?? 0 };
 
   return (
-    <Figure title={`Change in ${indexName}: share of the area by size of change`} source="Values are after minus before, per pixel, inside the area. Made with EarthPulse.">
+    <Figure title={`Change in ${indexName}: share of the area by size of change`} source="Values are after minus before, per pixel, inside the area. Made with Earthsift.">
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
         aria-label={`Histogram of ${indexName} change per pixel. Threshold at plus and minus ${threshold.toFixed(2)}.`}>
         <line x1={PAD.left} x2={W - PAD.right} y1={H - PAD.bottom} y2={H - PAD.bottom} className="axis" />
@@ -68,7 +68,7 @@ export function BackscatterHistogram({ edges, counts, threshold }: {
   const x = (value: number) => PAD.left + ((value - lo) / (hi - lo)) * PLOT_W;
   const barWidth = PLOT_W / counts.length;
   return (
-    <Figure title="Radar backscatter during the flood (VV, dB)" source="Sentinel-1 RTC, Microsoft Planetary Computer. Left of the dashed line: water. Made with EarthPulse.">
+    <Figure title="Radar backscatter during the flood (VV, dB)" source="Sentinel-1 RTC, Microsoft Planetary Computer. Left of the dashed line: water. Made with Earthsift.">
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
         aria-label={`Histogram of radar backscatter during the flood. Water threshold at ${threshold.toFixed(1)} decibels.`}>
         <line x1={PAD.left} x2={W - PAD.right} y1={H - PAD.bottom} y2={H - PAD.bottom} className="axis" />
@@ -130,7 +130,7 @@ export function SeriesChart({ series }: { series: SeriesEntry[] }) {
   };
 
   return (
-    <Figure title="Mean spectral index over the area, by year" source="Landsat or Sentinel-2 surface reflectance, yearly composites, Microsoft Planetary Computer. Made with EarthPulse.">
+    <Figure title="Mean spectral index over the area, by year" source="Landsat or Sentinel-2 surface reflectance, yearly composites, Microsoft Planetary Computer. Made with Earthsift.">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Mean spectral index over the area for each analysed year.">
         <line x1={PAD.left} x2={W - PAD.right} y1={y(0)} y2={y(0)} className="axis" />
         {[lo, 0, hi].map((tick) => (
@@ -197,7 +197,7 @@ export function WaterSeriesChart({ series }: { series: WaterYear[] }) {
   }
   const label = (ha: number) => (ha >= 10_000 ? `${(ha / 100).toFixed(0)} km²` : `${ha.toFixed(0)} ha`);
   return (
-    <Figure title="Surface water area, by year" source="Water mapped from Landsat or Sentinel-2 (MNDWI), Microsoft Planetary Computer. Hollow points: under 90% of the area seen. Made with EarthPulse.">
+    <Figure title="Surface water area, by year" source="Water mapped from Landsat or Sentinel-2 (MNDWI), Microsoft Planetary Computer. Hollow points: under 90% of the area seen. Made with Earthsift.">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Surface water area for each mapped year.">
         <line x1={PAD.left} x2={W - PAD.right} y1={y(0)} y2={y(0)} className="axis" />
         <text x={PAD.left - 4} y={y(0) + 3} textAnchor="end" className="tick">0</text>

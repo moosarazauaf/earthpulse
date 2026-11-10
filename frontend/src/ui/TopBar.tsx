@@ -179,7 +179,7 @@ export function TopBar() {
 
   return (
     <header className="topbar">
-      <button className="brand" onClick={() => set({ introOpen: true })} aria-label="EarthPulse home">
+      <button className="brand" onClick={() => set({ introOpen: true })} aria-label="Earthsift home">
         <svg viewBox="0 0 32 32" aria-hidden="true">
           <circle cx="16" cy="16" r="13" />
           <path d="M4 16h7l3-7 4 14 3-7h7" />

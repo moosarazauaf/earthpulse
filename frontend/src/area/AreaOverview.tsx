@@ -403,7 +403,7 @@ function Passes({ lat, lon }: { lat: number; lon: number }) {
 
 // ---- official figures --------------------------------------------------------------------------
 
-/** National statistics and UN records for the district at the area's centre, beside EarthPulse's own estimates. */
+/** National statistics and UN records for the district at the area's centre, beside Earthsift's own estimates. */
 function Official({ lat, lon }: { lat: number; lon: number }) {
   const t = useT();
   const people = useStore((s) => s.areaPeople);
@@ -707,7 +707,7 @@ function ClimateChart({ months }: { months: ClimateProfile["months"] }) {
   const line = months.map((m, i) => `${i === 0 ? "M" : "L"}${(i + 0.5) * step},${y(m.tmax)}`).join(" ");
   return (
     <Figure className="climate-figure" title="Average monthly rain and daily high temperature, 1991 to 2020"
-      source="Bars: rain (mm a month); line: average daily high (°C). ERA5 reanalysis through Open-Meteo, one grid cell of about 25 km. Made with EarthPulse.">
+      source="Bars: rain (mm a month); line: average daily high (°C). ERA5 reanalysis through Open-Meteo, one grid cell of about 25 km. Made with Earthsift.">
     <svg className="climate-chart" viewBox={`0 0 ${W} ${H + 14}`} role="img"
       aria-label="Average monthly rain as bars and average daily high temperature as a line, January to December">
       {months.map((m, i) => (

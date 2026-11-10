@@ -74,7 +74,7 @@ export function MyPlaces() {
       </section>
       {places.length > 0 && (
         <p className="muted">
-          Each time EarthPulse opens it checks hazard news within {WATCH_KM.news} km of your places, and USGS earthquakes and
+          Each time Earthsift opens it checks hazard news within {WATCH_KM.news} km of your places, and USGS earthquakes and
           GDACS alerts within {WATCH_KM.quake} km, here in your browser. It is not a warning service: follow your national
           authorities for safety decisions.
         </p>

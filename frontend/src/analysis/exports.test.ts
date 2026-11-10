@@ -67,7 +67,7 @@ describe("methods text", () => {
       },
     } as unknown as ChangeResult;
     const text = methodsText(result, "2026-10-23");
-    expect(text).toContain("EarthPulse 0.2.0 (Raza, 2026), in the web browser");
+    expect(text).toContain("Earthsift 0.2.0 (Raza, 2026), in the web browser");
     expect(text).toContain("change = after minus before.");
     expect(text).toContain("2 inputs (landsat-5, landsat-9) dated 1993-12-30 to 2026-01-10");
     expect(text).toContain("limited to 20% scene cloud cover or less");

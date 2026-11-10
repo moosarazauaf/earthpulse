@@ -8,9 +8,9 @@ const index = readFileSync(new URL("../../index.html", import.meta.url), "utf8")
 
 describe("topic pages", () => {
   it("finds the topic from the page path, with or without a trailing slash", () => {
-    expect(topicForPath("/earthpulse/wind-map/")?.slug).toBe("wind-map");
+    expect(topicForPath("/earthsift/wind-map/")?.slug).toBe("wind-map");
     expect(topicForPath("/wind-map")?.slug).toBe("wind-map");
-    expect(topicForPath("/earthpulse/")).toBeNull();
+    expect(topicForPath("/earthsift/")).toBeNull();
   });
 
   it("keeps titles and descriptions within what search results show, each unique", () => {

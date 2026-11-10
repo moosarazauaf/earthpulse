@@ -4,7 +4,7 @@
  * and text for search engines (see vite.config.ts); in the browser the same
  * app opens with that layer already on.
  */
-export const SITE = "https://moosarazauaf.github.io/earthpulse/";
+export const SITE = "https://moosarazauaf.github.io/earthsift/";
 
 export interface Topic {
   slug: string;
@@ -22,7 +22,7 @@ export interface Topic {
 export const TOPICS: Topic[] = [
   {
     slug: "wind-map",
-    title: "Live Wind Map of the World, Animated | EarthPulse",
+    title: "Live Wind Map of the World, Animated | Earthsift",
     description: "Free animated wind map: surface wind speed and direction worldwide, updated from weather models, on a 3D globe in your browser. No account.",
     h1: "Live wind map of the world",
     intro: "Watch the wind blowing across the planet right now. Particles drift with the current 10 m wind from Open-Meteo's weather models and are coloured by speed, from calm to gale.",
@@ -31,7 +31,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "sea-surface-temperature-map",
-    title: "Sea Surface Temperature Map, Daily | EarthPulse",
+    title: "Sea Surface Temperature Map, Daily | Earthsift",
     description: "Free daily sea surface temperature map of the world's oceans from NASA JPL MUR satellite analysis, on an interactive 3D globe.",
     h1: "Sea surface temperature map",
     intro: "See how warm the oceans are today. The NASA JPL Multi-scale Ultra-high Resolution (MUR) analysis blends satellite and buoy readings into a gap-free daily map, shown from 0 to 32 °C.",
@@ -40,7 +40,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "vegetation-ndvi-map",
-    title: "NDVI Vegetation Map of the World | EarthPulse",
+    title: "NDVI Vegetation Map of the World | Earthsift",
     description: "Free global NDVI vegetation map from NASA MODIS, updated every 8 days, plus Landsat and Sentinel-2 NDVI for any place since 1984. In your browser.",
     h1: "Global NDVI vegetation map",
     intro: "How green is the land right now? The Normalized Difference Vegetation Index from NASA's MODIS shows leafy vegetation worldwide at about 250 m, from the best cloud-free view of the past 8 days.",
@@ -49,7 +49,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "soil-moisture-map",
-    title: "Soil Moisture Map, Global and Daily | EarthPulse",
+    title: "Soil Moisture Map, Global and Daily | Earthsift",
     description: "Free global soil moisture map from NASA SMAP: water in the top 5 cm of soil, updated daily, to follow drought and wet spells on a 3D globe.",
     h1: "Global soil moisture map",
     intro: "Where is the ground dry and where is it soaked? NASA's SMAP Level 4 analysis merges satellite radiometer readings into a land model to map water in the top 5 cm of soil at about 9 km.",
@@ -58,7 +58,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "smoke-dust-aerosol-map",
-    title: "Smoke and Dust Map: Aerosol Optical Depth | EarthPulse",
+    title: "Smoke and Dust Map: Aerosol Optical Depth | Earthsift",
     description: "Free daily smoke, dust and haze map from NASA MODIS aerosol optical depth, with air quality at major cities, on a 3D globe.",
     h1: "Smoke and dust map",
     intro: "Follow wildfire smoke, desert dust storms and haze from space. Aerosol optical depth from NASA's MODIS on Aqua and Terra shows how much the air dims sunlight, every day.",
@@ -67,7 +67,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "ozone-map",
-    title: "Ozone Layer Map, Daily Total Ozone | EarthPulse",
+    title: "Ozone Layer Map, Daily Total Ozone | Earthsift",
     description: "Free daily map of total column ozone from NASA OMPS on Suomi NPP, in Dobson units, to watch the ozone hole on a 3D globe.",
     h1: "Ozone layer map",
     intro: "Watch the ozone layer day by day. NASA's OMPS instrument on Suomi NPP measures the total ozone above each point in Dobson units; below about 220 DU is called an ozone hole.",
@@ -76,7 +76,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "air-quality-map",
-    title: "Air Quality Map of World Cities, Live | EarthPulse",
+    title: "Air Quality Map of World Cities, Live | Earthsift",
     description: "Free live air quality map: AQI, PM2.5 and PM10 for the world's largest cities and every capital, with smoke and dust from NASA satellites.",
     h1: "Live air quality map",
     intro: "Check the air in cities around the world. The US air quality index, PM2.5 and PM10 come from the Copernicus Atmosphere Monitoring Service through Open-Meteo, for the 300 largest cities and every national capital.",
@@ -85,7 +85,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "rain-map",
-    title: "Live Rain Map of the World, Past 3 Hours | EarthPulse",
+    title: "Live Rain Map of the World, Past 3 Hours | Earthsift",
     description: "Free live global rain and snow map from NASA GPM IMERG satellite precipitation, animated over the past 3 hours on a 3D globe.",
     h1: "Live rain map of the world",
     intro: "See where it is raining or snowing now, anywhere on Earth, including over oceans and places without weather radar. NASA's GPM IMERG estimates precipitation every half hour from a fleet of satellites.",
@@ -94,7 +94,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "cloud-map",
-    title: "Live Cloud Map, Past 24 Hours Animated | EarthPulse",
+    title: "Live Cloud Map, Past 24 Hours Animated | Earthsift",
     description: "Free animated cloud map of the whole Earth from EUMETSAT infrared satellite imagery, the past 24 hours on a 3D globe.",
     h1: "Live cloud map of the world",
     intro: "Watch clouds move across the planet over the past day. EUMETSAT's infrared world cloud map, built from geostationary weather satellites, plays as a smooth animation on the globe.",
@@ -103,7 +103,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "earthquake-map",
-    title: "Earthquake Map, Past 7 Days, Live | EarthPulse",
+    title: "Earthquake Map, Past 7 Days, Live | Earthsift",
     description: "Free live earthquake map: every M4.5+ earthquake of the past week from USGS, replayed in order, with people living nearby and tsunami flags.",
     h1: "Live earthquake map",
     intro: "Where has the ground shaken this week? Every earthquake of magnitude 4.5 and above from the USGS, on a 3D globe. Replay the week in the order they struck, and click one for depth, PAGER alert and how many people live nearby.",
@@ -112,25 +112,25 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "wildfire-map",
-    title: "Live Wildfire Map, Active Fires from NASA | EarthPulse",
+    title: "Live Wildfire Map, Active Fires from NASA | Earthsift",
     description: "Free live wildfire map: active fires detected by NASA FIRMS satellites, fire danger forecasts and people near each fire, on a 3D globe.",
     h1: "Live wildfire map",
-    intro: "See where fires are burning now. NASA FIRMS detects active fires with the VIIRS instrument on NOAA-20 at 375 m; EarthPulse maps them with fire danger forecasts, smoke and the number of people nearby.",
+    intro: "See where fires are burning now. NASA FIRMS detects active fires with the VIIRS instrument on NOAA-20 at 375 m; Earthsift maps them with fire danger forecasts, smoke and the number of people nearby.",
     points: ["Active fires detected by satellite yesterday", "Fire danger forecast from GWIS", "Burn severity analysis for any area with Sentinel-2"],
     preset: { mode: "live", hazardLayers: ["fires"] },
   },
   {
     slug: "flood-map",
-    title: "Free Flood Map from Sentinel-1 Radar | EarthPulse",
+    title: "Free Flood Map from Sentinel-1 Radar | Earthsift",
     description: "Map floods anywhere for free with Sentinel-1 radar that sees through cloud, plus river flood forecasts and people affected. In your browser, no account.",
     h1: "Free flood mapping with Sentinel-1 radar",
-    intro: "Map where floodwater is, even under cloud. EarthPulse compares Sentinel-1 radar images before and during a flood, shows land cover under the water and estimates how many people live in the flooded area.",
+    intro: "Map where floodwater is, even under cloud. Earthsift compares Sentinel-1 radar images before and during a flood, shows land cover under the water and estimates how many people live in the flooded area.",
     points: ["Flood extent from Sentinel-1 radar, before and after", "GloFAS river flood forecasts and observed floods", "People affected from GHS-POP population data"],
     preset: { mode: "floods" },
   },
   {
     slug: "satellite-tracker",
-    title: "Landsat and Sentinel Satellite Tracker, Live | EarthPulse",
+    title: "Landsat and Sentinel Satellite Tracker, Live | Earthsift",
     description: "Track Landsat 8 and 9, Sentinel-1 and Sentinel-2 live with orbits, and see when each next passes over any place. Free, in your browser.",
     h1: "Live Landsat and Sentinel satellite tracker",
     intro: "Where are the Earth-observation satellites right now? Landsat 8 and 9, Sentinel-2A, 2B and 2C and Sentinel-1A and 1C at their true height, with the next 90 minutes of orbit, from CelesTrak.",
@@ -139,7 +139,7 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "population-density-map",
-    title: "Population Density Map of the World | EarthPulse",
+    title: "Population Density Map of the World | Earthsift",
     description: "Free world population density map from NASA SEDAC, and a people count for any area you draw from GHS-POP, checked against World Bank figures.",
     h1: "World population density map",
     intro: "How many people live here? The population density map from NASA SEDAC's Gridded Population of the World, and a count of people inside any area you draw, from the European Commission's GHS-POP.",
@@ -148,34 +148,34 @@ export const TOPICS: Topic[] = [
   },
   {
     slug: "carbon-stock-calculator",
-    title: "Free Carbon Stock Calculator: Biomass and Soil | EarthPulse",
+    title: "Free Carbon Stock Calculator: Biomass and Soil | Earthsift",
     description: "Estimate carbon stored in plants and soil for any area, with uncertainty ranges and a chart, from Harmonized Global Biomass and SoilGrids. Free, no account.",
     h1: "Free carbon stock calculator for any area",
-    intro: "How much carbon does this land hold? Ask Sentri, the EarthPulse assistant, for any place: carbon in plants above and below ground from Harmonized Global Biomass, and in the top 30 cm of soil from SoilGrids 2.0, each with its uncertainty and the CO2 equivalent.",
+    intro: "How much carbon does this land hold? Ask Sentri, the Earthsift assistant, for any place: carbon in plants above and below ground from Harmonized Global Biomass, and in the top 30 cm of soil from SoilGrids 2.0, each with its uncertainty and the CO2 equivalent.",
     points: ["Biomass carbon with the published uncertainty", "Soil organic carbon to 30 cm with its 5% to 95% range", "Chart with error bars, ready for a paper as SVG or 300 dpi PNG"],
     preset: { agentOpen: true },
   },
   {
     slug: "land-cover-map",
-    title: "Land Use and Land Cover (LULC) Map, Free | EarthPulse",
+    title: "Land Use and Land Cover (LULC) Map, Free | Earthsift",
     description: "Free land use and land cover statistics for any area: hectares of trees, cropland, built-up and water from ESA WorldCover at 10 m, on a 3D globe.",
     h1: "Land use and land cover (LULC) for any area",
-    intro: "What is this land used for? EarthPulse reads ESA WorldCover 2021 at 10 m for any area and gives the hectares and share of each class, drawn on the map, with a chart you can save for a report.",
+    intro: "What is this land used for? Earthsift reads ESA WorldCover 2021 at 10 m for any area and gives the hectares and share of each class, drawn on the map, with a chart you can save for a report.",
     points: ["Hectares and share of trees, cropland, built-up, water and more", "Map overlay and a publication-ready chart", "Classify your own land cover with training samples and an accuracy assessment"],
     preset: { agentOpen: true },
   },
   {
     slug: "satellite-time-lapse",
-    title: "Satellite Time-Lapse Maker, Landsat Since 1985 | EarthPulse",
+    title: "Satellite Time-Lapse Maker, Landsat Since 1985 | Earthsift",
     description: "Make a free satellite time-lapse video of any place from Landsat (1985 on) or Sentinel-2 imagery, in your browser, with years and sources stamped on each frame.",
     h1: "Make a satellite time-lapse of any place",
-    intro: "Watch a city grow, a lake shrink or a river move. EarthPulse steps through up to 21 years of Landsat or Sentinel-2 imagery for the view you choose and records a video in your browser, each frame stamped with its year and source.",
+    intro: "Watch a city grow, a lake shrink or a river move. Earthsift steps through up to 21 years of Landsat or Sentinel-2 imagery for the view you choose and records a video in your browser, each frame stamped with its year and source.",
     points: ["Landsat from 1985, Sentinel-2 from 2017", "Each frame taken only once its imagery has fully loaded", "MP4 recorded on your own computer, nothing uploaded"],
     preset: { agentOpen: true },
   },
 ];
 
-/** The topic a page path ends in, if any: "/earthpulse/wind-map/" gives the wind map. */
+/** The topic a page path ends in, if any: "/earthsift/wind-map/" gives the wind map. */
 export function topicForPath(path: string): Topic | null {
   const slug = path.replace(/\/+$/, "").split("/").pop();
   return TOPICS.find((t) => t.slug === slug) ?? null;
@@ -203,7 +203,7 @@ export function topicPage(html: string, t: Topic): string {
   out = replace(out, /(<meta property="og:title" content=")[^"]*/, `$1${esc(t.title)}`);
   out = replace(out, /(<meta property="og:description" content=")[^"]*/, `$1${esc(t.description)}`);
   out = replace(out, /(<meta property="og:url" content=")[^"]*/, `$1${url}`);
-  out = replace(out, /(<main[^>]*>)[\s\S]*?(<\/main>)/, `$1<h1 style="color: #fff; font-size: 24px">${esc(t.h1)}</h1><p>${esc(t.intro)}</p><ul>${t.points.map((p) => `<li>${esc(p)}</li>`).join("")}</ul><p>Free and open source, from EarthPulse. Loading the globe… it needs JavaScript and WebGL. <a style="color: #a3b18a" href="${SITE}">EarthPulse home</a></p>${topicLinks(t.slug)}$2`);
+  out = replace(out, /(<main[^>]*>)[\s\S]*?(<\/main>)/, `$1<h1 style="color: #fff; font-size: 24px">${esc(t.h1)}</h1><p>${esc(t.intro)}</p><ul>${t.points.map((p) => `<li>${esc(p)}</li>`).join("")}</ul><p>Free and open source, from Earthsift. Loading the globe… it needs JavaScript and WebGL. <a style="color: #a3b18a" href="${SITE}">Earthsift home</a></p>${topicLinks(t.slug)}$2`);
   return out;
 }
 

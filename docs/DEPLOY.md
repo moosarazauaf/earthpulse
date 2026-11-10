@@ -1,6 +1,6 @@
-# Deploying EarthPulse
+# Deploying Earthsift
 
-EarthPulse has two parts that are hosted separately.
+Earthsift has two parts that are hosted separately.
 
 | Part | What it is | Where it runs |
 |---|---|---|
@@ -39,7 +39,7 @@ Streamlit was considered for hosting and not chosen, for three reasons.
 
 ### A desktop app
 
-There are two ways to give EarthPulse its own window on a computer.
+There are two ways to give Earthsift its own window on a computer.
 
 **Installed web app (done).** The site ships a manifest and service worker, so
 Chrome and Edge can install it. It behaves like a desktop program and runs the
@@ -90,7 +90,7 @@ project yet, and the Dockerfile has not been built on Spaces.
 
 1. Create a Space at https://huggingface.co/new-space with **SDK: Docker**
    (blank template), visibility public. Call it, for example,
-   `earthpulse-api`.
+   `earthsift-api`.
 2. Clone the Space and copy the backend into it:
 
    ```bash
@@ -102,7 +102,7 @@ project yet, and the Dockerfile has not been built on Spaces.
 
    ```yaml
    ---
-   title: EarthPulse API
+   title: Earthsift API
    emoji: 🌍
    colorFrom: green
    colorTo: blue
@@ -138,7 +138,7 @@ The assistant (Analyse → Ask the assistant) turns plain requests into
 analyses with a free model on OpenRouter. OpenRouter needs a key even for free
 models, and a key in a public site is a key anyone can take, so a small
 Cloudflare Worker in `agent-proxy/` holds it. The Worker answers only browsers
-on the EarthPulse origins, allows only the free models listed in
+on the Earthsift origins, allows only the free models listed in
 `agent-proxy/src/index.js`, checks every request and limits each visitor to 20
 requests a minute. Without it the assistant still works with its built-in
 reader, and pasted Earth Engine scripts are always checked in the browser.

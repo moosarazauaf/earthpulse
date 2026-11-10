@@ -1,5 +1,5 @@
 /**
- * Sentri, the EarthPulse assistant: a small pixel-art satellite with solar
+ * Sentri, the Earthsift assistant: a small pixel-art satellite with solar
  * panels, a radar dish and an antenna light, drawn from character grids as
  * crisp SVG squares. Moods change the face and the animation; all motion is
  * CSS (styles.css, "Sentri") and stops for visitors who ask for reduced motion.

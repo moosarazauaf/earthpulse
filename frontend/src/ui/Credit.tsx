@@ -1,7 +1,7 @@
 /** Who built this, and where the source is. */
 export const AUTHOR = "Muhammad Moosa Raza";
 export const AUTHOR_URL = "https://moosarazauaf.github.io/";
-export const REPOSITORY_URL = "https://github.com/moosarazauaf/earthpulse";
+export const REPOSITORY_URL = "https://github.com/moosarazauaf/earthsift";
 
 export function Credit() {
   return (

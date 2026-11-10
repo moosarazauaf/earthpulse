@@ -202,7 +202,7 @@ export async function composeFigure(shot: Snapshot, title: string, subtitle: str
   }
   ctx.fillStyle = "#444";
   ctx.font = font(11);
-  const credits = `Data: ${shot.credits.join("; ") || "see EarthPulse"}. Made with EarthPulse (moosarazauaf.github.io/earthpulse).`;
+  const credits = `Data: ${shot.credits.join("; ") || "see Earthsift"}. Made with Earthsift (moosarazauaf.github.io/earthsift).`;
   let line = "";
   for (const w of credits.split(" ")) {
     if (ctx.measureText(`${line} ${w}`).width > shot.width && line) { ctx.fillText(line, mx, y); line = w; y += 15 * k; }

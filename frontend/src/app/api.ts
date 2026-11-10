@@ -34,7 +34,7 @@ export class ApiError extends Error {
 
 const OFFLINE: ApiErrorBody = {
   code: "offline",
-  message: "The EarthPulse analysis service cannot be reached.",
+  message: "The Earthsift analysis service cannot be reached.",
   hint: "Check that the backend is running.",
 };
 

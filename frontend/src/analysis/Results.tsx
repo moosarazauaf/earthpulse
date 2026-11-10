@@ -38,7 +38,7 @@ export function ResultHeader({ result }: { result: AnalysisResult }) {
       </div>
       {HOSTED && result.provenance.computedOn !== "browser" && (
         <p className="muted">
-          Stored result{created ? `, computed by the EarthPulse backend on ${created.slice(0, 10)}` : ""}. This hosted
+          Stored result{created ? `, computed by the Earthsift backend on ${created.slice(0, 10)}` : ""}. This hosted
           demo displays it; it did not compute it in your browser.
         </p>
       )}

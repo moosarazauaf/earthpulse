@@ -59,7 +59,7 @@ export function UrbanForm({ focus = BUILT }: { focus?: FocusClass }) {
         </div>
         <p className="muted">
           Uses the Impact Observatory annual land-cover maps (10 m, {FIRST_YEAR} to {LAST_YEAR}), produced from
-          Sentinel-2 by a machine-learning classifier. EarthPulse reads and counts them; it does not classify.
+          Sentinel-2 by a machine-learning classifier. Earthsift reads and counts them; it does not classify.
           {focus === TREES ? " The Trees class is tall, dense vegetation; leaving it is not the same as deforestation." : ""}
         </p>
       </section>

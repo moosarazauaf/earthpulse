@@ -1,6 +1,6 @@
 /**
  * The outlets scanned for hazard news. Only their public RSS feeds are read,
- * once an hour; EarthPulse keeps the headline, link and time of matching
+ * once an hour; Earthsift keeps the headline, link and time of matching
  * items, never the article text.
  *
  * `home` is the outlet's own country, used as weak evidence when a headline

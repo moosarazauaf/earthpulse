@@ -4,7 +4,7 @@
  * UrbanEye follows "Built area", ForestEye follows "Trees".
  *
  * Uses the Impact Observatory annual land-cover maps (10 m, 2017 onwards,
- * derived from Sentinel-2 by a deep-learning classifier). EarthPulse does not
+ * derived from Sentinel-2 by a deep-learning classifier). Earthsift does not
  * classify anything here: it reads the published maps and counts. The result
  * is therefore MODELED, and inherits the classifier's errors.
  */
@@ -191,7 +191,7 @@ export async function runUrban(request: UrbanRequest, hooks: EngineHooks) {
         "Reads the published Impact Observatory annual land-cover map for each year and counts pixels inside the " +
         `area. A gain is land classed as ${focusName.toLowerCase()} in the last year that had another class in the first year; ` +
         "a loss is the reverse. " +
-        "EarthPulse does not reclassify or correct the maps.",
+        "Earthsift does not reclassify or correct the maps.",
       crs: `EPSG:${grid.epsg}`,
       nativeResolutionM: NATIVE_RES,
       workingResolutionM: grid.res,

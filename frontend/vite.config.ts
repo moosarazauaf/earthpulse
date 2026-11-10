@@ -12,7 +12,7 @@ import { TOPICS, sitemap, topicLinks, topicPage } from "./src/app/topics";
 // base URL, so they are copied next to the bundle rather than imported.
 const CESIUM_BUILD = "node_modules/cesium/Build/Cesium";
 const CESIUM_BASE = "cesium";
-// "/" locally; "/earthpulse/" when built for GitHub Pages.
+// "/" locally; "/earthsift/" when built for GitHub Pages.
 const BASE = process.env.VITE_BASE ?? "/";
 // The service worker caches Cesium's files per version, so an upgrade replaces them.
 const CESIUM_VERSION = (JSON.parse(readFileSync(new URL("./node_modules/cesium/package.json", import.meta.url), "utf8")) as { version: string }).version;
@@ -53,7 +53,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Cesium is most of the download and changes only when the library is upgraded. In its own
-        // file it stays in returning visitors' cache across EarthPulse releases.
+        // file it stays in returning visitors' cache across Earthsift releases.
         manualChunks(id: string) {
           if (id.includes("node_modules/cesium") || id.includes("node_modules/@cesium")) return "cesium";
           if (id.includes("node_modules/react") || id.includes("node_modules/scheduler")) return "react";

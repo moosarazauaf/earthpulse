@@ -28,7 +28,7 @@ const OUT = resolve(here, "../public/data/news.json");
 const WINDOW_HOURS = 72;
 const TIMEOUT_MS = 20_000;
 // Some sites refuse requests whose user agent does not look like a browser.
-const USER_AGENT = "Mozilla/5.0 (compatible; EarthPulse hazard news scanner; +https://github.com/moosarazauaf/earthpulse)";
+const USER_AGENT = "Mozilla/5.0 (compatible; Earthsift hazard news scanner; +https://github.com/moosarazauaf/earthsift)";
 
 const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "@", htmlEntities: true, textNodeName: "#text" });
 

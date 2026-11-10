@@ -80,7 +80,7 @@ export function SharedRunCard() {
           ? `Proposed from the story "${run.fromNews}". The area outlined on the globe is a box around the place the story names; draw your own in the panel if the event was elsewhere. `
           : run.fromRecent ? "From your recent analyses, with the same area, dates and settings. " : "Someone shared the recipe for this analysis. "}
         Running it downloads the satellite scenes to this device and computes the result here, at the{" "}
-        {qualityFor(run.maxPixels)} setting. Nothing is sent to EarthPulse.
+        {qualityFor(run.maxPixels)} setting. Nothing is sent to Earthsift.
       </p>
       <div className="actions">
         <button className="primary" onClick={() => start(run)}>Run it on this device</button>

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { distanceKm } from "../news/stories";
 import { nextPass, parseTles, positionAt, sunElevation } from "./satellites";
 
-// Landsat 8 as CelesTrak gave it on 2026-11-01, plus a satellite EarthPulse does not use.
+// Landsat 8 as CelesTrak gave it on 2026-11-01, plus a satellite Earthsift does not use.
 const TLE = `LANDSAT 8
 1 39084U 13008A   26305.15842436  .00000205  00000+0  55472-4 0  9998
 2 39084  98.2162  13.5586 0001306  91.0221 269.1127 14.57102893717842
@@ -13,7 +13,7 @@ NOT USED
 const at = new Date("2026-11-01T06:00:00Z");
 
 describe("satellites", () => {
-  it("keeps only the satellites EarthPulse reads", () => {
+  it("keeps only the satellites Earthsift reads", () => {
     const sats = parseTles(TLE);
     expect(sats.map((s) => s.sat.name)).toEqual(["Landsat 8"]);
   });
