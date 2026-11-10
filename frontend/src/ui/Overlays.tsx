@@ -12,6 +12,22 @@ import { useT } from "../i18n";
 
 const NOTICE_SECONDS = 6;
 
+/**
+ * What people come with, in their words, and who they are. Each opens Sentri
+ * with the question written out and "[place]" selected to type over, except
+ * "what is happening now", which needs no place.
+ */
+const PROBLEMS: { icon: string; who: string; question: string; answer: string; draft?: string }[] = [
+  { icon: "🏡", who: "Land buyers, farmers, builders", question: "Has this land ever flooded?", answer: "Water seen there since 1984, slope, and the week's rain outlook.", draft: "Has [place] flooded before? Show water since 1984" },
+  { icon: "🌊", who: "Disaster and aid teams", question: "Where did the flood reach, and who lives there?", answer: "A Sentinel-1 radar flood map that sees through cloud, with people affected.", draft: "Map the floods in [place] from [start date] to [end date]" },
+  { icon: "🔴", who: "Everyone", question: "What is happening right now?", answer: "Today's floods, fires, storms and earthquakes, checked against the agencies." },
+  { icon: "🌤️", who: "Families, farmers, health workers", question: "Is the coming week safe?", answer: "Heavy rain, heat, frost, gales and unhealthy air in the next 7 days, and the cleanest hours.", draft: "What is the weather outlook for [place]?" },
+  { icon: "🌳", who: "Climate and forestry projects", question: "How much carbon does this land hold?", answer: "Carbon in plants and soil, with uncertainty, and a chart ready for a report.", draft: "Carbon stock of [place]" },
+  { icon: "🏙️", who: "Planners and journalists", question: "How has this place changed?", answer: "A time-lapse video since 1985, city growth, lost trees and shrinking water.", draft: "Make a time-lapse of [place]" },
+  { icon: "🗺️", who: "Students and researchers", question: "I need maps and figures for my report", answer: "Land cover, slope and terrain maps, with charts as SVG or 300 dpi PNG.", draft: "Land cover of [place]" },
+  { icon: "📐", who: "GIS users", question: "Buffer, terrain, export to QGIS", answer: "Buffers, hillshade, slope and aspect, area and perimeter, GeoJSON and KML.", draft: "Buffer 5 km around [place]" },
+];
+
 export function Intro() {
   const open = useStore((s) => s.introOpen);
   const set = useStore((s) => s.set);
@@ -20,6 +36,7 @@ export function Intro() {
   const t = useT();
   if (!open) return null;
   const close = () => { setStep("start"); set({ introOpen: false, mode: "explore" }); };
+  const askSentri = (text: string, send: boolean) => set({ introOpen: false, agentOpen: true, agentDraft: { text, send } });
   return (
     <div className="intro" role="dialog" aria-modal="false" aria-labelledby="intro-title">
       <button className="ghost intro-close" onClick={close} aria-label="Close and explore the globe">×</button>
@@ -27,22 +44,25 @@ export function Intro() {
       <h1 id="intro-title">{t("intro.title")}</h1>
       {step === "start" ? (
         <>
-          <div className="cards three">
-            <button className="lead" onClick={() => set({ introOpen: false, mode: "live", liveTab: "news" })}>
-              <strong>{t("intro.now")}</strong>
-              <span>{t("intro.nowText")}</span>
-            </button>
-            <button onClick={close}>
-              <strong>{t("intro.explore")}</strong>
-              <span>{t("intro.exploreText")}</span>
-            </button>
-            <button onClick={() => setStep("analyse")}>
-              <strong>{t("intro.measure")}</strong>
-              <span>{t("intro.measureText")}</span>
-            </button>
+          <form className="intro-ask" onSubmit={(e) => { e.preventDefault(); const q = new FormData(e.currentTarget).get("q"); if (typeof q === "string" && q.trim()) askSentri(q.trim(), true); }}>
+            <input name="q" type="text" placeholder="Ask in plain words: has Nowshera flooded before?" aria-label="Ask a question about any place" autoComplete="off" />
+            <button type="submit">Ask</button>
+          </form>
+          <p className="lede">Or start from what you need to know:</p>
+          <div className="problems">
+            {PROBLEMS.map((p) => (
+              <button key={p.question} className={p.draft ? "" : "now"}
+                onClick={() => (p.draft ? askSentri(p.draft, false) : set({ introOpen: false, mode: "live", liveTab: "news" }))}>
+                <span className="who"><span aria-hidden="true">{p.icon}</span> {p.who}</span>
+                <strong>{p.question}</strong>
+                <span className="answer">{p.answer}</span>
+              </button>
+            ))}
           </div>
           <p className="examples">
-            {t("intro.tip")}
+            <button className="link" onClick={close}>Just explore the globe since 1984</button>
+            {" · "}
+            <button className="link" onClick={() => setStep("analyse")}>Choose an analysis yourself</button>
           </p>
           <p className="examples">
             {t("intro.examples")}{" "}

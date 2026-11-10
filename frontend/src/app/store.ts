@@ -172,6 +172,8 @@ interface State {
   placesOpen: boolean;
   /** The assistant chat beside the globe. */
   agentOpen: boolean;
+  /** A question put into Sentri's box from elsewhere (the opening screen); sent at once when `send`. */
+  agentDraft: { text: string; send: boolean } | null;
   /** A time-lapse video being recorded: years done, how many, and the one on screen. */
   timelapse: { done: number; total: number; year: number } | null;
   /** Start a one-click analysis of the current area. */
@@ -370,6 +372,7 @@ export const useStore = create<State>((set, get) => {
     recent: loadRecent(),
     placesOpen: false,
     agentOpen: false,
+    agentDraft: null,
     timelapse: null,
     saveCurrentPlace: () => {
       const aoi = get().aoi;

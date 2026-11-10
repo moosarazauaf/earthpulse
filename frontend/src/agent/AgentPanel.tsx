@@ -71,11 +71,28 @@ export function AgentPanel() {
   // A new handful of example questions for every new chat.
   const [examples, setExamples] = useState(() => pickExamples());
   const controller = useRef<AbortController | null>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
+  const draft = useStore((s) => s.agentDraft);
   const end = useRef<HTMLDivElement>(null);
   // Braces matter: newer browsers return a Promise from scrollIntoView, which React would take for a cleanup.
   useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [entries, busy]);
   useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => saveChat(entries, history), [entries, history]);
+  // A question from the opening screen: sent at once, or put in the box with "[place]" selected to type over.
+  useEffect(() => {
+    if (!draft || !open) return;
+    useStore.getState().set({ agentDraft: null });
+    if (draft.send) { void send(undefined, draft.text); return; }
+    setText(draft.text);
+    requestAnimationFrame(() => {
+      const box = input.current;
+      if (!box) return;
+      box.focus();
+      const at = draft.text.indexOf("[");
+      if (at >= 0) box.setSelectionRange(at, draft.text.indexOf("]", at) + 1);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft, open]);
   // Reopening an empty chat brings new examples too.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { if (open && !entries.length) setExamples(pickExamples()); }, [open]);
@@ -176,7 +193,7 @@ export function AgentPanel() {
         <div ref={end} />
       </div>
       <form onSubmit={send}>
-        <textarea value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} rows={2} maxLength={20_000}
+        <textarea ref={input} value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey} rows={2} maxLength={20_000}
           placeholder="Floods in Layyah, August 2022… or paste a script" aria-label="Message to Sentri" />
         <button type="submit" disabled={busy || !text.trim()} aria-label="Send">➤</button>
       </form>

@@ -830,3 +830,18 @@ button.primary { color: #1b1d14; }
 .timelapse-status { flex-basis: 100%; font-size: 12px; color: var(--amber); margin: 0; }
 
 .legend-classes { list-style: none; margin: 5px 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: 12px; }
+
+/* ---- opening screen: start from the problem ---- */
+.intro-ask { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.intro-ask input { font: inherit; font-size: 16px; padding: 10px 13px; border-radius: 10px; border: 1px solid var(--line-strong); background: rgba(255, 255, 255, 0.04); color: var(--text); }
+.intro-ask input:focus { outline: none; border-color: var(--cyan); }
+.intro-ask button { padding: 0 21px; border-radius: 10px; border-color: var(--cyan); color: #fff; background: rgba(163, 177, 138, 0.18); font-weight: 600; }
+.problems { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.problems button { text-align: left; display: grid; gap: 5px; align-content: start; padding: 11px 13px; border-radius: 10px; }
+.problems .who { font-size: 11px; color: var(--muted); }
+.problems strong { font-size: 14px; color: var(--cyan); line-height: 1.3; }
+.problems .answer { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.problems .now { border-color: var(--amber); }
+.problems .now strong { color: var(--amber); }
+@media (max-width: 1100px) { .problems { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 800px) { .problems .answer { display: none; } .problems button { padding: 8px 10px; } }
