@@ -5,6 +5,25 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.38] - 2026-11-11
+
+### Added
+- **Risk check** for anyone deciding whether to build, buy, farm or stay
+  somewhere. At the top of every area overview, and from Sentri ("Is
+  Nowshera safe?", "flood risk of Charsadda"), it rates in one word each:
+  flooding (share of ground under water only some of the time since 1984,
+  JRC Global Surface Water), landslides (share steeper than 15 degrees) and
+  the next 7 days (forecast warnings). Each part is read on its own, so one
+  slow source does not hold up the others. The first opening card now asks
+  "Is this land safe to build on or buy?".
+- **Nearest higher ground** for flood-prone places: the closest spot at least
+  10 m above the centre (a whole 3 x 3 block of the height data, so a single
+  building or tree is not taken for a hill), drawn on the map as a line with
+  its distance and elevation profile. Nowshera: 1.5 km north, 15 m higher.
+
+### Fixed
+- The top-bar logo still read EARTHPULSE after the rename.
+
 ## [0.2.0-alpha.37] - 2026-11-10
 
 ### Changed
