@@ -139,7 +139,8 @@ function RiskSection({ lat, lon }: { lat: number; lon: number }) {
           </ul>
           {check.failed.length > 0 && <p className="note">Could not read the {check.failed.join(" or ")}; that part is left out.</p>}
           {check.ground && check.items.some((r) => r.hazard === "flood" && r.level !== "low") && (
-            <p className="muted">Higher ground at {formatLatLon(check.ground.lat, check.ground.lon)}, about {Math.round(check.ground.aboveM)} m above the centre.</p>
+            <p className="muted">Higher ground at {formatLatLon(check.ground.lat, check.ground.lon)}, about {Math.round(check.ground.aboveM)} m above the centre.{" "}
+              <button className="link" onClick={() => useStore.getState().set({ measure: [[lon, lat], [check.ground!.lon, check.ground!.lat]] })}>Show the way on the map</button></p>
           )}
           <p className="muted">{RISK_SOURCES}</p>
         </>

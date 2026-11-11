@@ -458,9 +458,12 @@ async function riskCheckTool(a: Record<string, unknown>): Promise<ToolResult> {
   const check = await riskCheck(area.geometry, (s + n) / 2, (w + e) / 2);
   if (!check.items.length) return failed(`The risk check could not read any data for ${area.label}. Try again in a moment.`);
   const word = { high: "high", medium: "some", low: "low" } as const;
+  // For flood-prone ground, a straight line to the higher ground, with its distance and elevation profile.
+  const showWay = check.ground && check.items.some((r) => r.hazard === "flood" && r.level !== "low");
+  if (showWay) useStore.getState().set({ measure: [[(w + e) / 2, (s + n) / 2], [check.ground!.lon, check.ground!.lat]] });
   return {
     result: JSON.stringify({ area: area.label, ratings: check.items.map((r) => ({ hazard: r.hazard, level: r.level })) }),
-    say: `Risk check for ${area.label}: ${check.items.map((r) => `${r.title.toLowerCase()} ${word[r.level]}`).join(", ")}. Details below and in the side panel.`,
+    say: `Risk check for ${area.label}: ${check.items.map((r) => `${r.title.toLowerCase()} ${word[r.level]}`).join(", ")}. Details below and in the side panel.${showWay ? " The line on the map leads to the nearest higher ground." : ""}`,
     card: {
       kind: "facts", title: `Risk check, ${area.label}`,
       lines: [...(check.failed.length ? [`Could not read the ${check.failed.join(" or ")}.`] : []), RISK_SOURCES],
