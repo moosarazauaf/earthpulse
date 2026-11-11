@@ -48,6 +48,7 @@ export function honest(text: string, cards: { kind: string; findings: { level: s
 export const CAN_RUN = [
   "Flood mapping with Sentinel-1 radar (2014 on), checked for mixed orbits and compositing before it runs",
   "Burn scars, vegetation change, surface water through the years, urban growth, tree cover loss, land surface temperature and index time series",
+  "Risk check of any place: flooding since 1984, landslide-prone slopes, the next 7 days and the nearest higher ground",
   "Area overview of any place: 7-day forecast and warnings, air quality, solar power, water since 1984, climate, terrain, people and satellite passes",
   "Map layers: wind, clouds, rain, air quality, earthquakes, satellites, population, sea temperature, vegetation, soil moisture, smoke and dust, ozone",
   "Land use and land cover (LULC) of any area: ESA WorldCover 2021, 10 m",
@@ -87,7 +88,7 @@ export function placeFromText(text: string): string {
 }
 
 /** Without a model: land cover and carbon requests, with the place after "of", "in" or "for" ("here" means the open area). */
-type OfflineTool = "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse" | "buffer" | "terrain" | "measure_area" | "export_area";
+type OfflineTool = "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse" | "buffer" | "terrain" | "measure_area" | "export_area" | "risk_check";
 const HERE = /^(here|there|this|it|the same place|this area|this view)$/i;
 const placeAfter = (text: string): string | null => {
   const m = /\b(?:of|in|for|at|around)\s+(.+?)[.?!]*$/i.exec(text.trim());
@@ -103,6 +104,11 @@ export function offlineIntent(text: string): { tool: OfflineTool; place: string 
   if (/\b(export|download|save)\b.*\b(geojson|kml|boundary|outline|area|shape)\b/i.test(text)) return { tool: "export_area", place: null, args: { format: /\bkml\b/i.test(text) ? "kml" : "geojson" } };
   const relief = /\b(hillshade|slope|aspect)\b/i.exec(text);
   if (relief || /\b(terrain|elevation|relief|zonal)\b/i.test(text)) return { tool: "terrain", place: placeAfter(text), args: relief ? { map: relief[1]!.toLowerCase() } : {} };
+  if (/\b(risks?|risky|safe|hazards?|dangers?|dangerous|flooded before|ever flood\w*|flood[- ]prone|high ground|higher ground)\b/i.test(text) && !/\b(week|tomorrow|today|forecast|outlook)\b/i.test(text)) {
+    const own = /^\s*(?:is|has|have|did|was|can)\s+(.+?)\s+(?:safe|ever|flooded|been|at risk|risky|flood)/i.exec(text);
+    const place = placeAfter(text.replace(/\?.*$/, "")) ?? (own && !HERE.test(own[1]!.trim()) && !/^(it|this|the|my|our)\b/i.test(own[1]!) ? own[1]!.trim() : null);
+    return { tool: "risk_check", place };
+  }
   if (/\b(perimeter|centroid|bounding box|how (big|large)|measure (this|the) area|size of)\b/i.test(text)) return { tool: "measure_area", place: placeAfter(text) };
   if (/\btime-?\s?lapse\b/i.test(text)) {
     const m = /\b(?:of|in|for|at)\s+(.+?)[.?!]*$/i.exec(text.trim());

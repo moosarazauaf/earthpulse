@@ -74,6 +74,11 @@ describe("chat memory and the built-in reader", () => {
     expect(offlineIntent("terrain here")).toEqual({ tool: "terrain", place: null, args: {} });
     expect(offlineIntent("How big is this area? Area and perimeter")).toMatchObject({ tool: "measure_area" });
     expect(offlineIntent("export this area as KML")).toEqual({ tool: "export_area", place: null, args: { format: "kml" } });
+    expect(offlineIntent("Is Nowshera, Pakistan safe? Risk check")).toEqual({ tool: "risk_check", place: "Nowshera, Pakistan" });
+    expect(offlineIntent("Has Sukkur flooded before?")).toEqual({ tool: "risk_check", place: "Sukkur" });
+    expect(offlineIntent("flood risk of Charsadda")).toEqual({ tool: "risk_check", place: "Charsadda" });
+    expect(offlineIntent("Is this land safe to build on?")).toEqual({ tool: "risk_check", place: null });
+    expect(offlineIntent("Is the coming week safe in Lahore?")).toBeNull();
   });
 });
 

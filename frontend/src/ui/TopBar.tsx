@@ -184,7 +184,7 @@ export function TopBar() {
           <circle cx="16" cy="16" r="13" />
           <path d="M4 16h7l3-7 4 14 3-7h7" />
         </svg>
-        <span><strong>EARTHPULSE</strong><em>See what is changing on Earth.</em></span>
+        <span><strong>EARTHSIFT</strong><em>See what is changing on Earth.</em></span>
       </button>
 
       <nav aria-label="Modes">

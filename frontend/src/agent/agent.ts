@@ -29,6 +29,7 @@ import { geometryBounds } from "../globe/Globe";
 import { getGlobe } from "../globe/GlobeViewer";
 import { isS1Script, lintGeeScript } from "./geeLint";
 import { fetchOutlook, warnings } from "../area/outlook";
+import { RISK_SOURCES, riskCheck } from "../area/risk";
 import { type Finding, checkFloodPlan } from "./s1checks";
 import { KINDS, abilitiesText, askFromArgs, asksAbilities, floodDates, honest, num, offlineIntent, placeFromText, str, trimHistory } from "./args";
 
@@ -146,6 +147,14 @@ export const TOOLS = [
       name: "terrain",
       description: "Terrain analysis of an area (zonal statistics of elevation and slope): lowest, highest and mean height, mean slope and the share in each slope class. Optionally draw a hillshade, slope or aspect map on the globe. Omit place to use the area already open.",
       parameters: { type: "object", properties: { map: { type: "string", enum: ["hillshade", "slope", "aspect", "none"] }, place: { type: "string" }, size_km: { type: "number" } } },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "risk_check",
+      description: "Is a place safe to build, buy, farm or visit? Rates flooding (water seen since 1984), landslides (slope) and the next 7 days (rain, heat, frost, gales, air), and finds the nearest higher ground for flood-prone places. Omit place to use the area already open.",
+      parameters: { type: "object", properties: { place: { type: "string" }, size_km: { type: "number" } } },
     },
   },
   {
@@ -441,6 +450,26 @@ async function terrain(a: Record<string, unknown>): Promise<ToolResult> {
   };
 }
 
+async function riskCheckTool(a: Record<string, unknown>): Promise<ToolResult> {
+  const area = await areaFor(a);
+  if (typeof area === "string") return failed(area);
+  useStore.getState().set({ mode: "area", introOpen: false, result: null });
+  const [w, s, e, n] = geometryBounds(area.geometry);
+  const check = await riskCheck(area.geometry, (s + n) / 2, (w + e) / 2);
+  if (!check.items.length) return failed(`The risk check could not read any data for ${area.label}. Try again in a moment.`);
+  const word = { high: "high", medium: "some", low: "low" } as const;
+  return {
+    result: JSON.stringify({ area: area.label, ratings: check.items.map((r) => ({ hazard: r.hazard, level: r.level })) }),
+    say: `Risk check for ${area.label}: ${check.items.map((r) => `${r.title.toLowerCase()} ${word[r.level]}`).join(", ")}. Details below and in the side panel.`,
+    card: {
+      kind: "facts", title: `Risk check, ${area.label}`,
+      lines: [...(check.failed.length ? [`Could not read the ${check.failed.join(" or ")}.`] : []), RISK_SOURCES],
+      findings: check.items.map((r) => ({ level: r.level === "low" ? "ok" : r.level === "high" ? "error" : "warn", text: `${r.title}: ${r.text}` })),
+    },
+    next: ["Show water since 1984 here", "Slope map here", "How many people live here?"],
+  };
+}
+
 async function measureArea(a: Record<string, unknown>): Promise<ToolResult> {
   const area = await areaFor(a);
   if (typeof area === "string") return failed(area);
@@ -505,6 +534,7 @@ export async function runTool(name: string, rawArgs: string, userText: string): 
       case "time_lapse": return await timeLapse(a);
       case "buffer": return await buffer(a);
       case "terrain": return await terrain(a);
+      case "risk_check": return await riskCheckTool(a);
       case "measure_area": return await measureArea(a);
       case "export_area": return exportArea(a);
       case "check_earth_engine_script": return checkScript(str(a.code, 20_000) ?? "");

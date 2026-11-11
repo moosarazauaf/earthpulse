@@ -18,7 +18,7 @@ const NOTICE_SECONDS = 6;
  * "what is happening now", which needs no place.
  */
 const PROBLEMS: { icon: string; who: string; question: string; answer: string; draft?: string }[] = [
-  { icon: "🏡", who: "Land buyers, farmers, builders", question: "Has this land ever flooded?", answer: "Water seen there since 1984, slope, and the week's rain outlook.", draft: "Has [place] flooded before? Show water since 1984" },
+  { icon: "🏡", who: "Land buyers, farmers, builders", question: "Is this land safe to build on or buy?", answer: "Flooding since 1984, landslide-prone slopes, the week ahead and the nearest higher ground.", draft: "Is [place] safe? Risk check" },
   { icon: "🌊", who: "Disaster and aid teams", question: "Where did the flood reach, and who lives there?", answer: "A Sentinel-1 radar flood map that sees through cloud, with people affected.", draft: "Map the floods in [place] from [start date] to [end date]" },
   { icon: "🔴", who: "Everyone", question: "What is happening right now?", answer: "Today's floods, fires, storms and earthquakes, checked against the agencies." },
   { icon: "🌤️", who: "Families, farmers, health workers", question: "Is the coming week safe?", answer: "Heavy rain, heat, frost, gales and unhealthy air in the next 7 days, and the cleanest hours.", draft: "What is the weather outlook for [place]?" },

@@ -30,6 +30,7 @@ import { LegendBar } from "../analysis/charts";
 import { AreaChoices } from "../analysis/AreaPrompt";
 import { Figure } from "../ui/Figure";
 import { type WaterHistory as WaterShares, fetchWaterHistory } from "./waterHistory";
+import { type RiskCheck, RISK_SOURCES, riskCheck } from "./risk";
 import { type SolarProfile, YIELD_FACTOR, fetchSolar } from "./solar";
 import { type CloudHours, type OutlookDay, cleanestWindow, cloudAt, cloudWords, dayName, fetchCloudHours, fetchOutlook, warnings, waterBalance } from "./outlook";
 
@@ -90,6 +91,7 @@ function Overview() {
           </div>
         )}
       </section>
+      <RiskSection lat={lat} lon={lon} />
       <QuickRuns />
       <Outlook lat={lat} lon={lon} />
       <LandCover />
@@ -104,6 +106,45 @@ function Overview() {
       <Solar lat={lat} lon={lon} />
       <Nearby lat={lat} lon={lon} />
     </>
+  );
+}
+
+// ---- risk check -------------------------------------------------------------------------------
+
+const LEVEL_WORD = { high: "High", medium: "Some", low: "Low" } as const;
+
+/** Flooding, landslides and the coming week, each rated in a word, before any detail. */
+function RiskSection({ lat, lon }: { lat: number; lon: number }) {
+  const aoi = useStore((s) => s.aoi)!;
+  const [check, setCheck] = useState<RiskCheck | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    setCheck(null);
+    riskCheck(aoi.geometry, lat, lon, controller.signal).then((c) => { if (!controller.signal.aborted) setCheck(c); }, () => {});
+    return () => controller.abort();
+  }, [aoi, lat, lon]);
+  return (
+    <section>
+      <header className="row"><h3>Risk check</h3><KindBadge kind="DERIVED" /></header>
+      {!check && <p className="muted" role="status">Checking flood history, slopes and the week ahead…</p>}
+      {check && (
+        <>
+          <ul className="risks">
+            {check.items.map((r) => (
+              <li key={r.hazard} className={`risk ${r.level}`}>
+                <span className="level">{LEVEL_WORD[r.level]}</span>
+                <span><strong>{r.title}</strong> {r.text}</span>
+              </li>
+            ))}
+          </ul>
+          {check.failed.length > 0 && <p className="note">Could not read the {check.failed.join(" or ")}; that part is left out.</p>}
+          {check.ground && check.items.some((r) => r.hazard === "flood" && r.level !== "low") && (
+            <p className="muted">Higher ground at {formatLatLon(check.ground.lat, check.ground.lon)}, about {Math.round(check.ground.aboveM)} m above the centre.</p>
+          )}
+          <p className="muted">{RISK_SOURCES}</p>
+        </>
+      )}
+    </section>
   );
 }
 
