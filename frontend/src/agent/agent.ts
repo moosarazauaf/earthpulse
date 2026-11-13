@@ -605,7 +605,11 @@ export async function ask(text: string, history: Message[], signal?: AbortSignal
     // The model's own prose is used only when it calls no tool, so it can never describe results it did not see.
     const reply = await complete([{ role: "system", content: system() }, ...trimHistory(messages)], signal);
     messages.push(reply);
-    if (!reply.tool_calls?.length) return { text: honest(reply.content?.trim() || "Sorry, I did not catch that.", cards), cards, history: messages };
+    if (!reply.tool_calls?.length) {
+      // The free model sometimes answers in words a request the rules can run ("buffer 2 km"): run it instead.
+      if (offlineIntent(text)) return { ...(await offline(text)), history: messages };
+      return { text: honest(reply.content?.trim() || "Sorry, I did not catch that.", cards), cards, history: messages };
+    }
     for (const call of reply.tool_calls) {
       const r = await runTool(call.function.name, call.function.arguments, text);
       if (r.card) cards.push(r.card);
@@ -618,6 +622,8 @@ export async function ask(text: string, history: Message[], signal?: AbortSignal
     if (signal?.aborted) throw e;
     // The model being unavailable should not stop the request: fall back to the rule-based reader.
     const fallback = await offline(text);
-    return { text: `${e instanceof Error ? e.message : "The assistant failed."} Using the built-in reader instead: ${fallback.text}`, cards: [...cards, ...fallback.cards], history };
+    // A network failure surfaces as the browser's own "Failed to fetch"; say it plainly.
+    const why = e instanceof Error && !(e instanceof TypeError) ? e.message : "The assistant could not be reached.";
+    return { text: `${why} Using the built-in reader instead: ${fallback.text}`, cards: [...cards, ...fallback.cards], history };
   }
 }
