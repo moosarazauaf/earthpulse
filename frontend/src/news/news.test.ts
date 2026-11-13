@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { classify } from "./classify";
 import { buildGazetteer, locate, outlineCentre } from "./locate";
-import { mergeStories, previousStories, toLocated } from "./stories";
+import { leadHazard, mergeStories, previousStories, toLocated } from "./stories";
 import { compare, describe as describeWindow } from "./weather";
 
 describe("classify", () => {
@@ -157,5 +157,13 @@ describe("weather before an event", () => {
   it("gives no comparison when too many days are missing", () => {
     const gappy = { ...recent(5), rain: recent(5).rain.map((v, i) => (i % 2 ? null : v)) };
     expect(compare(gappy, baseline, "2026-10-15", 7, "rain")).toBeNull();
+  });
+});
+
+describe("a story's label", () => {
+  it("follows what most headlines are about, not the highest-priority hazard", () => {
+    const titles = ["Wildfire activity surges in Kalimantan", "Forest fires choke Riau", "Floods and forest fires strain Indonesian agencies"].map((title) => ({ title }));
+    expect(leadHazard(titles, ["flood", "wildfire"])).toBe("wildfire");
+    expect(leadHazard([{ title: "Floods in Sindh" }, { title: "Forest fire in Sindh" }], ["flood", "wildfire"])).toBe("flood");
   });
 });

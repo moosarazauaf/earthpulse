@@ -88,14 +88,38 @@ export function placeFromText(text: string): string {
 }
 
 /** Without a model: land cover and carbon requests, with the place after "of", "in" or "for" ("here" means the open area). */
-type OfflineTool = "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse" | "buffer" | "terrain" | "measure_area" | "export_area" | "risk_check";
+type OfflineTool = "land_cover" | "carbon_stock" | "people_count" | "save_map" | "time_lapse" | "buffer" | "terrain" | "measure_area" | "export_area" | "risk_check" | "show_layers";
 const HERE = /^(here|there|this|it|the same place|this area|this view)$/i;
 const placeAfter = (text: string): string | null => {
   const m = /\b(?:of|in|for|at|around)\s+(.+?)[.?!]*$/i.exec(text.trim());
   return m && !HERE.test(m[1]!.trim()) ? m[1]!.trim() : null;
 };
 
+/** Map layers by the words people use for them: [tool argument, value when on, pattern]. */
+const LAYER_WORDS: [string, true | string, RegExp][] = [
+  ["wind", true, /\bwinds?\b/i], ["clouds", true, /\bclouds?\b/i], ["rain", true, /\b(rain|rainfall|precipitation)\b/i],
+  ["air_quality", true, /\b(air quality|aqi|pollution|smog)\b/i], ["earthquakes", true, /\b(earthquakes?|quakes?|seismic)\b/i],
+  ["satellites", true, /\bsatellites?\b/i], ["population", true, /\bpopulation (density|layer|map)\b/i],
+  ["water_history", true, /\bwater (since 1984|history)\b/i],
+  ["earth_today", "sst", /\bsea (surface )?temperature\b|\bsst\b/i], ["earth_today", "ndvi", /\b(ndvi|vegetation (map|layer))\b/i],
+  ["earth_today", "soil", /\bsoil moisture\b/i], ["earth_today", "aerosol", /\b(smoke|dust|aerosols?)\b/i], ["earth_today", "ozone", /\bozone\b/i],
+];
+
+/** "show wind", "turn off clouds", "hide earthquakes": a layer switch, not a place. */
+export function layerIntent(text: string): Record<string, unknown> | null {
+  const m = /^\s*(show|turn on|switch on|display|open|add|hide|turn off|switch off|remove)\s+(?:the\s+)?(.+?)(?:\s+(?:layer|map|on|off))?\s*[.!]*$/i.exec(text);
+  if (!m) return null;
+  const off = /^(hide|turn off|switch off|remove)$/i.test(m[1]!);
+  const args: Record<string, unknown> = {};
+  for (const [arg, value, re] of LAYER_WORDS) if (re.test(m[2]!)) args[arg] = arg === "earth_today" ? (off ? "none" : value) : !off;
+  // Anything left over that is not a layer name ("show wind in Karachi") is a place: leave it to the other readers.
+  const rest = LAYER_WORDS.reduce((s, [, , re]) => s.replace(new RegExp(re.source, "gi"), ""), m[2]!).replace(/\b(and|the|layers?|map|,)\b|,/gi, "").trim();
+  return Object.keys(args).length && !rest ? args : null;
+}
+
 export function offlineIntent(text: string): { tool: OfflineTool; place: string | null; args?: Record<string, unknown> } | null {
+  const layers = layerIntent(text);
+  if (layers) return { tool: "show_layers", place: null, args: layers };
   const buffered = /\bbuffer\b/i.test(text) ? /([\d.]+)\s*(km|kilomet\w*|m|met\w*)\b/i.exec(text) : null;
   if (/\bbuffer\b/i.test(text)) {
     const km = buffered ? Number(buffered[1]) / (/^k/i.test(buffered[2]!) ? 1 : 1000) : 1;

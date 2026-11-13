@@ -118,7 +118,8 @@ export function terrainStats(heights: Float32Array, width: number, height: numbe
 
 /** The RGBA pixels of a 256-pixel map tile. */
 export async function readPixels(url: string, signal?: AbortSignal): Promise<Uint8ClampedArray> {
-  const response = await fetch(url, { signal });
+  // One retry: on slow connections single tiles time out and would sink the whole terrain, water and risk readings.
+  const response = await fetch(url, { signal }).catch((e: unknown) => { if (signal?.aborted) throw e; return fetch(url, { signal }); });
   if (!response.ok) throw Object.assign(new Error("Map tiles could not be read."), { status: response.status });
   const bitmap = await createImageBitmap(await response.blob());
   // Older Safari has no 2D OffscreenCanvas; a detached canvas element does the same job.

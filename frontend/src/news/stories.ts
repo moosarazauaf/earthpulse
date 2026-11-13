@@ -74,6 +74,12 @@ function countryPlace(gazetteer: Gazetteer, cc: string): NewsPlace | null {
   return c ? { name: c.name, country: "", cc, lat: Math.round(c.lat * 1000) / 1000, lon: Math.round(c.lon * 1000) / 1000, precision: "country" } : null;
 }
 
+/** The hazard most of a story's headlines are about; ties go to the higher-priority hazard. */
+export function leadHazard(articles: { title: string }[], hazards: Hazard[]): Hazard {
+  const count = (h: Hazard) => articles.filter((a) => classify(a.title).includes(h)).length;
+  return [...hazards].sort((x, y) => count(y) - count(x) || PRIORITY.indexOf(x) - PRIORITY.indexOf(y))[0]!;
+}
+
 function compatible(a: Hazard[], b: Hazard[]): boolean {
   return a.some((h) => b.includes(h)) || (a.some((h) => WET.includes(h)) && b.some((h) => WET.includes(h)));
 }
@@ -122,7 +128,7 @@ export function mergeStories(previous: NewsStory[], items: Located[], now: Date)
   const cutoff = now.getTime() - SAME_STORY_HOURS * HOUR_MS;
   const stories = previous
     .filter((s) => new Date(s.last).getTime() >= cutoff)
-    .map((s) => ({ ...s, articles: [...s.articles], hazards: [...s.hazards] }));
+    .map((s) => ({ ...s, articles: [...s.articles], hazards: [...s.hazards], hazard: leadHazard(s.articles, s.hazards) }));
   const seen = new Set(stories.flatMap((s) => s.articles.map((a) => a.url)));
 
   for (const item of [...items].sort((a, b) => a.article.published.localeCompare(b.article.published))) {
@@ -149,7 +155,7 @@ export function mergeStories(previous: NewsStory[], items: Located[], now: Date)
     story.articles = story.articles.slice(0, MAX_ARTICLES);
     for (const h of item.hazards) if (!story.hazards.includes(h)) story.hazards.push(h);
     story.hazards.sort((x, y) => PRIORITY.indexOf(x) - PRIORITY.indexOf(y));
-    story.hazard = story.hazards[0]!;
+    story.hazard = leadHazard(story.articles, story.hazards);
     if (item.article.published > story.last) story.last = item.article.published;
     if (item.article.published < story.first) story.first = item.article.published;
     story.place = votePlace(story.articles, story.place);

@@ -283,6 +283,8 @@ function showLayers(a: Record<string, unknown>): ToolResult {
   for (const [arg, field] of flags) if (typeof a[arg] === "boolean") patch[field] = a[arg];
   if (typeof a.earthquakes === "boolean") Object.assign(patch, { quakesOn: a.earthquakes }, a.earthquakes ? { mode: "live" } : {});
   if (typeof a.earth_today === "string") patch.earthLayer = EARTH_LAYERS.some((l) => l.id === a.earth_today) ? a.earth_today : null;
+  // Live layers are drawn in Explore and Live; from an analysis screen they would not show.
+  if (Object.keys(patch).length && !("mode" in patch) && !["explore", "live"].includes(useStore.getState().mode)) patch.mode = "explore";
   useStore.getState().set({ ...patch, introOpen: false });
   const names: Record<string, string> = { windOn: "wind", cloudsOn: "clouds", rainOn: "rain", airOn: "air quality", satellitesOn: "satellites", waterHistoryOn: "water since 1984", populationOn: "population", quakesOn: "earthquakes" };
   const said = Object.entries(patch).filter(([k]) => k !== "mode").map(([k, v]) => k === "earthLayer" ? (v ? `${EARTH_LAYERS.find((l) => l.id === v)!.label.toLowerCase()} on` : "Earth today off") : `${names[k]} ${v ? "on" : "off"}`);

@@ -455,10 +455,11 @@ function Official({ lat, lon }: { lat: number; lon: number }) {
   const [food, setFood] = useState<FoodSecurity | null>(null);
   const [rain, setRain] = useState<RainAnomaly | null>(null);
   const [done, setDone] = useState(false);
+  const [unFailed, setUnFailed] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
-    setDistrict(null); setFacts(null); setFood(null); setRain(null); setDone(false);
+    setDistrict(null); setFacts(null); setFood(null); setRain(null); setDone(false); setUnFailed(false);
     void (async () => {
       const d = await districtAt(lon, lat).catch(() => null);
       if (signal.aborted) return;
@@ -466,8 +467,8 @@ function Official({ lat, lon }: { lat: number; lon: number }) {
       if (!d) { setDone(true); return; }
       const [f, ipc, r] = await Promise.all([
         fetchCountryFacts(d.iso3, signal).catch(() => null),
-        fetchFoodSecurity(d.iso3, d.name, signal).catch(() => null),
-        fetchRainAnomaly(d.iso3, d.name, new Date(), signal).catch(() => null),
+        fetchFoodSecurity(d.iso3, d.name, signal).catch(() => { setUnFailed(true); return null; }),
+        fetchRainAnomaly(d.iso3, d.name, new Date(), signal).catch(() => { setUnFailed(true); return null; }),
       ]);
       if (signal.aborted) return;
       setFacts(f); setFood(ipc); setRain(r); setDone(true);
@@ -511,7 +512,8 @@ function Official({ lat, lon }: { lat: number; lon: number }) {
           <span className="muted">WFP, from CHIRPS satellite rainfall: a separate record to set beside &quot;Rain lately&quot;.</span>
         </p>
       )}
-      {done && district && !food && !rain && (
+      {done && district && unFailed && !food && !rain && <p className="note">The UN&apos;s Humanitarian API did not answer; try again later.</p>}
+      {done && district && !unFailed && !food && !rain && (
         <p className="muted">
           No IPC food-security analysis or WFP rainfall record for {district.name} in the UN&apos;s Humanitarian API; these cover places
           with humanitarian concerns, and district names can differ between map sources.

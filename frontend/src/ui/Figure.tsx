@@ -113,7 +113,7 @@ const nice = (v: number) => {
   const p = 10 ** Math.floor(Math.log10(Math.max(v, 1e-9)));
   return [1, 2, 2.5, 5, 10].map((f) => f * p).find((n) => n >= v) ?? v;
 };
-const fmt = (v: number) => (v >= 1e6 ? `${(v / 1e6).toLocaleString("en", { maximumSignificantDigits: 3 })}M` : v >= 1e3 ? `${(v / 1e3).toLocaleString("en", { maximumSignificantDigits: 3 })}k` : v.toLocaleString("en", { maximumSignificantDigits: 3 }));
+const fmt = (v: number) => (v > 0 && v < 0.1 ? "<0.1" : v >= 1e6 ? `${(v / 1e6).toLocaleString("en", { maximumSignificantDigits: 3 })}M` : v >= 1e3 ? `${(v / 1e3).toLocaleString("en", { maximumSignificantDigits: 3 })}k` : v.toLocaleString("en", { maximumFractionDigits: 1 }));
 
 /** Bars with optional error bars, in print colours, so the screen shows exactly what is saved. */
 export function BarChart({ spec }: { spec: BarChartSpec }) {
