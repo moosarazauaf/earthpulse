@@ -14,6 +14,8 @@ const OPENROUTER = "https://openrouter.ai/api/v1/chat/completions";
 const MAX_BODY = 120_000;
 const MAX_MESSAGES = 40;
 const MAX_TEXT = 20_000;
+// The app sends every tool it has (15 in 0.2.0-alpha.38); room to grow without a redeploy.
+const MAX_TOOLS = 24;
 const ROLES = new Set(["system", "user", "assistant", "tool"]);
 
 export function corsHeaders(origin) {
@@ -45,7 +47,7 @@ export function validate(body) {
     }
   }
   if (tools !== undefined) {
-    if (!Array.isArray(tools) || tools.length > 8) return "At most eight tools.";
+    if (!Array.isArray(tools) || tools.length > MAX_TOOLS) return `At most ${MAX_TOOLS} tools.`;
     if (!tools.every((t) => t?.type === "function" && isText(t.function?.name, 64))) return "Tools must be functions with a name.";
   }
   const clean = messages.map((m) => {

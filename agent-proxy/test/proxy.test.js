@@ -21,7 +21,7 @@ describe("assistant proxy", () => {
     expect(validate({ messages: [] })).toMatch(/messages must be/);
     expect(validate({ messages: [{ role: "admin", content: "x" }] })).toMatch(/role/);
     expect(validate({ messages: [{ role: "user", content: "x".repeat(20_001) }] })).toMatch(/content/);
-    expect(validate({ ...ok, tools: Array(9).fill(ok.tools[0]) })).toMatch(/eight tools/);
+    expect(validate({ ...ok, tools: Array(25).fill(ok.tools[0]) })).toMatch(/At most 24 tools/);
     // Unknown fields such as a chosen model are dropped, so callers cannot pick a paid model.
     const clean = validate({ ...ok, model: "openai/gpt-5", messages: [{ role: "user", content: "hi", extra: 1 }] });
     expect(clean).toEqual({ messages: [{ role: "user", content: "hi" }], tools: ok.tools });
