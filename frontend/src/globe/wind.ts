@@ -24,7 +24,20 @@ export function components(speed: number, fromDeg: number): [number, number] {
 
 type Body = { current?: { time: string; wind_speed_10m: number; wind_direction_10m: number } };
 
-export async function fetchWind(): Promise<WindField> {
+/** Open-Meteo's current values change every 15 minutes, and one field costs 504 of a visitor's 600 free calls a minute. */
+const KEEP_MS = 15 * 60_000;
+let kept: { at: number; field: Promise<WindField> } | null = null;
+
+export function fetchWind(now = Date.now()): Promise<WindField> {
+  if (kept && now - kept.at < KEEP_MS) return kept.field;
+  const field = loadWind();
+  kept = { at: now, field };
+  // A failed load is not kept, so the next switch-on tries again.
+  field.catch(() => { if (kept?.field === field) kept = null; });
+  return field;
+}
+
+async function loadWind(): Promise<WindField> {
   const nodes = LATS.flatMap((lat) => LONS.map((lon) => [lat, lon] as const));
   const u = new Float32Array(nodes.length), v = new Float32Array(nodes.length);
   let time = "";

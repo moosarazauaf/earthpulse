@@ -164,8 +164,8 @@ export function parseAlerts(body: unknown): Alert[] {
       id: `${type}-${p.eventid}-${p.episodeid}`,
       type,
       level,
-      name: String(p.name ?? ALERT_TYPES[type]),
-      country: String(p.country ?? ""),
+      name: tidyList(String(p.name ?? ALERT_TYPES[type])),
+      country: tidyList(String(p.country ?? "")),
       lon,
       lat,
       from: String(p.fromdate ?? "").slice(0, 10),
@@ -199,6 +199,9 @@ export interface Quake {
   /** True when the USGS flags the event for possible tsunami. */
   tsunami: boolean;
 }
+
+/** GDACS lists can hold empty entries ("Aruba, , Brazil"): drop them. */
+export const tidyList = (s: string) => s.split(",").map((x) => x.trim()).filter(Boolean).join(", ");
 
 /** Earthquakes from the USGS feed, strongest first; malformed entries are dropped. */
 export function parseQuakes(body: unknown): Quake[] {

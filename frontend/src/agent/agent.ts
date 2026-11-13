@@ -31,7 +31,7 @@ import { isS1Script, lintGeeScript } from "./geeLint";
 import { fetchOutlook, warnings } from "../area/outlook";
 import { RISK_SOURCES, riskCheck } from "../area/risk";
 import { type Finding, checkFloodPlan } from "./s1checks";
-import { KINDS, abilitiesText, askFromArgs, asksAbilities, floodDates, honest, num, offlineIntent, placeFromText, str, trimHistory } from "./args";
+import { KINDS, abilitiesText, toolNamesFor, askFromArgs, asksAbilities, floodDates, honest, num, offlineIntent, placeFromText, str, trimHistory } from "./args";
 
 const AGENT_URL = (import.meta.env.VITE_AGENT_URL as string | undefined) ?? "";
 /** True when the site was built with the model proxy's address. */
@@ -553,9 +553,10 @@ export async function runTool(name: string, rawArgs: string, userText: string): 
 // ---- the loop --------------------------------------------------------------------
 
 async function complete(messages: Message[], signal?: AbortSignal): Promise<Message> {
+  const recent = messages.filter((m) => m.role === "user").slice(-2).map((m) => m.content ?? "").join(" ");
   const response = await fetch(AGENT_URL, {
     method: "POST", signal, headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, tools: TOOLS }),
+    body: JSON.stringify({ messages, tools: TOOLS.filter((tool) => toolNamesFor(recent).includes(tool.function.name)) }),
   });
   if (!response.ok) throw new Error(response.status === 429 ? "The assistant is busy; try again in a minute." : "The assistant could not be reached.");
   const body = (await response.json()) as { choices?: { message?: Message }[] };

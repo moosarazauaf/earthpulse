@@ -209,3 +209,24 @@ export function pickExamples(n = 4, random: () => number = Math.random): string[
   }
   return ["What can you do?", ...pool.slice(0, n - 1)];
 }
+
+/**
+ * The deployed proxy accepts at most 8 tools (raised to 24 in agent-proxy, not yet deployed), so each request
+ * sends the four everyday tools plus the four whose words appear in the conversation.
+ */
+const MAX_TOOLS = 8;
+const ALWAYS = ["plan_analysis", "open_area", "show_layers", "risk_check"];
+const WORDS: Record<string, RegExp> = {
+  land_cover: /land ?cover|land use|lulc|forest|crop|built/i, carbon_stock: /carbon|biomass|co2|soil/i,
+  people_count: /people|population|inhabitants|live there|live here/i, save_map: /save|image|figure|png|export.*map|print/i,
+  time_lapse: /time-?\s?lapse|video|animation/i, buffer: /buffer|around .* km|within/i,
+  terrain: /terrain|slope|elevation|height|hillshade|aspect|relief|steep/i, measure_area: /area|perimeter|size|how big|centroid|bounds/i,
+  export_area: /geojson|kml|shapefile|qgis|arcgis|export|download/i, check_earth_engine_script: /ee\.|earth engine|script|gee/i,
+};
+export function toolNamesFor(text: string): string[] {
+  const picked = Object.keys(WORDS).filter((name) => WORDS[name]!.test(text));
+  // Fill unused places with the most asked-for extras.
+  for (const name of ["land_cover", "terrain", "carbon_stock", "people_count"]) if (!picked.includes(name)) picked.push(name);
+  return [...ALWAYS, ...picked].slice(0, MAX_TOOLS);
+}
+
