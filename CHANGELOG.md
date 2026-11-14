@@ -5,6 +5,20 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.40] - 2026-11-14
+
+A second user walkthrough. Sentri's model now answers every prompt itself.
+
+### Fixed
+- "Has Sukkur flooded before?" runs the risk check; the model had planned
+  a 2024 radar flood map instead.
+- Official figures: the World Bank's CDN served a cached copy without the
+  CORS header, so browsers refused it and the country facts were missing.
+- Network errors name what failed ("The population grid could not be
+  reached"), not always "Satellite imagery".
+- Risk check wording for dry ground ("Water covers 0% of the area most of
+  the time" is gone).
+
 ## [0.2.0-alpha.39] - 2026-11-13
 
 A user walkthrough of the live site: every opening card, Sentri prompt,

@@ -8,7 +8,7 @@ authors:
 repository-code: "https://github.com/moosarazauaf/earthsift"
 url: "https://moosarazauaf.github.io/earthsift/"
 license: MIT
-version: "0.2.0-alpha.39"
+version: "0.2.0-alpha.40"
 date-released: 2026-11-06
 keywords:
   - remote sensing
