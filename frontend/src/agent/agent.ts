@@ -595,6 +595,8 @@ export async function ask(text: string, history: Message[], signal?: AbortSignal
   }
   if (asksAbilities(text)) return { text: abilitiesText(), cards: [], history };
   if (!agentOnline) return { ...(await offline(text)), history };
+  // "Has Sukkur flooded before?" is a risk check, which the rules read exactly; the model tended to plan a radar flood map.
+  if (offlineIntent(text)?.tool === "risk_check") return { ...(await offline(text)), history };
 
   const messages: Message[] = [...history, { role: "user", content: text.slice(0, 4000) }];
   const cards: Card[] = [];

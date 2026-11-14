@@ -81,7 +81,7 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
     post({
       type: "error",
       message: offline
-        ? "Satellite imagery could not be reached. Check your connection and try again."
+        ? `${event.data.kind === "population" || event.data.kind === "exposure" ? "The population grid" : event.data.kind === "carbon" ? "The carbon maps" : event.data.kind === "cover" ? "The land-cover map" : "Satellite imagery"} could not be reached. Check your connection and try again.`
         : error instanceof Error ? error.message : "Analysis could not be completed.",
     });
   }

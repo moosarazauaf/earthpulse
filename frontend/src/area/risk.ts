@@ -62,7 +62,7 @@ export function rateRisks(input: { water?: WaterHistory | null; steep?: number |
   if (w !== undefined) {
     const level: Level = !w ? "low" : w.sometimes >= 0.05 ? "high" : w.sometimes >= 0.01 ? "medium" : "low";
     let text = !w || w.ever === 0 ? "No surface water was seen here in any Landsat image from 1984 to 2021."
-      : level === "low" ? `Water covers ${pct(w.often)} of the area most of the time, but almost no ground here floods only now and then.`
+      : level === "low" ? (w.often >= 0.005 ? `Water covers ${pct(w.often)} of the area most of the time (rivers, lakes), but almost no other ground here floods now and then.` : `Water was seen on only ${pct(w.ever)} of the area since 1984; almost no ground here floods.`)
       : `${pct(w.sometimes)} of the area has been under water some of the time since 1984: floodplain, seasonal wetland or a moving river. It has flooded before and can again.`;
     if (level !== "low" && input.groundSearched) {
       text += input.ground

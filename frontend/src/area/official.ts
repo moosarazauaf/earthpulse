@@ -34,7 +34,13 @@ export function parseCountryFacts(body: unknown): CountryFacts | null {
 
 export async function fetchCountryFacts(iso3: string, signal?: AbortSignal): Promise<CountryFacts | null> {
   const ids = Object.values(INDICATORS).join(";");
-  const response = await fetch(`${WB}/${iso3}/indicator/${ids}?source=2&format=json&mrnev=1&per_page=20`, { signal });
+  // The World Bank's CDN can cache a copy without the CORS header, which browsers then refuse. Our own
+  // parameter keeps a separate cache entry; if even that is refused, a dated one skips the cache.
+  const url = `${WB}/${iso3}/indicator/${ids}?source=2&format=json&mrnev=1&per_page=20&client=earthsift`;
+  const response = await fetch(url, { signal }).catch((e: unknown) => {
+    if (signal?.aborted) throw e;
+    return fetch(`${url}-${new Date().toISOString().slice(0, 10)}`, { signal });
+  });
   if (!response.ok) return null;
   return parseCountryFacts(await response.json());
 }
