@@ -5,6 +5,33 @@ All notable changes are recorded here. Versions follow
 
 ## [Unreleased]
 
+## [0.2.0-alpha.39] - 2026-11-13
+
+A user walkthrough of the live site: every opening card, Sentri prompt,
+analysis, layer, Live tab, topic page and shortcut, on desktop and phone.
+
+### Fixed
+- **Sentri's model never answered** since the GIS tools: the app sent 15
+  tools and the proxy refused more than 8 (HTTP 400), so every reply came
+  from the built-in reader. Requests now carry the 8 tools that fit the
+  message; the proxy accepts 24 once redeployed.
+- The free model sometimes answered "Sorry, I did not catch that." to
+  requests the rules understand ("buffer 2 km"); those now run. A network
+  failure no longer shows the browser's raw "Failed to fetch".
+- Built-in reader: "show wind", "show earthquakes" and "turn off clouds"
+  switch layers instead of flying to a place named Wind.
+- Wind layer hit Open-Meteo's free limit (HTTP 429) when switched on twice,
+  which also broke the area forecast; the field is kept for 15 minutes.
+- Live news: a story is labelled by what most of its headlines are about
+  (eleven forest-fire headlines read as Flood).
+- Agency alerts: empty entries in GDACS place lists are dropped
+  ("Drought in Aruba, , Brazil").
+- Charts: at most one decimal, "<0.1" for slivers (was "0.00107").
+- Official figures: a UN API that does not answer says so, instead of
+  reporting that the district has no record.
+- Terrain and water-history tiles get one retry, so one timed-out tile no
+  longer empties the terrain, slope map and risk check.
+
 ## [0.2.0-alpha.38] - 2026-11-11
 
 ### Added
